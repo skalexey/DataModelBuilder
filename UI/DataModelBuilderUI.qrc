@@ -1,0 +1,15 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+<file>./DataModelBuilderUI.qml</file>
+<file>./DataModelBuilderUI.qmlproject.qtds</file>
+<file>./fonts/fonts.txt</file>
+<file>./images/place_holder.png</file>
+<file>./imports/DataModelBuilderUI/Constants.qml</file>
+<file>./imports/DataModelBuilderUI/DirectoryFontLoader.qml</file>
+<file>./imports/DataModelBuilderUI/EventListModel.qml</file>
+<file>./imports/DataModelBuilderUI/EventListSimulator.qml</file>
+<file>./imports/DataModelBuilderUI/qmldir</file>
+<file>./qtquickcontrols2.conf</file>
+<file>./Screen01.ui.qml</file>
+</qresource>
+</RCC>
