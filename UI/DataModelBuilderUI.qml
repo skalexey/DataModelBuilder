@@ -4,7 +4,7 @@ import DataModelBuilderUI 1.0
 Item {
     width: Constants.width
     height: Constants.height
-
+    property alias objectsLibrary: objectsLibrary
     Screen01 {
         ObjectsLibrary {
             id: objectsLibrary
@@ -20,11 +20,6 @@ Item {
             height: parent.height
         }
     }
-
 }
 
-/*##^##
-Designer {
-    D{i:0;formeditorZoom:0.66}D{i:2}D{i:3}D{i:1}
-}
-##^##*/
+

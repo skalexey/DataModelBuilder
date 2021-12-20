@@ -5,6 +5,8 @@ Item {
     width: 300
     height: 1080
 
+    property alias gridView: objectsLibraryContainer
+
     Text {
         id: objectsLibraryTitle
         x: 51
