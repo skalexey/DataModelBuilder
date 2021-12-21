@@ -14,7 +14,6 @@ int main(int argc, char *argv[])
 #endif
     QGuiApplication app(argc, argv);
     qmlRegisterType<ObjectListModel>("ObjectModel", 1, 0, "ObjectListModel");
-    //qmlRegisterType<Object>("ObjectModel", 1, 0, "ObjectData");
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
     for (const QString &locale : uiLanguages) {

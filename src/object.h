@@ -1,32 +1,46 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 #include <QObject>
+#include <QString>
 #include <memory>
+#include "parameterlistmodel.h"
 
-class ObjectParameterListModel;
-typedef std::unique_ptr<ObjectParameterListModel> ParamListModelPtr;
-
-template <typename StringContainer>
-struct Object// : public QObject
+struct Object : public QObject
 {
-//    Q_OBJECT
+    Q_OBJECT
 
-//public:
-//    explicit Object(QObject *parent = nullptr);
-    Object(const StringContainer& name)
-        : name(name)
-        , mParamListModel(nullptr)
+public:
+    Object() = default;
+    ~Object() = default;
+    Object(const QString& name);
+
+public:
+    // Properties
+    const QString &name() const
     {
-        mParamListModel = std::make_unique<ObjectParameterListModel>();
+        return mName;
     }
 
-    ObjectParameterListModel &paramListModel() const
+    void setName(const QString &newName)
     {
-        return *mParamListModel.get();
+        if (mName == newName)
+            return;
+        mName = newName;
+        emit nameChanged();
     }
 
-    StringContainer name;
-    ParamListModelPtr mParamListModel;
+    ObjectParameterListModel *paramListModel();
+
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+    Q_PROPERTY(ObjectParameterListModel* paramListModel READ paramListModel NOTIFY paramListChanged)
+
+private:
+    QString mName;
+    ObjectParameterListModel mParamListModel;
+
+signals:
+    void nameChanged();
+    void paramListChanged();
 };
 
 #endif // OBJECT_H

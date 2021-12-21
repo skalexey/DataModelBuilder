@@ -9,9 +9,11 @@
 #include "object.h"
 #include "parameterlistmodel.h"
 
-typedef Object<QString> ObjectData;
+typedef Object ObjectData;
 typedef std::shared_ptr<ObjectData> ObjectDataPtr;
 typedef QVector<ObjectDataPtr> ObjectList;
+
+Q_DECLARE_METATYPE(ObjectData)
 
 class ObjectListModel : public QAbstractListModel
 {
@@ -31,10 +33,8 @@ public:
     // Our interface
     void resetList(const std::function<void()>& doWithList);
 
-    Q_INVOKABLE
-    ObjectParameterListModel* objectParamListModel(int index) const;
+    Q_INVOKABLE ObjectData* object(int index) const;
 
-public slots:
     void addItem();
     void removeItem(int index);
 

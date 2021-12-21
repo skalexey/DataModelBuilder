@@ -8,7 +8,7 @@ Item {
     property ObjectListModel m: ObjectListModel {};
     DataModelBuilderUI {
         objectsLibrary.gridView.model: m
-        selectedObject.params.model: m.objectParamListModel(objectsLibrary.gridView.currentIndex)
-        selectedObject.objectName.text: objectsLibrary.gridView.currentItem.objectName.text
+        selectedObject.params.model: m.object(objectsLibrary.gridView.currentIndex).paramListModel
+        selectedObject.objectName.text: m.object(objectsLibrary.gridView.currentIndex).name
     }
 }

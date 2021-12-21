@@ -4,6 +4,7 @@
 namespace
 {
     ObjectParameterListModel emptyParamListModel;
+    ObjectData emptyObject;
 }
 
 ObjectListModel::ObjectListModel(QObject *parent)
@@ -11,11 +12,11 @@ ObjectListModel::ObjectListModel(QObject *parent)
 {
     resetList([&] {
         mList.append(std::make_shared<ObjectData>("Scheme element"));
-        mList.back()->paramListModel().addParam("Title", ParamTypeString);
-        mList.back()->paramListModel().addParam("Image", ParamTypeImage);
+        mList.back()->paramListModel()->addParam("Title", ParamTypeString);
+        mList.back()->paramListModel()->addParam("Image", ParamTypeImage);
         mList.append(std::make_shared<ObjectData>("Connection"));
-        mList.back()->paramListModel().addParam("Title", ParamTypeString);
-        mList.back()->paramListModel().addParam("Doublesided", ParamTypeFlag);
+        mList.back()->paramListModel()->addParam("Title", ParamTypeString);
+        mList.back()->paramListModel()->addParam("Doublesided", ParamTypeFlag);
         mList.append(std::make_shared<ObjectData>("Item Three"));
         mList.append(std::make_shared<ObjectData>("Item Four"));
 //        mList.append({"Item One", {{"Name", ObjectParameterModel::ParamTypeString}, {"Used", ObjectParameterModel::ParamTypeFlag}} });
@@ -44,9 +45,9 @@ QVariant ObjectListModel::data(const QModelIndex &index, int role) const
     switch (role)
     {
         case NameRole:
-            return QVariant(item.name);
+            return QVariant(item.name());
         case ParamsRole:
-            return QVariant::fromValue(&item.paramListModel());
+            return QVariant::fromValue(item.paramListModel());
     }
     return QVariant();
 }
@@ -60,11 +61,9 @@ bool ObjectListModel::setData(const QModelIndex &index, const QVariant &value, i
     switch (role)
     {
         case NameRole:
-            item.name = value.toString();
+            item.setName(value.toString());
             break;
-        //case ParamsRole: {
-            //return qvariant_cast<ObjectParameterListModel>(v));
-           default:
+        default:
             return false;
     }
     emit dataChanged(index, index, QVector<int>() << role);
@@ -76,11 +75,9 @@ void ObjectListModel::addItem()
     auto sz = mList.size();
     beginInsertRows(QModelIndex(), sz, sz);
     mList.append(std::make_shared<ObjectData>("new item"));
-//    mList.append({"Very New Item",
-//                  {{"Param 1", ObjectParameterModel::ParamTypeString}
-//                   , {"Description", ObjectParameterModel::ParamTypeString}
-//                   , {"Image", ObjectParameterModel::ParamTypeImage}
-//    }});
+    mList.back()->paramListModel()->addParam("Param 1", ParamTypeString);
+    mList.back()->paramListModel()->addParam("Description", ParamTypeString);
+    mList.back()->paramListModel()->addParam("Image", ParamTypeImage);
     endInsertRows();
 }
 
@@ -117,23 +114,12 @@ void ObjectListModel::resetList(const std::function<void()>& doWithList)
     endResetModel();
 }
 
-ObjectParameterListModel *ObjectListModel::objectParamListModel(int index) const
+ObjectData *ObjectListModel::object(int index) const
 {
-    // TODO: implement
     auto sz = mList.size();
     if (index < sz && index >= 0)
-        return &mList[index]->paramListModel();
+        return mList[index].get();
     else
-        return &emptyParamListModel;
+        return &emptyObject;
 }
 
-//bool ObjectList::setItemAt(int index, const ObjectListItem &item)
-//{
-//    if (index < 0 || index >= mItems.size())
-//        return false;
-//    auto& currentItem = mItems[index];
-//    if (currentItem == item)
-//        return false;
-//    mItems[index] = item;
-//    return true;
-//}
