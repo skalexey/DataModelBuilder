@@ -31,6 +31,9 @@ public:
     // Our interface
     void resetList(const std::function<void()>& doWithList);
 
+    Q_INVOKABLE
+    ObjectParameterListModel* objectParamListModel(int index) const;
+
 public slots:
     void addItem();
     void removeItem(int index);

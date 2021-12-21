@@ -4,7 +4,8 @@ import QtQuick.Controls 2.15
 Item {
     width: 500
     height: 1080
-
+    property alias params: params
+    property alias objectName: objectName
     Text {
         id: objectName
         x: 163

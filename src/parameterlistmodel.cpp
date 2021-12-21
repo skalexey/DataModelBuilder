@@ -4,11 +4,7 @@
 ObjectParameterListModel::ObjectParameterListModel(QObject *parent)
     : QAbstractListModel(parent)
 {
-    resetList([&] {
-        mList.append({"Param 1", ParamTypeString});
-        mList.append({"Param 2", ParamTypeFlag});
-        mList.append({"Param 3", ParamTypeImage});
-    });
+    resetList();
 }
 
 // ====== Begin of QAbstractListModel interface ======
@@ -84,4 +80,12 @@ void ObjectParameterListModel::resetList(const std::function<void()>& doWithList
     else
         mList.clear();
     endResetModel();
+}
+
+void ObjectParameterListModel::addParam(const QString &name, ObjectParamType type)
+{
+    auto sz = mList.size();
+    beginInsertRows(QModelIndex(), sz, sz);
+    mList.append({name, type});
+    endInsertRows();
 }

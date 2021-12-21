@@ -32,7 +32,7 @@ public:
     QHash<int,QByteArray> roleNames() const override;
     // Custom:
     void resetList(const std::function<void()>& doWithList = nullptr);
-
+    void addParam(const QString& name, ObjectParamType type);
 private:
     ParameterList mList;
 };

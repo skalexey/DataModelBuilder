@@ -5,6 +5,8 @@ Item {
     width: Constants.width
     height: Constants.height
     property alias objectsLibrary: objectsLibrary
+    property alias selectedObject: selectedObject
+
     Screen01 {
         ObjectsLibrary {
             id: objectsLibrary

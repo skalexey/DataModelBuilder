@@ -1,12 +1,21 @@
 #include "objectlistmodel.h"
 #include "parameterlistmodel.h"
 
+namespace
+{
+    ObjectParameterListModel emptyParamListModel;
+}
+
 ObjectListModel::ObjectListModel(QObject *parent)
     : QAbstractListModel(parent)
 {
     resetList([&] {
-        mList.append(std::make_shared<ObjectData>("Item One"));
-        mList.append(std::make_shared<ObjectData>("Item Two"));
+        mList.append(std::make_shared<ObjectData>("Scheme element"));
+        mList.back()->paramListModel().addParam("Title", ParamTypeString);
+        mList.back()->paramListModel().addParam("Image", ParamTypeImage);
+        mList.append(std::make_shared<ObjectData>("Connection"));
+        mList.back()->paramListModel().addParam("Title", ParamTypeString);
+        mList.back()->paramListModel().addParam("Doublesided", ParamTypeFlag);
         mList.append(std::make_shared<ObjectData>("Item Three"));
         mList.append(std::make_shared<ObjectData>("Item Four"));
 //        mList.append({"Item One", {{"Name", ObjectParameterModel::ParamTypeString}, {"Used", ObjectParameterModel::ParamTypeFlag}} });
@@ -106,6 +115,16 @@ void ObjectListModel::resetList(const std::function<void()>& doWithList)
     else
         mList.clear();
     endResetModel();
+}
+
+ObjectParameterListModel *ObjectListModel::objectParamListModel(int index) const
+{
+    // TODO: implement
+    auto sz = mList.size();
+    if (index < sz && index >= 0)
+        return &mList[index]->paramListModel();
+    else
+        return &emptyParamListModel;
 }
 
 //bool ObjectList::setItemAt(int index, const ObjectListItem &item)
