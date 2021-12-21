@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
         }
     }
     QQuickView view;
+    view.rootContext()->setContextProperty("paramTypeModel", ObjectParameter::typeList);
     view.engine()->addImportPath("qrc:/imports");
-    //const QUrl url(QStringLiteral("qrc:/DataModelBuilderUI.qml"));
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     view.setSource(url);
     if (!view.errors().isEmpty())

@@ -6,6 +6,7 @@ Item {
     height: 1080
     property alias params: params
     property alias objectName: objectName
+    property var paramTypeModel: ["No modifier", "Shift", "Control"]
     Text {
         id: objectName
         x: 163
@@ -20,7 +21,9 @@ Item {
         y: 149
         width: 110
         height: 160
-        delegate: SelectedObjectParam {}
+        delegate: SelectedObjectParam {
+            typeModel: paramTypeModel
+        }
         model: ListModel {
             ListElement {
                 name: "Name"

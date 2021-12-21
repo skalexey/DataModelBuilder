@@ -23,7 +23,7 @@ QVariant ObjectParameterListModel::data(const QModelIndex &index, int role) cons
     int intIndex = index.row();
     if (!index.isValid() || mList.size() <= intIndex)
         return QVariant();
-    auto& item = mList[intIndex];
+    auto& item = *mList[intIndex];
     switch (role) {
         case RoleName:
             return QVariant(item.name);
@@ -38,14 +38,14 @@ bool ObjectParameterListModel::setData(const QModelIndex &index, const QVariant 
     int intIndex = index.row();
     if (intIndex >= mList.size())
         return false;
-    auto& item = mList[intIndex];
+    auto& item = *mList[intIndex];
     if (data(index, role) != value) {
         switch (role) {
             case RoleName:
                 item.name = value.toString();
                 break;
             case RoleType:
-                item.type = qvariant_cast<ObjectParamType>(value);
+                item.type = qvariant_cast<ObjectParameter::Type>(value);
                 break;
         }
 
@@ -82,10 +82,10 @@ void ObjectParameterListModel::resetList(const std::function<void()>& doWithList
     endResetModel();
 }
 
-void ObjectParameterListModel::addParam(const QString &name, ObjectParamType type)
+void ObjectParameterListModel::addParam(const QString &name, ObjectParameter::Type type)
 {
     auto sz = mList.size();
     beginInsertRows(QModelIndex(), sz, sz);
-    mList.append({name, type});
+    mList.append(std::make_shared<ObjectParameter>(name, type));
     endInsertRows();
 }

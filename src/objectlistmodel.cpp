@@ -12,11 +12,11 @@ ObjectListModel::ObjectListModel(QObject *parent)
 {
     resetList([&] {
         mList.append(std::make_shared<ObjectData>("Scheme element"));
-        mList.back()->paramListModel()->addParam("Title", ParamTypeString);
-        mList.back()->paramListModel()->addParam("Image", ParamTypeImage);
+        mList.back()->paramListModel()->addParam("Title", ObjectParameter::TypeString);
+        mList.back()->paramListModel()->addParam("Image", ObjectParameter::TypeImage);
         mList.append(std::make_shared<ObjectData>("Connection"));
-        mList.back()->paramListModel()->addParam("Title", ParamTypeString);
-        mList.back()->paramListModel()->addParam("Doublesided", ParamTypeFlag);
+        mList.back()->paramListModel()->addParam("Title", ObjectParameter::TypeString);
+        mList.back()->paramListModel()->addParam("Doublesided", ObjectParameter::TypeFlag);
         mList.append(std::make_shared<ObjectData>("Item Three"));
         mList.append(std::make_shared<ObjectData>("Item Four"));
 //        mList.append({"Item One", {{"Name", ObjectParameterModel::ParamTypeString}, {"Used", ObjectParameterModel::ParamTypeFlag}} });
@@ -75,9 +75,9 @@ void ObjectListModel::addItem()
     auto sz = mList.size();
     beginInsertRows(QModelIndex(), sz, sz);
     mList.append(std::make_shared<ObjectData>("new item"));
-    mList.back()->paramListModel()->addParam("Param 1", ParamTypeString);
-    mList.back()->paramListModel()->addParam("Description", ParamTypeString);
-    mList.back()->paramListModel()->addParam("Image", ParamTypeImage);
+    mList.back()->paramListModel()->addParam("Param 1", ObjectParameter::TypeString);
+    mList.back()->paramListModel()->addParam("Description", ObjectParameter::TypeString);
+    mList.back()->paramListModel()->addParam("Image", ObjectParameter::TypeImage);
     endInsertRows();
 }
 

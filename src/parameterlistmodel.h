@@ -5,15 +5,15 @@
 #include <QVariantList>
 #include <QVector>
 #include <functional>
+#include <memory>
 #include "objectparameter.h"
 
-typedef ObjectParameter<QString> ObjectParameterData;
-typedef QVector<ObjectParameterData> ParameterList;
+typedef std::shared_ptr<ObjectParameter> ObjectParameterPtr;
+typedef QVector<ObjectParameterPtr> ParameterList;
 
 class ObjectParameterListModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_ENUM (ObjectParamType)
     enum Role {
         RoleName,
         RoleType
@@ -32,7 +32,7 @@ public:
     QHash<int,QByteArray> roleNames() const override;
     // Custom:
     void resetList(const std::function<void()>& doWithList = nullptr);
-    void addParam(const QString& name, ObjectParamType type);
+    void addParam(const QString& name, ObjectParameter::Type type);
 private:
     ParameterList mList;
 };

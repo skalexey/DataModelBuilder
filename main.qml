@@ -10,5 +10,6 @@ Item {
         objectsLibrary.gridView.model: m
         selectedObject.params.model: m.object(objectsLibrary.gridView.currentIndex).paramListModel
         selectedObject.objectName.text: m.object(objectsLibrary.gridView.currentIndex).name
+        selectedObject.paramTypeModel: paramTypeModel
     }
 }
