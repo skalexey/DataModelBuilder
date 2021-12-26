@@ -1,10 +1,11 @@
+#include<QDebug>
 #include "objectlistmodel.h"
 #include "parameterlistmodel.h"
 
 namespace
 {
     ObjectParameterListModel emptyParamListModel;
-    ObjectData emptyObject;
+    ObjectData emptyObject("Empty object");
 }
 
 ObjectListModel::ObjectListModel(QObject *parent)
@@ -70,18 +71,20 @@ bool ObjectListModel::setData(const QModelIndex &index, const QVariant &value, i
     return true;
 }
 
-void ObjectListModel::addItem()
+void ObjectListModel::newObject()
 {
     auto sz = mList.size();
     beginInsertRows(QModelIndex(), sz, sz);
-    mList.append(std::make_shared<ObjectData>("new item"));
+    auto obj = new ObjectData(this);
+    mList.append(ObjectDataPtr(obj));
+    mList.back()->setName("New object");
     mList.back()->paramListModel()->addParam("Param 1", ObjectParameter::TypeString);
     mList.back()->paramListModel()->addParam("Description", ObjectParameter::TypeString);
     mList.back()->paramListModel()->addParam("Image", ObjectParameter::TypeImage);
     endInsertRows();
 }
 
-void ObjectListModel::removeItem(int index)
+void ObjectListModel::removeObject(int index)
 {
     beginRemoveRows(QModelIndex(), index, index);
     mList.remove(index);
@@ -117,9 +120,11 @@ void ObjectListModel::resetList(const std::function<void()>& doWithList)
 ObjectData *ObjectListModel::object(int index) const
 {
     auto sz = mList.size();
+    //qDebug() << "ObjectListModel::object(" << index << ") from list with size " << sz;
     if (index < sz && index >= 0)
         return mList[index].get();
     else
         return &emptyObject;
+
 }
 

@@ -34,9 +34,8 @@ public:
     void resetList(const std::function<void()>& doWithList);
 
     Q_INVOKABLE ObjectData* object(int index) const;
-
-    void addItem();
-    void removeItem(int index);
+    Q_INVOKABLE void newObject();
+    Q_INVOKABLE void removeObject(int index);
 
 private:
     enum {

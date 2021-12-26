@@ -33,6 +33,9 @@ public:
     // Custom:
     void resetList(const std::function<void()>& doWithList = nullptr);
     void addParam(const QString& name, ObjectParameter::Type type);
+    void removeParam(int index);
+    ObjectParameter* getParam(int index);
+
 private:
     ParameterList mList;
 };

@@ -14,3 +14,16 @@ QVariantList ObjectParameter::composeTypeList()
         list.append(QString(en.key(i)));
     return list;
 }
+
+ObjectParameter::Type ObjectParameter::type() const
+{
+    return mType;
+}
+
+void ObjectParameter::setType(ObjectParameter::Type newType)
+{
+    if (mType == newType)
+        return;
+    mType = newType;
+    emit typeChanged();
+}

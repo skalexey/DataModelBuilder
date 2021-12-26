@@ -23,10 +23,19 @@ private:
 
 public:
     ObjectParameter(const QString& name, const Type& type)
-        : name(name), type(type) {}
+        : name(name), mType(type) {}
     ObjectParameter() = default;
     QString name;
-    Type type;
+
+    Q_PROPERTY (Type type READ type WRITE setType NOTIFY typeChanged)
+    Type type() const;
+    void setType(Type newType);
+
+signals:
+    void typeChanged();
+
+private:
+    Type mType = TypeString;
 };
 Q_DECLARE_METATYPE (ObjectParameter)
 #endif // OBJECTPARAMETER_H

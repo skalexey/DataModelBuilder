@@ -4,14 +4,11 @@ import QtQuick.Controls 2.15
 Item {
     width: 500
     height: 1080
-    property alias params: params
-    property alias objectName: objectName
-    property var paramTypeModel: ["No modifier", "Shift", "Control"]
+
     Text {
-        id: objectName
         x: 163
         y: 75
-        text: qsTr("Object Name")
+        text: selectedObjectName
         font.pixelSize: 30
     }
 
@@ -21,21 +18,16 @@ Item {
         y: 149
         width: 110
         height: 160
-        delegate: SelectedObjectParam {
-            typeModel: paramTypeModel
+        delegate: SelectedObjectParam {}
+        model: selectedObjParamListModel
+        highlight: Rectangle {
+            property var currentItem: params.currentItem
+            color: "yellow"
+            width: parent ? parent.width : 0
+            height: currentItem ? currentItem.height : 0
+            y: currentItem ? currentItem.y : 0
         }
-        model: ListModel {
-            ListElement {
-                name: "Name"
-            }
-
-            ListElement {
-                name: "ImageUrl"
-            }
-
-            ListElement {
-                name: "Circled"
-            }
-        }
+        highlightFollowsCurrentItem: false
+        footer: ParamListFooter {}
     }
 }

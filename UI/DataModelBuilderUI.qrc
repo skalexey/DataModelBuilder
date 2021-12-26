@@ -27,5 +27,7 @@
 <file>./Screen01.ui.qml</file>
 <file>./SelectedObject.qml</file>
 <file>./SelectedObjectParam.qml</file>
+<file>./ObjectsLibraryListFooter.qml</file>
+<file>./ParamListFooter.qml</file>
 </qresource>
 </RCC>

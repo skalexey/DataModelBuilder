@@ -5,7 +5,7 @@ Item {
     width: 300
     height: 1080
 
-    property alias gridView: objectsLibraryContainer
+    property alias libraryContainer: objectsLibraryContainer
 
     Text {
         id: objectsLibraryTitle
@@ -21,38 +21,17 @@ Item {
         y: 136
         width: 237
         height: 900
-        delegate: ObjectInLibrary {
-            id: obj
-            MouseArea {
-                width: 50
-                height: 50
-                onClicked: objectsLibraryContainer.currentIndex = index
-            }
-        }
+        delegate: ObjectInLibrary {}
         highlight: Rectangle {
-            color: "cyan"
-            width: parent.width
-            height: objectsLibraryContainer.currentItem.height
-            y: objectsLibraryContainer.currentItem.y;
+            property var currentItem: objectsLibraryContainer.currentItem
+            color: "yellow"
+            width: parent ? parent.width : 0
+            height: currentItem ? currentItem.height : 0
+            y: currentItem ? currentItem.y : 0
         }
         highlightFollowsCurrentItem: false
         focus: true
-        model: ListModel {
-            ListElement {
-                name: "Scheme element"
-            }
-
-            ListElement {
-                name: "Connection"
-            }
-
-            ListElement {
-                name: "Back image"
-            }
-
-            ListElement {
-                name: "Square"
-            }
-        }
+        model: libraryObjectListModel
+        footer: ObjectsLibraryListFooter {}
     }
 }
