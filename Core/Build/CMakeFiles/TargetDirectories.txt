@@ -1,0 +1,3 @@
+C:/Users/skoro/Projects/DataModelBuilder/Core/Build/CMakeFiles/DataModelBuilder.dir
+C:/Users/skoro/Projects/DataModelBuilder/Core/Build/CMakeFiles/ALL_BUILD.dir
+C:/Users/skoro/Projects/DataModelBuilder/Core/Build/CMakeFiles/ZERO_CHECK.dir
