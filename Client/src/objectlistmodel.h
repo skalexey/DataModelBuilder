@@ -13,8 +13,6 @@ typedef Object ObjectData;
 typedef std::shared_ptr<ObjectData> ObjectDataPtr;
 typedef QVector<ObjectDataPtr> ObjectList;
 
-Q_DECLARE_METATYPE(ObjectData)
-
 class ObjectListModel : public QAbstractListModel
 {
     Q_OBJECT

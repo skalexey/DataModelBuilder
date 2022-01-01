@@ -46,4 +46,6 @@ signals:
     void paramListChanged();
 };
 
+Q_DECLARE_METATYPE(Object)
+
 #endif // OBJECT_H

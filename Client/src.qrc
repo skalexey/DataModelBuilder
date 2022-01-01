@@ -1,8 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>src/objectlistmodel.cpp</file>
-        <file>src/objectlistmodel.h</file>
-        <file>src/object.cpp</file>
-        <file>src/object.h</file>
-    </qresource>
-</RCC>

@@ -12,7 +12,6 @@ SOURCES += \
         src/parameterlistmodel.cpp
 
 RESOURCES += UI/DataModelBuilderUI.qrc \
-    src.qrc \
     main.qml
 
 TRANSLATIONS += \
