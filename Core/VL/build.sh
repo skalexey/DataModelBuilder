@@ -1,4 +1,4 @@
-mklink /D VL ../VL
+#!/usr/bin/sh
 mkdir Build
 cd Build
 cmake ..

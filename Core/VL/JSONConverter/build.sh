@@ -1,6 +1,6 @@
-mklink /D VL ../VL
+#!/usr/bin/sh
 mkdir Build
 cd Build
-cmake ..
+cmake .. -DBUILD_TESTS=ON
 cmake --build .
 cd ..
