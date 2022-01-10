@@ -8,18 +8,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 project(DataModelBuilderCore)
 option(USE_JSONCONVERTER "Use JSONConverter lib" ON)
 
+set(DEPS "dependencies")
+
 include_directories(${PROJECT_BINARY_DIR})
-include_directories("${PROJECT_SOURCE_DIR}/VL/VL")
+include_directories("${PROJECT_SOURCE_DIR}/include")
+include_directories("${DEPS}/VL/include")
+include_directories("${DEPS}/VL/JSONConverter/include")
 
 if (USE_JSONCONVERTER)
 	set (EXTRA_LIBS ${EXTRA_LIBS} JSONConverter)
-	include_directories("${PROJECT_SOURCE_DIR}/VL/JSONConverter")
-	add_subdirectory("VL/JSONConverter")
+	add_subdirectory("${DEPS}/VL/JSONConverter")
 else()
-	add_subdirectory("VL/VL")
+	set (EXTRA_LIBS ${EXTRA_LIBS} VL)
+	add_subdirectory("${DEPS}/VL")
 endif () 
 
-add_library(DMBCore DMBCore.h DMBCore.cpp)
+file(GLOB SRC "src/*")
+file(GLOB HEADERS "include/*")
+add_library(DMBCore ${SRC} ${HEADERS})
+
 target_link_libraries(DMBCore ${EXTRA_LIBS})
 
 configure_file(
