@@ -9,10 +9,10 @@ class ObjectParameter : public QObject
 public:
     enum Type {
         TypeString,
-        TypeImage,
+        TypeInt,
         TypeFlag,
         TypeObject,
-        TypeListOfObjects
+        TypeList
     };
     Q_ENUM (Type)
 

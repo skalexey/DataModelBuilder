@@ -1,6 +1,7 @@
 #include<QDebug>
 #include "objectlistmodel.h"
 #include "parameterlistmodel.h"
+#include "DMBCore.h"
 
 namespace
 {
@@ -11,10 +12,12 @@ namespace
 ObjectListModel::ObjectListModel(QObject *parent)
     : QAbstractListModel(parent)
 {
+    dmb::Model model;
+    model.Store("model.json");
     resetList([&] {
         mList.append(std::make_shared<ObjectData>("Scheme element"));
         mList.back()->paramListModel()->addParam("Title", ObjectParameter::TypeString);
-        mList.back()->paramListModel()->addParam("Image", ObjectParameter::TypeImage);
+        mList.back()->paramListModel()->addParam("Image", ObjectParameter::TypeInt);
         mList.append(std::make_shared<ObjectData>("Connection"));
         mList.back()->paramListModel()->addParam("Title", ObjectParameter::TypeString);
         mList.back()->paramListModel()->addParam("Doublesided", ObjectParameter::TypeFlag);
@@ -80,7 +83,7 @@ void ObjectListModel::newObject()
     mList.back()->setName("New object");
     mList.back()->paramListModel()->addParam("Param 1", ObjectParameter::TypeString);
     mList.back()->paramListModel()->addParam("Description", ObjectParameter::TypeString);
-    mList.back()->paramListModel()->addParam("Image", ObjectParameter::TypeImage);
+    mList.back()->paramListModel()->addParam("Image", ObjectParameter::TypeInt);
     endInsertRows();
 }
 
