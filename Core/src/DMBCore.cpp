@@ -72,6 +72,7 @@ bool dmb::Model::Load(const char* fileName)
 	if (!converter.Load(mData, fileName))
 		return false;
 	Init();
+	return true;
 }
 
 bool dmb::Model::Store(const char* fileName, const vl::CnvParams& params)
