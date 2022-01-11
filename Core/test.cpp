@@ -1,7 +1,6 @@
 #include <iostream>
 #include "CoreConfig.h"
 #include "DMBCore.h"
-#include "JSONConverter.h"
 
 void ModelCreationTest()
 {
@@ -35,7 +34,6 @@ void ModelCreationTest()
 	branch1.Get("branches").AsList().Add(branch2);
 	bush.Get("branches").AsList().Add(branch1);
 	std::cout << "Model created\n";
-	vl::JSONConverter converter;
 	const char* fName = "new_model.json";
 	model.Store(fName, { true, true });
 	std::cout << "Model written to the json file'" << fName << "':\n";
