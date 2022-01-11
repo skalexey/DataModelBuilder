@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 project(DataModelBuilderCore)
 option(USE_JSONCONVERTER "Use JSONConverter lib" ON)
+option(DMB_TESTS "Include DMBTest target" OFF)
 
 set(DEPS "dependencies")
 
@@ -34,6 +35,8 @@ configure_file(
 	"${PROJECT_BINARY_DIR}/CoreConfig.h"
 )
 
-add_executable(Test main.cpp)
-target_link_libraries(Test DMBCore)
+if (DMB_TESTS)
+	add_executable(DMBTest test.cpp)
+	target_link_libraries(DMBTest DMBCore)
+endif ()
 

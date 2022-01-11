@@ -23,7 +23,7 @@ IF not exist %build% (
 )
 
 cd %build%
-cmake ..
+cmake .. -DDMB_TESTS=ON
 
 IF errorlevel 1 (
 	echo "CMake generation error: %errorlevel%"
