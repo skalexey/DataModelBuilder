@@ -19,28 +19,37 @@ find_package(Qt6 COMPONENTS Core)
 find_package(Qt6 COMPONENTS Gui)
 find_package(Qt6 COMPONENTS Quick)
 
-
 file(GLOB sources CONFIGURE_DEPENDS "src/*")
 
 qt_add_executable(DataModelBuilder WIN32 MACOSX_BUNDLE
-    main.cpp
-    ${sources}
-    UI/DataModelBuilderUI.qrc
+	main.cpp
+	${sources}
+	UI/DataModelBuilderUI.qrc
 )
+
+target_include_directories(DataModelBuilder PUBLIC
+    ../Core/dependencies/VL/JSONConverter/include
+    ../Core/dependencies/VL/include
+    ../Core/include
+)
+
+add_library( DMBCore STATIC IMPORTED )
+set_target_properties( DMBCore PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Debug/DMBCore.lib )
+
+add_library( JSONConverter STATIC IMPORTED )
+set_target_properties( JSONConverter PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Debug/JSONConverter.lib )
+
+add_library( VL STATIC IMPORTED )
+set_target_properties( VL PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Debug/VL.lib )
+
 target_link_libraries(DataModelBuilder PUBLIC
     Qt::Core
     Qt::Gui
     Qt::Quick
+    DMBCore
+    JSONConverter
+    VL
 )
-
-#message(STATUS "QML_IMPORT_PATH content: ${QML_IMPORT_PATH}")
-#list(APPEND QML_DIRS "UI")
-#set(QML_IMPORT_PATH "${QML_DIRS}" CACHE STRING "Qt Creator extra qml import paths")
-
-# Make Qt Creator aware of where the QML modules live
-#set (_QML_IMPORT_PATHS "UI/imports")
-## Add new module paths here.
-#list (APPEND _QML_IMPORT_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/UI)
 
 set (
     QML_IMPORT_PATH
@@ -50,8 +59,6 @@ set (
     "Path used to locate CMake modules by Qt Creator"
     FORCE
 )
-
-message(STATUS "QML_IMPORT_PATH content: ${QML_IMPORT_PATH}")
 
 set(qmake_immediate_resource_files
     "main.qml"
@@ -63,6 +70,51 @@ qt6_add_resources(DataModelBuilder "qmake_immediate"
     FILES
         ${qmake_immediate_resource_files}
 )
+
+message("CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+
+#link_directories(
+#    ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Debug/
+#    ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Debug/
+#    ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Debug/
+#)
+
+#target_link_libraries(DataModelBuilder DMBCore)
+#target_link_libraries(DataModelBuilder JSONConverter)
+#target_link_libraries(DataModelBuilder VL)
+
+#if(WIN32 AND CONFIG(release,debug OR release))
+#    target_link_libraries(DataModelBuilder PUBLIC
+        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Release/
+        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Release/
+        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Release/
+#        DMBCore
+#        JSONConverter
+#        VL
+#    )
+#endif()
+
+#if((NOT (WIN32 AND CONFIG(release,debug OR release))) AND (WIN32 AND CONFIG(debug,debug OR release)))
+#    target_link_libraries(DataModelBuilder PUBLIC
+        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Debug/
+        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Debug/
+        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Debug/
+#        DMBCore
+#        JSONConverter
+#        VL
+#    )
+#endif()
+
+#if(((NOT (WIN32 AND CONFIG(release,debug OR release))) AND (NOT (WIN32 AND CONFIG(debug,debug OR release)))) AND (UNIX))
+#    target_link_libraries(DataModelBuilder PUBLIC
+        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-g++/
+        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-g++/dependencies/VL/JSONConverter/
+        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/
+#        DMBCore
+#        JSONConverter
+#        VL
+#    )
+#endif()
 
 install(TARGETS DataModelBuilder
     RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"
