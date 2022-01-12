@@ -5,6 +5,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Uncomment the next line if want to experiment with g++ compliation
 #set(CMAKE_CXX_COMPILER "g++")
 
+if (LOG_ON)
+	add_compile_definitions("LOG_ON")
+endif ()
+
 project(DataModelBuilderCore)
 option(USE_JSONCONVERTER "Use JSONConverter lib" ON)
 option(DMB_TESTS "Include DMBTest target" OFF)
