@@ -33,14 +33,13 @@ target_include_directories(DataModelBuilder PUBLIC
     ../Core/include
 )
 
-add_library( DMBCore STATIC IMPORTED )
-set_target_properties( DMBCore PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Debug/DMBCore.lib )
+#target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Core/Build-g++)
+#target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-g++/dependencies/VL/JSONConverter)
+#target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../???)
 
-add_library( JSONConverter STATIC IMPORTED )
-set_target_properties( JSONConverter PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Debug/JSONConverter.lib )
-
-add_library( VL STATIC IMPORTED )
-set_target_properties( VL PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Debug/VL.lib )
+target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Debug/)
+target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Debug)
+target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Debug)
 
 target_link_libraries(DataModelBuilder PUBLIC
     Qt::Core
