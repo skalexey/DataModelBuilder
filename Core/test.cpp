@@ -96,9 +96,29 @@ void SeparateContentStoreTest()
 	const char* outFName = "separate_content.json";
 	if (model.GetContent().Store(outFName))
 		std::cout << "Content stored into the file '" << outFName << "':\n"
-			<< model.GetContent().JSONStr({ true });
+			<< model.GetContent().JSONStr({ true }) << "\n";
 	else
 		std::cout << "Error while storing the content\n";
+}
+
+void RenameTest()
+{
+	std::cout << "Rename test\n";
+	dmb::Model model;
+	const char* fName = "new_model.json";
+	model.Load(fName);
+	auto& registry = model.GetRegistry();
+	if (registry.HasType("pear"))
+	{
+		if (registry.GetType("pear").RenameProperty("radius", "diameter"))
+			std::cout << "Pear's 'radius' property renamed to 'diameter'\n";
+		else
+			std::cout << "Can't rename property 'radius'\n";
+	}
+	else
+	{
+		std::cout << "Can't find 'pear' type in the model loaded from '" << fName << "'\n";
+	}
 }
 
 int main(int argc, const char* argv[])
@@ -108,5 +128,6 @@ int main(int argc, const char* argv[])
 	ModelEditTest();
 	ContentFillingTest();
 	SeparateContentStoreTest();
+	RenameTest();
 	return 0;
 }

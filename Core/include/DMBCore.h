@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+#include <string>
 #include "vl.h"
 #include "JSONDefs.h"
 
@@ -12,9 +14,13 @@ namespace dmb
 		friend class Model;
 
 	public:
-		vl::Object& CreateType(const char* typeName);
-		vl::Var& RegisterType(const char* typeName, vl::Var& type);
-		vl::Object& GetType(const char* typeName);
+		vl::Object& CreateType(const std::string&);
+		vl::Var& RegisterType(const std::string&, vl::Var& type);
+		vl::Object& GetType(const std::string&);
+		bool ForeachType(const std::function<bool(const std::string&, vl::Object&)>& pred);
+		bool RemoveType(const std::string& typeName);
+		bool RenameType(const std::string& typeName, const std::string& newName);
+		bool HasType(const std::string& typeName);
 
 	protected:
 		void Init(const vl::Object& data);

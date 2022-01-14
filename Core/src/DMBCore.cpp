@@ -6,19 +6,43 @@ namespace
 	vl::NullVar emptyVar;
 }
 
-vl::Object& dmb::Registry::CreateType(const char* typeName)
+vl::Object& dmb::Registry::CreateType(const std::string& typeName)
 {
 	return mData.Set(typeName, vl::Object()).AsObject();
 }
 
-vl::Var& dmb::Registry::RegisterType(const char* typeName, vl::Var& type)
+vl::Var& dmb::Registry::RegisterType(const std::string& typeName, vl::Var& type)
 {
 	return mData.Set(typeName, type);
 }
 
-vl::Object& dmb::Registry::GetType(const char* typeName)
+vl::Object& dmb::Registry::GetType(const std::string& typeName)
 {
 	return mData.Get(typeName).AsObject();
+}
+
+bool dmb::Registry::ForeachType(const std::function<bool(const std::string&, vl::Object&)>& pred)
+{
+	return mData.ForeachProp([&](const std::string& name, vl::Var& value) {
+		if (!pred(name, value.AsObject()))
+			return false;
+		return true;
+	});
+}
+
+bool dmb::Registry::RemoveType(const std::string& typeName)
+{
+	return mData.RemoveProperty(typeName);
+}
+
+bool dmb::Registry::RenameType(const std::string& typeName, const std::string& newName)
+{
+	return mData.RenameProperty(typeName, newName);
+}
+
+bool dmb::Registry::HasType(const std::string& typeName)
+{
+	return mData.Has(typeName);
 }
 
 void dmb::Registry::Init(const vl::Object& data)
