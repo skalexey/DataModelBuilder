@@ -19,7 +19,9 @@ find_package(Qt6 COMPONENTS Core)
 find_package(Qt6 COMPONENTS Gui)
 find_package(Qt6 COMPONENTS Quick)
 
-file(GLOB sources CONFIGURE_DEPENDS "src/*")
+include_directories("include")
+
+file(GLOB sources CONFIGURE_DEPENDS "src/*" "include/*")
 
 qt_add_executable(DataModelBuilder WIN32 MACOSX_BUNDLE
 	main.cpp

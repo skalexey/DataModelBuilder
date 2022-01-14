@@ -4,8 +4,8 @@
 #include <QLocale>
 #include <QTranslator>
 #include <QQmlContext>
-#include "src/objectlistmodel.h"
-#include "src/object.h"
+#include "TypeListModel.h"
+#include "TypeModel.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
     QGuiApplication app(argc, argv);
-    qmlRegisterType<ObjectListModel>("ObjectModel", 1, 0, "ObjectListModel");
+    qmlRegisterType<TypeListModel>("TypeModel", 1, 0, "TypeListModel");
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
     for (const QString &locale : uiLanguages) {
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
         }
     }
     QQuickView view;
-    view.rootContext()->setContextProperty("paramTypeModel", ObjectParameter::typeList);
+    view.rootContext()->setContextProperty("propTypeModel", TypePropListModel::typeList);
     view.engine()->addImportPath("qrc:/imports");
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     view.setSource(url);

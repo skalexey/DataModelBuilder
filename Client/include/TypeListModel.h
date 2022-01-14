@@ -3,46 +3,59 @@
 
 #include <QAbstractListModel>
 #include <QObject>
-#include <QVector>
+#include <vector>
+#include <string>
 #include <functional>
 #include <memory>
-#include "object.h"
-#include "parameterlistmodel.h"
+#include "TypeModel.h"
+#include "PropListModel.h"
+#include "DMBCore.h"
 
-typedef Object ObjectData;
+typedef TypeModel ObjectData;
 typedef std::shared_ptr<ObjectData> ObjectDataPtr;
-typedef QVector<ObjectDataPtr> ObjectList;
 
-class ObjectListModel : public QAbstractListModel
+// object id is only c-string
+typedef std::vector<std::string> ObjectIdList;
+
+class TypeListModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    explicit ObjectListModel(QObject *parent = nullptr);
+    explicit TypeListModel(QObject *parent = nullptr);
+    ~TypeListModel();
+
     // QAbstractListModel interface
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
     // Editable:
     bool setData(const QModelIndex &index, const QVariant &value,
                  int role = Qt::EditRole) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     virtual QHash<int,QByteArray> roleNames() const override;
-    // Our interface
-    void resetList(const std::function<void()>& doWithList);
 
-    Q_INVOKABLE ObjectData* object(int index) const;
+    // Our interface
+    dmb::Model& getDataModel();
+    void resetList(const std::function<void()>& doWithList);
+    const std::string& getObjectId(int index);
+
+    // Properties
+    Q_INVOKABLE ObjectData* object(int index);
     Q_INVOKABLE void newObject();
     Q_INVOKABLE void removeObject(int index);
+    Q_INVOKABLE void store();
 
 private:
     enum {
         NameRole,
-        ParamsRole
     };
 
 private:
-    ObjectList mList;
+    ObjectIdList mList;
+    dmb::Model mModel;
+    ObjectData mObject;
 };
 
 #endif // OBJECTLISTMODEL_H

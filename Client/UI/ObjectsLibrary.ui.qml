@@ -1,5 +1,5 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 
 Item {
     width: 300
@@ -31,7 +31,13 @@ Item {
         }
         highlightFollowsCurrentItem: false
         focus: true
-        model: libraryObjectListModel
+        model: libraryTypeListModel
         footer: ObjectsLibraryListFooter {}
     }
 }
+
+/*##^##
+Designer {
+    D{i:0;formeditorZoom:0.5}D{i:1}D{i:2}
+}
+##^##*/
