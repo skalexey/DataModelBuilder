@@ -17,29 +17,29 @@ using namespace Utils;
 
 void Utils::Log(const char* fmt, va_list args)
 {
-    char buf[512];
-    vsnprintf(buf, 512, fmt, args);
-    std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-    time_t tnow = std::chrono::system_clock::to_time_t(now);
-    tm *date = std::localtime(&tnow);
-    long ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    printf("%02i:%02i:%02i:%03li %s\n", date->tm_hour, date->tm_min, date->tm_sec, ms % 1000, buf);
+	char buf[512];
+	vsnprintf(buf, 512, fmt, args);
+	std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+	time_t tnow = std::chrono::system_clock::to_time_t(now);
+	tm *date = std::localtime(&tnow);
+	long ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	printf("%02i:%02i:%02i:%03li %s\n", date->tm_hour, date->tm_min, date->tm_sec, ms % 1000, buf);
 }
 
 void Utils::Log(const char* fmt, ...)
 {
-    va_list args;
-    va_start(args, fmt);
-    Log(fmt, args);
-    va_end(args);
+	va_list args;
+	va_start(args, fmt);
+	Log(fmt, args);
+	va_end(args);
 }
 
 void Utils::Warn(const char* fmt, ...)
 {
-    va_list args;
-    va_start(args, fmt);
-    Log("Warning: %s", fmt, args);
-    va_end(args);
+	va_list args;
+	va_start(args, fmt);
+	Log("Warning: %s", fmt, args);
+	va_end(args);
 }
 
 unsigned Utils::Hash(const std::string& data)
@@ -56,10 +56,10 @@ unsigned Utils::Hash(const std::string& data)
 
 std::string Utils::FormatStr(const char* fmt, ...)
 {
-    va_list args;
-    va_start(args, fmt);
-    char buf[512];
-    vsnprintf(buf, 512, fmt, args);
-    va_end(args);
-    return buf;
+	va_list args;
+	va_start(args, fmt);
+	char buf[512];
+	vsnprintf(buf, 512, fmt, args);
+	va_end(args);
+	return buf;
 }

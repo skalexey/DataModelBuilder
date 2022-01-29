@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-if(NOT DEFINED INSTALL_EXAMPLESDIR)
+if(NOT DEFINED INSTALL_EXAMPLESDIRn)
   set(INSTALL_EXAMPLESDIR "examples")
 endif()
 
@@ -28,6 +28,8 @@ qt_add_executable(DataModelBuilder WIN32 MACOSX_BUNDLE
 	${sources}
 	UI/DataModelBuilderUI.qrc
 )
+
+target_compile_definitions(DataModelBuilder PRIVATE QT_QML_DEBUG)
 
 target_include_directories(DataModelBuilder PUBLIC
     ../Core/dependencies/VL/JSONConverter/include

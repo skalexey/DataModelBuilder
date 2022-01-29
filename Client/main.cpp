@@ -4,8 +4,12 @@
 #include <QLocale>
 #include <QTranslator>
 #include <QQmlContext>
-#include "TypeListModel.h"
-#include "TypeModel.h"
+#include "VLObjectVarModel.h"
+#include "VLListModelInterface.h"
+#include "VLListModel.h"
+#include "ObjectProperty.h"
+#include "GlobalContext.h"
+#include "DMBModel.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +17,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
     QGuiApplication app(argc, argv);
-    qmlRegisterType<TypeListModel>("TypeModel", 1, 0, "TypeListModel");
+	dmb::emptyObjectModel->Init(&app); // Set parent to
+	qmlRegisterType<dmb::DMBModel>("DMBModel", 1, 0, "DMBModel");
+	qmlRegisterType<dmb::ObjectProperty>("DMBModel", 1, 0, "ObjectProperty");
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
     for (const QString &locale : uiLanguages) {
@@ -22,14 +28,27 @@ int main(int argc, char *argv[])
             app.installTranslator(&translator);
             break;
         }
-    }
-    QQuickView view;
-    view.rootContext()->setContextProperty("propTypeModel", TypePropListModel::typeList);
-    view.engine()->addImportPath("qrc:/imports");
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
-    view.setSource(url);
-    if (!view.errors().isEmpty())
-        return -1;
-    view.show();
+	}
+	const QUrl url(QStringLiteral("qrc:/main.qml"));
+	// Uncomment if want to use Item as a root QML object int main.qml
+	//	QQuickView view;
+	//	view.rootContext()->setContextProperty("vlTypeModel", dmb::ObjectPropListModel::typeList);
+	//	view.engine()->addImportPath("qrc:/imports");
+	//	view.setSource(url);
+	//	if (!view.errors().isEmpty())
+	//		return -1;
+	//	view.show();
+
+	// Load a Window from main.qml
+	QQmlApplicationEngine engine;
+	engine.rootContext()->setContextProperty("vlTypeModel", dmb::ObjectProperty::typeList);
+	engine.rootContext()->setContextProperty("vlTypeModelDetailed", dmb::ObjectProperty::typeMap);
+	engine.addImportPath("qrc:/imports");
+	QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+					 &app, [url](QObject *obj, const QUrl &objUrl) {
+		if (!obj && url == objUrl)
+			QCoreApplication::exit(-1);
+	}, Qt::QueuedConnection);
+	engine.load(url);
     return app.exec();
 }

@@ -1,71 +1,70 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 
 Item {
     id: item1
-    x: 5
-    width: 150
+    width: parent.width
     height: 40
     state: "base"
 
     property var rowIndex: index
     property bool ignoreChanges: false
 
-    Row {
-        id: row1
-        spacing: 10
+    Text {
+        id: paramName
+        visible: true
+        text: name
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.left
+        anchors.leftMargin: 6
+        font.bold: true
+    }
 
-
-        Text {
-            id: paramName
-            visible: true
-            text: name
-            anchors.verticalCenter: parent.verticalCenter
-            font.bold: true
-        }
-
-        TextField {
-            id: textField
-            width: 100
-            height: 25
-            text: name
-            placeholderText: qsTr("Text Field")
-            onFocusChanged: {
-                if (!focus)
-                {
-                    if (!ignoreChanges)
-                        name = text;
-                    item1.state = "base"
-                }
-            }
-            Keys.onEscapePressed: {
-                ignoreChanges = true;
+    TextField {
+        id: textField
+        width: paramName.width
+        height: 25
+        text: name
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.left
+        anchors.leftMargin: 54
+        placeholderText: qsTr("Text Field")
+        onFocusChanged: {
+            if (!focus)
+            {
+                if (!ignoreChanges)
+                    name = text;
                 item1.state = "base"
-                ignoreChanges = false;
             }
-            function enterPressed() {
-                textField.focus = false;
-                item1.state = "base";
-            }
-
-            Keys.onEnterPressed: enterPressed()
-            Keys.onReturnPressed: enterPressed()
+        }
+        Keys.onEscapePressed: {
+            ignoreChanges = true;
+            item1.state = "base"
+            ignoreChanges = false;
+        }
+        function enterPressed() {
+            textField.focus = false;
+            item1.state = "base";
         }
 
-        ComboBox {
-            id: paramType
-            width: 103
-            height: 26
-            model: selectedObjParamTypeModel
-            onActivated: type = currentValue
-            Component.onCompleted: currentIndex = type
-        }
+        Keys.onEnterPressed: enterPressed()
+        Keys.onReturnPressed: enterPressed()
+    }
 
+    ComboBox {
+        id: paramType
+        width: 103
+        height: 26
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
+        anchors.rightMargin: 6
+        model: selectedObjParamTypeModel
+        onActivated: type = currentValue
+        Component.onCompleted: currentIndex = type
     }
 
     MouseArea {
-        width: 50
-        height: 50
+        anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         propagateComposedEvents: true
         onPressed: function(mouse){
@@ -120,8 +119,4 @@ Item {
 
 
 
-/*##^##
-Designer {
-    D{i:0;autoSize:true;height:480;width:640}D{i:2}D{i:3}D{i:4}D{i:1}D{i:6}D{i:5}
-}
-##^##*/
+

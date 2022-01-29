@@ -1,33 +1,37 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 
 Item {
-    width: 500
-    height: 1080
+    id: item1
+    width: parent.width
+    height: parent.height
 
     Text {
-        x: 163
-        y: 75
+        id: selectedObjectNameText
         text: selectedObjectName
-        font.pixelSize: 30
+        font.pixelSize: 24
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        width: parent.width
+        height: 50
     }
 
-    ListView {
+	InteractiveListView {
         id: params
-        x: 195
-        y: 149
-        width: 110
-        height: 160
-        delegate: SelectedObjectParam {}
-        model: selectedObjParamListModel
-        highlight: Rectangle {
-            property var currentItem: params.currentItem
-            color: "yellow"
-            width: parent ? parent.width : 0
-            height: currentItem ? currentItem.height : 0
-            y: currentItem ? currentItem.y : 0
+        y: selectedObjectNameText.y + selectedObjectNameText.height
+        width: parent.width * 0.5
+        height: parent.height - selectedObjectNameText.height
+        anchors.horizontalCenter: parent.horizontalCenter
+        delegate: SelectedObjectParam {
+            width: params.width // To fix the error "TypeError: Cannot read property 'width' of null"
         }
-        highlightFollowsCurrentItem: false
+        model: selectedObjParamListModel
         footer: ParamListFooter {}
     }
 }
+
+/*##^##
+Designer {
+    D{i:0;formeditorZoom:0.5}D{i:1}D{i:2}
+}
+##^##*/

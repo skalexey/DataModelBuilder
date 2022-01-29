@@ -53,11 +53,10 @@ void ContentFillingTest()
 {
 	std::cout << "Content filling test\n";
 	dmb::Model model;
-	model.Load("content_filling_test.json");
+	model.Load("new_model.json");
 	auto& content = model.GetContent();
 	auto& tree = content.Add("fruitTree", model.GetType("bush"));
 	std::cout << "Object 'bush' instantiated into the content with name 'fruitTree'\n";
-	// TODO: fix changing property in the type object
 	tree.Set("leafColor", "Gold");
 	std::cout << "leafPerBranch: " << tree.Get("leafPerBranch").AsNumber().Val() << "\n";
 	content.Add("fieldSize", vl::NumberVar(4));
@@ -94,7 +93,7 @@ void SeparateContentStoreTest()
 		return;
 	}
 	const char* outFName = "separate_content.json";
-	if (model.GetContent().Store(outFName))
+	if (model.GetContent().Store(outFName, { true }))
 		std::cout << "Content stored into the file '" << outFName << "':\n"
 			<< model.GetContent().JSONStr({ true }) << "\n";
 	else

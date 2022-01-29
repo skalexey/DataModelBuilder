@@ -2,42 +2,41 @@ import QtQuick
 import QtQuick.Controls
 
 Item {
-    width: 300
-    height: 1080
+	id: item1
+	width: 300
+	height: 1080
 
-    property alias libraryContainer: objectsLibraryContainer
+	property alias libraryContainer: objectsLibraryContainer
 
-    Text {
-        id: objectsLibraryTitle
-        x: 51
-        y: 49
-        text: qsTr("Objects Library")
-        font.pixelSize: 30
-    }
+	Text {
+		id: objectsLibraryTitle
+		x: 0
+		y: 0
+		width: parent.width
+		height: 40
+		text: qsTr("Type Library")
+		font.pixelSize: 24
+		horizontalAlignment: Text.AlignHCenter
+		verticalAlignment: Text.AlignVCenter
+	}
 
-    ListView {
-        id: objectsLibraryContainer
-        x: 33
-        y: 136
-        width: 237
-        height: 900
-        delegate: ObjectInLibrary {}
-        highlight: Rectangle {
-            property var currentItem: objectsLibraryContainer.currentItem
-            color: "yellow"
-            width: parent ? parent.width : 0
-            height: currentItem ? currentItem.height : 0
-            y: currentItem ? currentItem.y : 0
-        }
-        highlightFollowsCurrentItem: false
-        focus: true
-        model: libraryTypeListModel
-        footer: ObjectsLibraryListFooter {}
-    }
+	InteractiveListView {
+		id: objectsLibraryContainer
+		width: parent.width * 0.8
+		y: objectsLibraryTitle.y + objectsLibraryTitle.height
+		height: parent.height - objectsLibraryTitle.y - objectsLibraryTitle.height
+		anchors.horizontalCenter: parent.horizontalCenter
+		delegate: ObjectInLibrary {
+			width: objectsLibraryContainer.width // To fix the error "TypeError: Cannot read property 'width' of null"
+		}
+		model: libraryTypeListModel
+		footer: ObjectsLibraryListFooter {}
+	}
 }
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.5}D{i:1}D{i:2}
+	D{i:0;formeditorZoom:0.66}D{i:1}D{i:2}
 }
 ##^##*/
+

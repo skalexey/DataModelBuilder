@@ -3,28 +3,26 @@ import QtQuick.Controls
 
 Item {
     id: obj
-    x: 0
-    height: 50
     width: parent.width
+    height: 40
     state: "base"
-    property var parentContainer: objectsLibraryContainer
+
+    property var parentContainer: contentBlockContainer
     property bool ignoreChanges: false
 
     Text {
-        leftPadding: 6
-        id: nameText
+        id: text1
         text: name
         anchors.verticalCenter: parent.verticalCenter
+        leftPadding: 6
         anchors.left: parent.left
         font.bold: true
-        anchors.horizontalCenter: parent.horizontalCenter
     }
 
     TextField {
         id: textField
         width: 100
         height: 25
-        visible: false
         text: name
         anchors.verticalCenter: parent.verticalCenter
         placeholderText: qsTr("Text Field")
@@ -57,7 +55,7 @@ Item {
         }
         onClicked: function(mouse) {
             if (mouse.button === Qt.LeftButton)
-                typeClick();
+                itemClick();
         }
 
         onDoubleClicked: function(mouse) {
@@ -71,43 +69,40 @@ Item {
         Menu {
             id: contextMenu
             MenuItem {
-                text: "Instantiate"
-                onClicked: instantiateClick(parentContainer.currentIndex)
-            }
-            MenuItem {
                 text: "Rename"
                 onClicked: function () {
                     obj.state = "edit"
+                    textField.focus = true;
                 }
             }
             MenuItem {
                 text: "Delete"
-                onClicked: libraryDeleteObjectClicked(index)
+                onClicked: contentDeleteItemClicked(index)
             }
         }
     }
+
     states: [
         State {
-            name: "edit"
+            name: "base"
 
             PropertyChanges {
                 target: textField
-                visible: true
-            }
-
-            PropertyChanges {
-                target: nameText
                 visible: false
             }
         },
         State {
-            name: "base"
+            name: "edit"
+
+            PropertyChanges {
+                target: text1
+                visible: false
+            }
+
+            PropertyChanges {
+                target: textField
+                focus: true
+            }
         }
     ]
 }
-
-/*##^##
-Designer {
-    D{i:0;formeditorZoom:0.75}D{i:1}D{i:2}D{i:4}D{i:3}
-}
-##^##*/

@@ -7,6 +7,7 @@ set cmakeLogOnArg= -DLOG_ON=ON
 set cmakeGppArg=
 set onlyLibArg=
 set gppArg=
+set vlBranch=dev
 
 set argCount=0
 for %%x in (%*) do (
@@ -32,7 +33,7 @@ cd %deps%
 
 IF not exist VL (
 	echo --- Clone VL library from GitHub
-	git clone https://github.com/skalexey/VL.git --branch v0.1
+	git clone https://github.com/skalexey/VL.git --branch %vlBranch%
 )
 
 cd VL\JSONConverter
