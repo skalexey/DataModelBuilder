@@ -41,9 +41,19 @@ target_include_directories(DataModelBuilder PUBLIC
 #target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-g++/dependencies/VL/JSONConverter)
 #target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../???)
 
-target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Debug/)
-target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Debug)
-target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Debug)
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    message("=== Set ${CMAKE_BUILD_TYPE} link directories")
+    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Debug/)
+    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Debug)
+    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Debug)
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    message("=== Set ${CMAKE_BUILD_TYPE} link directories")
+    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Release/)
+    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Release)
+    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Release)
+endif()
+
+
 
 target_link_libraries(DataModelBuilder PUBLIC
     Qt::Core
