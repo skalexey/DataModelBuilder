@@ -4,6 +4,7 @@
 #include "vl.h"
 #include "VLListModel.h"
 #include "VLVarModel.h"
+#include "DMBModel.h"
 
 namespace dmb
 {
@@ -18,6 +19,10 @@ namespace dmb
 //		else
 //			qDebug() << "Object(QObject* parent == nullptr) Empty object cretaed";
 	}
+
+	VLObjectVarModel::VLObjectVarModel(const vl::Var& v, QObject* parent)
+		: Base(v, parent)
+	{}
 
 	VLObjectVarModel::~VLObjectVarModel() {
 		//qDebug() << "~Object() with id '" << Base::getId().c_str() << "'";
@@ -40,10 +45,10 @@ namespace dmb
 		mPropListModel.setParent(this);
 	}
 
-	void VLObjectVarModel::Init(QObject *parent, const vl::Var& data)
+	void VLObjectVarModel::Init(QObject *parent, const vl::Var& data, DMBModel* owner)
 	{
-		Base::Init(parent, data);
-		mPropListModel.Init(std::dynamic_pointer_cast<VLVarModel>(shared_from_this()));
+		Base::Init(parent, data, owner);
+		mPropListModel.Init(shared_from_this());
 		// Uncomment if there are problems with not existent nested models
 		// Only in the first call of the nested model
 		//loadPropList();
@@ -72,7 +77,11 @@ namespace dmb
 		return true;
 	}
 
-	// Data and model getters
+	bool VLObjectVarModel::has(const QString &propId) const
+	{
+		return getData().Has(propId.toStdString());
+	}
+
 	const vl::ObjectVar &VLObjectVarModel::getData() const
 	{
 		return Base::getData().AsObject();
@@ -109,6 +118,11 @@ namespace dmb
 		if (index >= 0)
 			return getId(index);
 		return emptyString;
+	}
+
+	bool VLObjectVarModel::removeChild(const VLVarModel *childPtr)
+	{
+		return mPropListModel.remove(getChildId(childPtr));
 	}
 
 	const std::string &VLObjectVarModel::getId(int index) const
@@ -161,6 +175,11 @@ namespace dmb
 		return nullptr;
 	}
 
+	VLCollectionModel& VLObjectVarModel::getPropListModel()
+	{
+		return mPropListModel;
+	}
+
 	void VLObjectVarModel::add(const QString& propId, ObjectProperty::Type type)
 	{
 		mPropListModel.add(propId, type);
@@ -176,11 +195,6 @@ namespace dmb
 		return mPropListModel.removeAt(index);
 	}
 
-	bool VLObjectVarModel::has(const QString &propId) const
-	{
-		return getData().Has(propId.toStdString());
-	}
-
 	VLVarModel *VLObjectVarModel::at(int index)
 	{
 		return mPropListModel.at(index);
@@ -194,6 +208,11 @@ namespace dmb
 	VLVarModel *VLObjectVarModel::set(const QString &propId, VLVarModel *var)
 	{
 		return mPropListModel.set(propId, var);
+	}
+
+	VLVarModel *VLObjectVarModel::set(const QString &propId, const QVariant &data)
+	{
+		return mPropListModel.set(propId, data);
 	}
 
 	vl::Var& VLObjectVarModel::setData(const std::string &propId, const vl::Var &v)

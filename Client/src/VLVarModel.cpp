@@ -2,6 +2,7 @@
 #include "VLVarModel.h"
 #include "vl.h"
 #include "VLObjectVarModel.h"
+#include "DMBModel.h"
 
 namespace dmb
 {
@@ -12,6 +13,12 @@ namespace dmb
 		: QObject(parent)
 	{
 //		qDebug() << "Create VarModel " << this;
+	}
+
+	VLVarModel::VLVarModel(const vl::Var& v, QObject *parent)
+		: VLVarModel(parent)
+	{
+		mVarPtr = vl::MakePtr(v);
 	}
 
 	VLVarModel::~VLVarModel()
@@ -25,16 +32,21 @@ namespace dmb
 		setParent(parent);
 	}
 
-	void VLVarModel::Init(QObject *parent, const vl::Var &data)
+	void VLVarModel::Init(QObject *parent, const vl::Var &data, DMBModel* owner)
 	{
 		setParent(parent);
 		mVarPtr = vl::MakePtr(data);
+		mDMBModel = owner;
 	}
 
 	void VLVarModel::Init(const VLVarModelPtr& parent)
 	{
 		setParent(parent.get());
+		if (mVarPtr)
+			mVarPtr.reset();
 		mParentModel = parent;
+		if (parent)
+			mDMBModel = parent->mDMBModel;
 	}
 
 	const VLObjectVarModel* VLVarModel::asObject() const
@@ -87,6 +99,23 @@ namespace dmb
 		return vl::emptyVar;
 	}
 
+	std::string VLVarModel::getTypeId() const
+	{
+		if (mDMBModel)
+			return mDMBModel->getDataModel().GetTypeId(getData().AsObject());
+		return "";
+	}
+
+	const DMBModel *VLVarModel::getDataModel() const
+	{
+		return mDMBModel;
+	}
+
+	DMBModel *VLVarModel::getDataModel()
+	{
+		return mDMBModel;
+	}
+
 	vl::Var &VLVarModel::getChildData(const VLVarModel *childPtr)
 	{
 		return const_cast<vl::Var&>(const_cast<const VLVarModel*>(this)->getChildData(childPtr));
@@ -111,8 +140,23 @@ namespace dmb
 
 	int VLVarModel::getChildIndex(const VLVarModel *childPtr) const
 	{
-		// Only objects and lists can have children
+		// Only objects and lists can use this method
 		return -1;
+	}
+
+	bool VLVarModel::removeChild(const VLVarModel *childPtr)
+	{
+		// Only objects and lists can use this method
+		return false;
+	}
+
+	bool VLVarModel::remove()
+	{
+		if (auto parent = getParentModel())
+			return parent->removeChild(this);
+		else if (auto owner = getDataModel())
+			return owner->removeStandaloneModel(this);
+		return false;
 	}
 
 	QString VLVarModel::id() const

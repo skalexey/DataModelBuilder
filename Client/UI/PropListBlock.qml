@@ -15,20 +15,25 @@ Column {
 	}
 
 	Text {
+		id: emptyLabel
+		visible: false
+		text: qsTr("<Empty>")
+		font.pixelSize: 9
+		anchors.left: parent.left
+		anchors.leftMargin: 6
+	}
+
+	Text {
 		id: ownPropsLabel
 		text: qsTr("own props")
 		anchors.left: parent.left
 		font.pixelSize: 8
 		anchors.leftMargin: 6
-		visible: props.state === "object"
-				 && ownPropListModel && (ownPropListModel.rowCount() > 0
-				 || protoPropListModel && protoPropListModel.rowCount() > 0)
+		visible: false
 	}
 	Text {
 		id: ownNoPropsLabel
-		visible: props.state === "object"
-				 && ownPropListModel && ownPropListModel.rowCount() === 0
-				 && protoPropListModel && protoPropListModel.rowCount() > 0
+		visible: false
 		text: qsTr("<Nothing>")
 		font.pixelSize: 9
 		anchors.left: parent.left
@@ -39,6 +44,7 @@ Column {
 	InteractiveListView {
 		id: ownPropList
 		width: parent.width
+		visible: false
 		implicitHeight: contentItem.childrenRect.height
 		delegate: ParamInItem {
 			container: ownPropList
@@ -56,38 +62,14 @@ Column {
 		anchors.left: parent.left
 		font.pixelSize: 8
 		anchors.leftMargin: 6
-		visible: props.state === "object"
-				 && ownPropListModel && (ownPropListModel.rowCount() > 0
-				 || (protoPropListModel && protoPropListModel.rowCount() > 0))
+		visible: false
 	}
 
-	Text {
-		id: protoNoPropsLabel
-		visible: props.state === "object"
-				 && protoPropListModel && protoPropListModel.rowCount() === 0
-				 && ownPropListModel && ownPropListModel.rowCount() > 0
-		text: qsTr("<Nothing>")
-		font.pixelSize: 9
-		anchors.left: parent.left
-		anchors.leftMargin: 6
-	}
-
-	Text {
-		id: emptyLabel
-		visible: (props.state === "object"
-				  && protoPropListModel && protoPropListModel.rowCount() === 0
-				  && ownPropListModel && ownPropListModel.rowCount() === 0)
-				|| (props.state === "list" && arrayListModel
-					&& arrayListModel.rowCount() === 0)
-		text: qsTr("<Empty>")
-		font.pixelSize: 9
-		anchors.left: parent.left
-		anchors.leftMargin: 6
-	}
 	Rectangle {
 		id: protoPropListBg
 		color: "#67dfffcd"
 		width: parent.width
+		visible: false
 		implicitHeight: childrenRect.height
 		InteractiveListView {
 			id: protoPropList
@@ -127,43 +109,52 @@ Column {
 	states: [
 		State {
 			name: "object"
+
+			PropertyChanges {
+				target: ownPropsLabel
+				visible: (ownPropListModel && ownPropListModel.rowCount() > 0)
+						 || (protoPropListModel && protoPropListModel.rowCount() > 0)
+			}
+
+			PropertyChanges {
+				target: ownNoPropsLabel
+				visible: ownPropListModel && ownPropListModel.rowCount() === 0
+						 && protoPropListModel && protoPropListModel.rowCount() > 0
+			}
+
+			PropertyChanges {
+				target: ownPropList
+				visible: true
+			}
+
+			PropertyChanges {
+				target: protoPropsLabel
+				visible: protoPropListModel && protoPropListModel.rowCount() > 0
+			}
+
+			PropertyChanges {
+				target: emptyLabel
+				visible: (!protoPropListModel || (protoPropListModel && protoPropListModel.rowCount() === 0))
+						 && (!ownPropListModel || (ownPropListModel && ownPropListModel.rowCount() === 0))
+			}
+
+			PropertyChanges {
+				target: protoPropListBg
+				visible: protoPropListModel && protoPropListModel.rowCount() > 0
+			}
 		},
 		State {
 			name: "list"
 
 			PropertyChanges {
-				target: ownPropsLabel
-				visible: false
-			}
-
-			PropertyChanges {
-				target: ownNoPropsLabel
-				visible: false
-			}
-
-			PropertyChanges {
-				target: protoPropsLabel
-				visible: false
-			}
-
-			PropertyChanges {
-				target: protoNoPropsLabel
-				visible: false
-			}
-			PropertyChanges {
-				target: ownPropList
-				visible: false
-			}
-
-			PropertyChanges {
-				target: protoPropListBg
-				visible: false
-			}
-
-			PropertyChanges {
 				target: arrayListBg
 				color: "#67cdd0ff"
 				visible: true
+			}
+
+			PropertyChanges {
+				target: emptyLabel
+				visible: arrayListModel&& arrayListModel.rowCount() === 0
 			}
 		}
 	]
@@ -173,7 +164,7 @@ Column {
 
 /*##^##
 Designer {
-	D{i:0;formeditorZoom:1.5;height:22;width:216}D{i:1}D{i:2}D{i:3}D{i:5}D{i:6}D{i:7}
-D{i:9}D{i:8}D{i:12}D{i:11}
+	D{i:0;formeditorZoom:1.5;height:22;width:216}D{i:1}D{i:2}D{i:3}D{i:6}D{i:8}D{i:7}
+D{i:12}D{i:11}
 }
 ##^##*/

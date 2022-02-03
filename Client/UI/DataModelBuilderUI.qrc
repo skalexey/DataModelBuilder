@@ -71,5 +71,10 @@
 <file>./SelectedObjectParam.qml</file>
 <file>./VarListFooter.qml</file>
 <file>./VLListElement.qml</file>
+<file>./ChooseFileDialog.qml</file>
+<file>./BodyBlock.qml</file>
+<file>./DialogTemplate.qml</file>
+<file>./SaveAsDialog.qml</file>
+<file>./EnterTextLineDialog.qml</file>
 </qresource>
 </RCC>

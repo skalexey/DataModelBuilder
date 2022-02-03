@@ -1,14 +1,37 @@
 import QtQuick
 import QtQuick.Controls
 
-Item {
+InteractiveListElement {
     id: obj
     x: 0
     height: 50
     width: parent.width
     state: "base"
-    property var parentContainer: objectsLibraryContainer
-    property bool ignoreChanges: false
+	onPress: function() {
+		typeClick();
+	}
+
+	menuModel: ListModel {
+		ListElement {
+			title: "Instantiate"
+			cmd: function(i) {
+				instantiateClick(index)
+			}
+		}
+		ListElement {
+			title: "Rename"
+			cmd: function(i) {
+				obj.state = "edit";
+				idInput.edit(name);
+			}
+		}
+		ListElement {
+			title: "Delete"
+			cmd: function(i) {
+				parentModel.removeAt(index);
+			}
+		}
+	}
 
     Text {
         leftPadding: 6
@@ -20,78 +43,25 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
-    TextField {
-        id: textField
-        width: 100
-        height: 25
+	EditField {
+		id: idInput
+		textToEdit: nameText
         visible: false
         text: name
-        anchors.verticalCenter: parent.verticalCenter
-        placeholderText: qsTr("Text Field")
-        Keys.onReturnPressed: focus = false;
-        Keys.onEnterPressed: focus = false;
-        Keys.onEscapePressed: function() {
-            ignoreChanges = true;
-            focus = false;
-            ignoreChanges = false;
-        }
-        onFocusChanged: function() {
-            if (!focus)
-            {
-                if (!ignoreChanges)
-                    name = text
-                obj.state = "base"
-            }
-        }
+		onDefocus: function() {
+			obj.state = "base"
+		}
+		onNewValue: function(val) {
+			name = val
+		}
     }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        propagateComposedEvents: true
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onPressed: function(mouse) {
-            parentContainer.currentIndex = index
-            if (mouse.button === Qt.RightButton)
-                contextMenu.popup();
-        }
-        onClicked: function(mouse) {
-            if (mouse.button === Qt.LeftButton)
-                typeClick();
-        }
-
-        onDoubleClicked: function(mouse) {
-            obj.state = "edit"
-            textField.focus = true;
-        }
-        onPressAndHold: function(mouse) {
-            if (mouse.source === Qt.MouseEventNotSynthesized)
-                contextMenu.popup()
-        }
-        Menu {
-            id: contextMenu
-            MenuItem {
-                text: "Instantiate"
-                onClicked: instantiateClick(parentContainer.currentIndex)
-            }
-            MenuItem {
-                text: "Rename"
-                onClicked: function () {
-                    obj.state = "edit"
-                }
-            }
-            MenuItem {
-                text: "Delete"
-                onClicked: libraryDeleteObjectClicked(index)
-            }
-        }
-    }
     states: [
         State {
             name: "edit"
 
             PropertyChanges {
-                target: textField
+				target: idInput
                 visible: true
             }
 

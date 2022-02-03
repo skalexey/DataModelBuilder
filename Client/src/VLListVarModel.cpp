@@ -15,11 +15,15 @@ namespace dmb
 	VLListVarModel::~VLListVarModel()
 	{}
 
-	void VLListVarModel::Init(QObject *parent, const vl::Var& data)
+	void VLListVarModel::Init(QObject *parent, const vl::Var& data, DMBModel* owner)
 	{
-		Base::Init(parent, data);
+		Base::Init(parent, data, owner);
 		mListModel.Init(shared_from_this());
 	}
+
+	VLListVarModel::VLListVarModel(const vl::Var& v, QObject* parent)
+		: Base(v, parent)
+	{}
 
 	void VLListVarModel::Init(const VLVarModelPtr &parent)
 	{
@@ -87,9 +91,24 @@ namespace dmb
 		return mListModel.at(index);
 	}
 
-	void VLListVarModel::add(ObjectProperty::Type type)
+	VLVarModel* VLListVarModel::add(ObjectProperty::Type type, int indexBefore)
 	{
-		mListModel.add(type);
+		return mListModel.add(type, indexBefore);
+	}
+
+	VLVarModel* VLListVarModel::add(const QVariant &data, int indexBefore)
+	{
+		return mListModel.add(data, indexBefore);
+	}
+
+	VLVarModel *VLListVarModel::add(const VLVarModel *model, int indexBefore)
+	{
+		return mListModel.add(model, indexBefore);
+	}
+
+	bool VLListVarModel::removeChild(const VLVarModel *childPtr)
+	{
+		return removeAt(getChildIndex(childPtr));
 	}
 
 	bool VLListVarModel::removeAt(int index)
@@ -97,7 +116,12 @@ namespace dmb
 		return mListModel.removeAt(index);
 	}
 
-	QObject *VLListVarModel::at(int index)
+	VLVarModel *VLListVarModel::find(const QVariant &data)
+	{
+		return mListModel.find(data);
+	}
+
+	dmb::VLVarModel *VLListVarModel::at(int index)
 	{
 		return getAt(index);
 	}

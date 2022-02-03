@@ -31,6 +31,15 @@ Item {
 		}
 	}
 
+	property var onPress: function () {
+		//console.log("InteraciveListElement.onPress default handler");
+	}
+
+	property var onClick: function () {
+		//console.log("InteraciveListElement.onClick default handler");
+	}
+
+
 	MouseArea {
 		id: mouseArea
 		anchors.fill: parent
@@ -39,8 +48,15 @@ Item {
 		onPressed: function(mouse){
 			container.currentIndex = index
 			if (mouse.button === Qt.RightButton)
-				contextMenu.popup()
+				contextMenu.popup();
+			else if (mouse.button === Qt.LeftButton)
+				onPress();
 		}
+		onClicked: function(mouse) {
+			if (mouse.button === Qt.LeftButton)
+				onClick();
+		}
+
 		onPressAndHold: function(mouse){
 			if (mouse.source === Qt.MouseEventNotSynthesized)
 				contextMenu.popup()

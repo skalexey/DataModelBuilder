@@ -51,6 +51,8 @@ Item {
 				anchors.verticalCenter: parent.verticalCenter
 				anchors.right: parent.right
 				font.pixelSize: 12
+				width: 200
+				clip: true
 			}
 
 			EditField {
@@ -69,6 +71,7 @@ Item {
 			CheckBox {
 				id: checkBox
 				x: 259
+				visible: false
 				text: qsTr("Check Box")
 				anchors.verticalCenter: parent.verticalCenter
 				anchors.right: parent.right
@@ -77,6 +80,7 @@ Item {
 			Switch {
 				id: expandSwitch
 				x: 251
+				visible: false
 				text: qsTr("Expand")
 				anchors.verticalCenter: parent.verticalCenter
 				anchors.right: parent.right
@@ -154,28 +158,9 @@ Item {
 	states: [
 		State {
 			name: "text"
-			PropertyChanges {
-				target: checkBox
-				visible: false
-			}
-
-			PropertyChanges {
-				target: expandSwitch
-				visible: false
-			}
 		},
 		State {
 			name: "textEdit"
-
-			PropertyChanges {
-				target: checkBox
-				visible: false
-			}
-
-			PropertyChanges {
-				target: expandSwitch
-				visible: false
-			}
 
 			PropertyChanges {
 				target: text1
@@ -191,8 +176,8 @@ Item {
 			name: "flag"
 
 			PropertyChanges {
-				target: expandSwitch
-				visible: false
+				target: checkBox
+				visible: true
 			}
 		},
 		State {
@@ -207,14 +192,15 @@ Item {
 				target: text1
 				visible: false
 			}
+
+			PropertyChanges {
+				target: expandSwitch
+				visible: true
+				text: qsTr("Expand")
+			}
 		},
 		State {
 			name: "expanded"
-
-			PropertyChanges {
-				target: checkBox
-				visible: false
-			}
 
 			PropertyChanges {
 				target: text1
@@ -223,6 +209,7 @@ Item {
 
 			PropertyChanges {
 				target: expandSwitch
+				visible: true
 				text: qsTr("Collapse")
 			}
 		}

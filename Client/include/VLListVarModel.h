@@ -28,9 +28,10 @@ namespace dmb
 		// Constructors and initializers
 		typedef std::function<const std::string&()> FGetId;
 		explicit VLListVarModel(QObject* parent = nullptr);
+		VLListVarModel(const vl::Var& v, QObject* parent = nullptr);
 		~VLListVarModel();
 		void Init(QObject* parent = nullptr) override;
-		void Init(QObject *parent, const vl::Var& data) override;
+		void Init(QObject *parent, const vl::Var& data, DMBModel* owner) override;
 		void Init(const VLVarModelPtr& parent) override;
 
 	public:
@@ -56,6 +57,8 @@ namespace dmb
 		const VLVarModel* getAt(int index) const;
 		const VLListModel *listModel() const;
 		int getChildIndex(const VLVarModel* childPtr) const override;
+		VLVarModel* add(const dmb::VLVarModel* model, int indexBefore = -1);
+		bool removeChild(const VLVarModel* childPtr) override;
 
 	protected:
 		// Protected Qt model interface
@@ -68,9 +71,11 @@ namespace dmb
 
 	public:
 		// Properties
-		Q_INVOKABLE void add(ObjectProperty::Type type);
+		Q_INVOKABLE dmb::VLVarModel* at(int index);
+		Q_INVOKABLE dmb::VLVarModel* add(ObjectProperty::Type type, int indexBefore = -1);
+		Q_INVOKABLE dmb::VLVarModel* add(const QVariant& data, int indexBefore = -1);
 		Q_INVOKABLE bool removeAt(int index);
-		Q_INVOKABLE QObject* at(int index);
+		Q_INVOKABLE dmb::VLVarModel* find(const QVariant& data);
 		Q_PROPERTY (VLListModel* listModel READ listModel NOTIFY listChanged)
 
 	signals:

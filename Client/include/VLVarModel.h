@@ -2,6 +2,7 @@
 #define VLVARMODEL_H
 
 #include <memory>
+#include <string>
 #include <QObject>
 #include "vl_fwd.h"
 #include "ObjectProperty.h"
@@ -22,9 +23,10 @@ namespace dmb
 	public:
 		// Constructors and initializers
 		explicit VLVarModel(QObject *parent = nullptr);
+		VLVarModel(const vl::Var& v, QObject *parent = nullptr);
 		~VLVarModel();
 		virtual void Init(QObject* parent = nullptr);
-		virtual void Init(QObject *parent, const vl::Var& data);
+		virtual void Init(QObject *parent, const vl::Var& data, DMBModel* owner);
 		virtual void Init(const VLVarModelPtr& parent = nullptr);
 		// Type casts
 		virtual const VLObjectVarModel* asObject() const;
@@ -40,6 +42,9 @@ namespace dmb
 		const std::string& getId() const;
 		const vl::Var& getData() const;
 		virtual const vl::Var& getChildData(const VLVarModel* childPtr) const;
+		std::string getTypeId() const;
+		DMBModel* getDataModel();
+		const DMBModel* getDataModel() const;
 
 	protected:
 		// Protected data interface
@@ -52,6 +57,7 @@ namespace dmb
 		VLVarModel* getParentModel();
 		int getIndex() const;
 		virtual int getChildIndex(const VLVarModel* childPtr) const;
+		virtual bool removeChild(const VLVarModel* childPtr);
 
 	public:
 		// Properties
@@ -60,6 +66,8 @@ namespace dmb
 		Q_PROPERTY (ObjectProperty::Type type READ type WRITE setType NOTIFY typeChanged)
 		Q_PROPERTY (QVariant value READ value WRITE setValue NOTIFY valueChanged)
 		Q_PROPERTY (QVariant valueStr READ valueStr NOTIFY valueChanged)
+		Q_INVOKABLE bool remove();
+
 		QString id() const;
 		bool setId(const QString &newId);
 		bool setId(const std::string &newId);
@@ -81,6 +89,7 @@ namespace dmb
 		// Data
 		vl::VarPtr mVarPtr = nullptr;
 		std::weak_ptr<VLVarModel> mParentModel;
+		DMBModel* mDMBModel = nullptr;
 	};
 
 	typedef std::shared_ptr<VLVarModel> VLVarModelPtr;

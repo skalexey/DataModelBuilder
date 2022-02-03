@@ -1,5 +1,6 @@
 #include "VLListModel.h"
 #include "VLListVarModel.h"
+#include "DMBModel.h"
 
 namespace dmb
 {
@@ -61,19 +62,95 @@ namespace dmb
 		return roles;
 	}
 
-	bool VLListModel::add(ObjectProperty::Type type)
+	VLVarModel* VLListModel::add(ObjectProperty::Type type, int indexBefore)
 	{
-		return addData(type);
+		if (addData(type), indexBefore)
+			return at(size() - 1);
+		return nullptr;
 	}
 
-	vl::Var& VLListModel::addData(ObjectProperty::Type type)
+	VLVarModel *VLListModel::add(const QVariant &data, int indexBefore)
+	{
+		if (auto parent = getParentModel())
+			if (auto dataModel = parent->getDataModel())
+				return add(dataModel->createFromData(data), indexBefore);
+		return nullptr;
+	}
+
+	VLVarModel *VLListModel::add(const VLVarModel *m, int indexBefore)
+	{
+		if (auto parentModel = getParentModel()) {
+			if (auto dataModel = parentModel->getDataModel())
+				if (auto modelPtr = dataModel->takeStandaloneModel(m))
+				{
+					const VLVarModel* m = modelPtr.get();
+					int index = -1;
+					addData(vl::MakePtr(m->getData()), indexBefore, [&] (int newIndex) {
+						index = newIndex;
+						modelPtr->Init(parentModel);
+						putModel(index, modelPtr);
+					});
+					return at(index);
+				}
+		}
+		return nullptr;
+	}
+
+	vl::Var &VLListModel::addData(const vl::VarPtr &ptr, int indexBefore, const std::function<void(int newIndex)>& customModelLoader)
 	{
 		auto sz = size();
 		QModelIndex index = this->index(sz, 0, QModelIndex());
 		beginInsertRows(index, sz, sz);
-		auto& result = getData().Add(ObjectProperty::MakeVarPtr(type));
-		loadElementModel(sz);
+		auto& result = getData().Add(ptr, indexBefore);
+		if (customModelLoader)
+			customModelLoader(sz);
+		else
+			loadElementModel(sz);
 		endInsertRows();
+		return result;
+	}
+
+	vl::Var& VLListModel::addData(ObjectProperty::Type type, int indexBefore)
+	{
+		return addData(ObjectProperty::MakeVarPtr(type), indexBefore);
+	}
+
+	vl::Var &VLListModel::addData(const vl::Var &v, int indexBefore)
+	{
+		return addData(vl::MakePtr(v), indexBefore);
+	}
+
+	VLVarModel *VLListModel::find(const QVariant &data)
+	{
+		VLVarModel* result = nullptr;
+		foreachElement([&](int index, const VLVarModelPtr& model) {
+			if (data.canConvert<VLVarModel*>())
+			{
+				if (model.get() == qvariant_cast<VLVarModel*>(data))
+					result = model.get();
+			}
+			else
+			{
+				const VLVarModel* m = model.get();
+				switch (data.userType())
+				{
+				case QMetaType::QString:
+					if (m->getData().AsString().Val() == data.toString().toStdString())
+						result = model.get();
+					break;
+				case QMetaType::Int:
+					if (m->getData().AsNumber().Val() == data.toInt())
+						result = model.get();
+					break;
+				case QMetaType::Bool:
+					if (m->getData().AsBool().Val() == data.toBool())
+						result = model.get();
+				}
+			}
+			if (result != nullptr)
+				return false;
+			return true;
+		});
 		return result;
 	}
 }

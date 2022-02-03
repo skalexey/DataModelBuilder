@@ -1,16 +1,17 @@
 #ifndef VLLISTMODEL_H
 #define VLLISTMODEL_H
 
+#include <functional>
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include "VLListModelInterface.h"
 #include "vl.h"
+// Needed for Q_INVOKABLE VLVarModel*
+#include "VLVarModel.h"
 
 namespace dmb
 {
-	class VLListVarModel;
-
 	class VLListModel: public VLListModelInterface
 	{
 		typedef VLListModelInterface Base;
@@ -44,7 +45,9 @@ namespace dmb
 	public:
 		// Public data interface
 		const vl::List& getData() const;
-		vl::Var& addData(ObjectProperty::Type type);
+		vl::Var& addData(ObjectProperty::Type type, int indexBefore = -1);
+		vl::Var& addData(const vl::Var& v, int indexBefore = -1);
+		vl::Var& addData(const vl::VarPtr& ptr, int indexBefore = -1, const std::function<void(int newIndex)>& customModelLoader = nullptr);
 
 	protected:
 		// Protected data interface
@@ -53,10 +56,13 @@ namespace dmb
 	public:
 		// Public Qt model interface
 		const VLListVarModel* getParentModel() const;
+		VLVarModel* add(const dmb::VLVarModel* model, int indexBefore = -1);
 
 	public:
 		// Properties
-		Q_INVOKABLE bool add(ObjectProperty::Type type);
+		Q_INVOKABLE dmb::VLVarModel* add(ObjectProperty::Type type, int indexBefore = -1);
+		Q_INVOKABLE dmb::VLVarModel* add(const QVariant& data, int indexBefore = -1);
+		Q_INVOKABLE dmb::VLVarModel* find(const QVariant& data);
 
 	protected:
 		// Protected Qt model interface

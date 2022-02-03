@@ -73,6 +73,7 @@ namespace dmb
 		Content& GetContent() { return mContent; }
 		vl::Object& GetType(const std::string& typeName);
 		bool Load(const std::string& fileName);
+		bool IsLoaded() const;
 		bool Store(const std::string& fileName, const vl::CnvParams& params = vl::CnvParams());
 		std::string JSONStr(const vl::CnvParams& params = vl::CnvParams());
 		std::string GetTypeId(const vl::Object& obj) const;
@@ -86,5 +87,6 @@ namespace dmb
 		Registry mRegistry;
 		Registry mPrivate;
 		Content mContent;
+		bool mIsLoaded = false;
 	};
 }

@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <functional>
 #include <QAbstractListModel>
 #include <QVariantList>
 #include "vl_fwd.h"
@@ -30,8 +31,8 @@ namespace dmb
 		// Constructors and initializers
 		explicit VLListModelInterface(QObject* parentModel);
 		~VLListModelInterface();
-		void Init(QObject* parentModel);
-		void Init(const VLVarModelPtr& parentModel);
+		virtual void Init(QObject* parentModel);
+		virtual void Init(const VLVarModelPtr& parentModel);
 		// Strictly necessary
 		virtual int dataSize() const = 0;
 		virtual const vl::Var& getDataAt(int index) const = 0;
@@ -88,6 +89,8 @@ namespace dmb
 		const dmb::VLVarModel* getAt(int index) const;
 		const VLVarModelPtr getParentModel() const;
 		int getElementIndex(const VLVarModel* elementPtr) const;
+		bool foreachElement(const std::function<bool(int, const VLVarModelPtr&)>& pred) const;
+		bool foreachElement(const std::function<bool(int, const VLVarModelPtr&)>& pred);
 
 	protected:
 		// Protected Qt model interface
@@ -102,9 +105,17 @@ namespace dmb
 		// Properties
 		Q_INVOKABLE dmb::VLVarModel* at(int index);
 		Q_INVOKABLE bool removeAt(int index);
+		Q_PROPERTY (int size READ size NOTIFY sizeChanged);
 
 	public slots:
 		void onValueChanged(int index);
+		void onTypeChanged(int index);
+
+	signals:
+		void sizeChanged(int newSize);
+
+	protected:
+		void putModel(int index, const VLVarModelPtr& ptr);
 
 	private:
 		// Data

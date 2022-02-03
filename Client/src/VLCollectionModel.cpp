@@ -5,7 +5,6 @@
 #include "VLObjectVarModel.h"
 #include "Utils.h"
 #include "vl.h"
-#include "GlobalContext.h"
 #include "DMBModel.h"
 
 namespace dmb
@@ -17,6 +16,11 @@ namespace dmb
 	void VLCollectionModel::Init(const VLVarModelPtr& objectPtr)
 	{
 		Base::Init(objectPtr);
+		UpdateIdList();
+	}
+
+	void VLCollectionModel::UpdateIdList()
+	{
 		resetList([&]() {
 			clear();
 			getData().ForeachProp(
@@ -58,25 +62,35 @@ namespace dmb
 		return setData(propId, MakePtr(value));
 	}
 
-	vl::Var& VLCollectionModel::setData(const std::string& propId, const vl::VarPtr& ptr)
+	vl::Var& VLCollectionModel::setData(const std::string& propId, const vl::VarPtr& ptr, const std::function<void(bool alreadyExist)>& customModelLoader)
 	{
-		auto sz = size();
-		QModelIndex index = this->index(sz, 0, QModelIndex());
 		if (!hasData(propId))
 		{
+			auto sz = size();
+			QModelIndex index = this->index(sz, 0, QModelIndex());
 			beginInsertRows(index, sz, sz);
 			auto& result = getData().Set(propId, ptr);
 			mPropIndex[propId] = sz;
 			mIdList.push_back(propId);
-			loadElementModel(sz);
+			if (customModelLoader)
+				customModelLoader(false);
+			else
+				loadElementModel(sz);
 			endInsertRows();
-			onValueChanged(sz);
+			//onValueChanged(sz);
 			return result;
 		}
 		else
 		{
+			auto& oldData = getData().Get(propId);
+			bool newType = ObjectProperty::ConvertVLType(oldData) != ObjectProperty::ConvertVLType(*ptr);
 			auto& result = getData().Set(propId, ptr);
-			onValueChanged(sz);
+			if (customModelLoader)
+				customModelLoader(true);
+			auto i = getIndex(propId);
+			if (newType)
+				onTypeChanged(i);
+			onValueChanged(i);
 			return result;
 		}
 	}
@@ -121,7 +135,7 @@ namespace dmb
 		if (getId(index) == "proto")
 			return QVariant(
 				Utils::FormatStr("{%s}"
-				, GlobalContext::Instance().GetCurrentDataModel().GetTypeId(m->getData().AsObject()).c_str()).c_str()
+				, m->getTypeId().c_str()).c_str()
 			);
 		else
 			return Base::roleValueStr(m, index);
@@ -144,6 +158,7 @@ namespace dmb
 		mPropIndex.erase(it);
 		mPropIndex[newId] = index;
 		mIdList[index] = newId;
+		onNameChanged(index);
 		return true;
 	}
 
@@ -221,9 +236,20 @@ namespace dmb
 		return addData("New prop", type);
 	}
 
+	bool VLCollectionModel::remove(const std::string& propId)
+	{
+		return removeAt(getIndex(propId));
+	}
+
 	bool VLCollectionModel::remove(const QString &propId)
 	{
-		return removeAt(getIndex(propId.toStdString()));
+		return remove(propId.toStdString());
+	}
+
+	void VLCollectionModel::onNameChanged(int i)
+	{
+		QModelIndex index = this->index(i, 0, QModelIndex());
+		emit dataChanged(index, index, QVector<int>() << RoleName);
 	}
 
 	vl::Object &VLCollectionModel::getData()
@@ -274,13 +300,31 @@ namespace dmb
 
 	VLVarModel *VLCollectionModel::set(const QString &propId, VLVarModel *v)
 	{
-		VLVarModel* result = nullptr;
 		if (auto parentModel = getParentModel()) {
-			auto id = propId.toStdString();
-			setData(id, const_cast<const VLVarModel*>(v)->getData());
-			result = at(getIndex(id));
+			if (auto dataModel = parentModel->getDataModel())
+				if (auto modelPtr = dataModel->takeStandaloneModel(v))
+				{
+					const VLVarModel* m = modelPtr.get();
+					auto id = propId.toStdString();
+					auto ptr = vl::MakePtr(m->getData());
+					setData(id, ptr, [&] (bool modelAlreadyExists) {
+						modelPtr->Init(parentModel);
+						putModel(getIndex(id), modelPtr);
+					});
+					return at(getIndex(id));
+				}
 		}
-		return result;
+		return nullptr;
+	}
+
+	VLVarModel *VLCollectionModel::set(const QString &propId, const QVariant &data)
+	{
+		if (data.canConvert<VLVarModel*>())
+			return set(propId, qvariant_cast<VLVarModel*>(data));
+		if (auto parent = getParentModel())
+			if (auto dataModel = parent->getDataModel())
+				return set(propId, dataModel->createFromData(data));
+		return nullptr;
 	}
 
 	const std::string &VLCollectionModel::getId(int index) const

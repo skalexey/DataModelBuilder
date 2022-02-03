@@ -1,8 +1,14 @@
+#include <QUrl>
 #include "DMBModel.h"
 #include "DMBCore.h"
-#include "GlobalContext.h"
 #include "Utils.h"
 #include "VLObjectVarModel.h"
+#include "VarModelFactory.h"
+
+namespace
+{
+	const dmb::VLVarModelPtr emptyVarModelPtr = nullptr;
+}
 
 namespace dmb
 {
@@ -10,10 +16,7 @@ namespace dmb
 		: QObject(parent)
 	{
 		mRoot = std::make_shared<VLObjectVarModel>();
-		mRoot->Init(nullptr, getDataModel().GetData());
-		// TODO: support multiple models
-		GlobalContext::Instance().SetCurrentModel(this);
-		GlobalContext::Instance().SetCurrentDataModel(&mDataModel);
+		mRoot->Init(nullptr, getDataModel().GetData(), this);
 	}
 
 	DMBModel::~DMBModel()
@@ -104,16 +107,120 @@ namespace dmb
 
 	bool DMBModel::store(const QString &filePath, bool pretty)
 	{
-		return getDataModel().Store(filePath.toStdString(), { pretty });
+		auto filePathStd = filePath.isEmpty() ? mFilePath : filePath.toStdString();
+		return getDataModel().Store(filePathStd, { pretty });
 	}
 
-	bool DMBModel::load(const QString &filePath)
+	bool DMBModel::load(const QString &url)
 	{
-		if (getDataModel().Load(filePath.toStdString()))
+		auto& m = mRoot->getPropListModel();
+		bool firstLoad = true;
+		if (m.elementsLoaded())
 		{
-			emit modelLoaded(filePath);
+			m.clear();
+			firstLoad = false;
+		}
+		QUrl u(url);
+		auto fPath = u.isRelative() ? url.toStdString() : u.toLocalFile().toStdString();
+		if (getDataModel().Load(fPath))
+		{
+			if (!firstLoad)
+				// The list of ids created in Init method
+				// on the object creation or loaded here
+				mRoot->getPropListModel().UpdateIdList();
+			// Create new Qt models for types and content
+			mRoot->loadPropList();
+			mFilePath = fPath;
+			emit modelLoaded(url);
 			return true;
 		}
+		else
+		{
+			emit modelLoadError(Utils::FormatStr("Can't load the file '%s'", fPath.c_str()).c_str());
+		}
 		return false;
+	}
+
+	bool DMBModel::isLoaded() const
+	{
+		return mDataModel.IsLoaded();
+	}
+
+	const VLVarModelPtr &DMBModel::storeStandalonePtr(const VLVarModelPtr &ptr)
+	{
+		auto it = mStandaloneModels.emplace(ptr.get(), ptr);
+		ptr->Init(this, const_cast<const VLVarModel&>(*ptr).getData(), this);
+		return it.first->second;
+	}
+
+	VLVarModel *DMBModel::createFromData(const QVariant& data)
+	{
+		if (auto ptr = createPtrFromData(data))
+			return storeStandalonePtr(ptr).get();
+		return nullptr;
+	}
+
+	VLVarModel *DMBModel::createObject()
+	{
+		if (auto ptr = createObjectPtr())
+			return storeStandalonePtr(ptr).get();
+		return nullptr;
+	}
+
+	VLVarModel *DMBModel::createList()
+	{
+		if (auto ptr = createListPtr())
+			return storeStandalonePtr(ptr).get();
+		return nullptr;
+	}
+
+	VLVarModelPtr DMBModel::createPtrFromData(const QVariant &data)
+	{
+		vl::VarPtr v;
+		switch (data.userType())
+		{
+		case QMetaType::QString:
+			v = vl::MakePtr(data.toString().toStdString());
+			break;
+		case QMetaType::Int:
+			v = vl::MakePtr(data.toInt());
+			break;
+		case QMetaType::Bool:
+			v = vl::MakePtr(data.toBool());
+		default:
+			v = vl::MakePtr(data.toString().toStdString());
+		}
+		return VarModelFactory::Instance().Create(*v);
+	}
+
+	VLVarModelPtr DMBModel::createObjectPtr()
+	{
+		vl::Object v;
+		auto m = VarModelFactory::Instance().Create(v);
+		return m;
+	}
+
+	VLVarModelPtr DMBModel::createListPtr()
+	{
+		vl::List v;
+		auto m = VarModelFactory::Instance().Create(v);
+		return m;
+	}
+
+	VLVarModelPtr DMBModel::takeStandaloneModel(const VLVarModel *p)
+	{
+		auto it = mStandaloneModels.find(p);
+		if (it != mStandaloneModels.end())
+		{
+			auto ptr = it->second;
+			mStandaloneModels.erase(it);
+			return ptr;
+		}
+		return emptyVarModelPtr;
+	}
+
+	bool DMBModel::removeStandaloneModel(const VLVarModel *p)
+	{
+		return mStandaloneModels.erase(p) > 0;
 	}
 }

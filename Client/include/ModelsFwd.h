@@ -15,6 +15,8 @@ namespace dmb {
 	class VLListModelInterface;
 	class VLListModel;
 	class VLCollectionModel;
+
+	class DMBModel;
 }
 
 #endif // MODELSFWD_H

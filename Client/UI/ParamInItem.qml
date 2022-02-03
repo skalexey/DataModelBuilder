@@ -11,7 +11,7 @@ InteractiveListElement {
 		ListElement {
 			title: "Rename"
 			cmd: function(i) {
-				obj.state = "edit";
+				obj.state = "editName";
 				idInput.edit(name);
 			}
 		}
@@ -20,6 +20,13 @@ InteractiveListElement {
 			cmd: function(i) {
 				paramValue.state = "textEdit";
 				paramValue.valueInput.edit(value);
+			}
+		}
+		ListElement {
+			title: "Edit Type"
+			cmd: function(i) {
+				console.log("paramValue.state: " + paramValue.state)
+				obj.state = "editType";
 			}
 		}
 		ListElement {
@@ -44,6 +51,8 @@ InteractiveListElement {
 			anchors.left: parent.left
 			anchors.leftMargin: 6
 			font.bold: true
+			width: 200
+			clip: true
 		}
 
 		Text {
@@ -54,6 +63,23 @@ InteractiveListElement {
 			anchors.verticalCenter: parent.verticalCenter
 			font.pixelSize: 12
 			anchors.horizontalCenter: parent.horizontalCenter
+		}
+
+		ComboBox {
+			id: paramTypeInput
+			x: paramType.x
+			y: paramType.y
+			height: paramType.height * 1.4
+			width: 103
+			visible: false
+			model: propTypeModel
+			onActivated: {
+				type = currentValue;
+				console.log("paramValue.state: " + paramValue.state)
+				obj.state = "base";
+				paramValue.chooseState();
+			}
+			Component.onCompleted: currentIndex = type
 		}
 
 		EditField {
@@ -95,7 +121,7 @@ InteractiveListElement {
 			name: "base"
 		},
 		State {
-			name: "edit"
+			name: "editName"
 
 			PropertyChanges {
 				target: idInput
@@ -106,6 +132,34 @@ InteractiveListElement {
 				target: paramId
 				visible: false
 			}
+		},
+		State {
+			name: "editType"
+			PropertyChanges {
+				target: idInput
+				visible: false
+			}
+
+			PropertyChanges {
+				target: paramId
+				visible: true
+			}
+
+			PropertyChanges {
+				target: paramTypeInput
+				visible: true
+			}
+
+			PropertyChanges {
+				target: paramType
+				visible: false
+			}
 		}
 	]
 }
+
+/*##^##
+Designer {
+	D{i:0;formeditorZoom:1.25}D{i:7}D{i:8}D{i:9}D{i:10}D{i:6}D{i:11}D{i:12}
+}
+##^##*/

@@ -164,11 +164,18 @@ vl::Object& dmb::Model::GetType(const std::string& typeName)
 
 bool dmb::Model::Load(const std::string& fileName)
 {
+	mIsLoaded = false;
 	vl::JSONConverter converter;
 	if (!converter.Load(mData, fileName))
 		return false;
 	Init();
+	mIsLoaded = true;
 	return true;
+}
+
+bool dmb::Model::IsLoaded() const
+{
+	return mIsLoaded;
 }
 
 bool dmb::Model::Store(const std::string& fileName, const vl::CnvParams& params)

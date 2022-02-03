@@ -28,6 +28,7 @@ Item {
 		anchors.horizontalCenter: parent.horizontalCenter
 		delegate: ObjectInLibrary {
 			width: objectsLibraryContainer.width // To fix the error "TypeError: Cannot read property 'width' of null"
+			container: objectsLibraryContainer
 		}
 		model: libraryTypeListModel
 		footer: ObjectsLibraryListFooter {}

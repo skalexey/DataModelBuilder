@@ -4,17 +4,32 @@ import QtQuick.Controls
 import QtQuick.Window
 
 Item {
-    id: root
-    width: Constants.width
-    height: Constants.height
-// ======= The code for Window =======
-//    visible: true
-// Uncomment if you deside to test dialogs in the Qt Designer
-// ======= End code for Window =======
-    // ======= Aliases =======
-    property alias preInstantiateDialog: preInstantiateDialog
+	id: root
+	width: Constants.width
+	height: Constants.height
+	// ======= The code for Window =======
+	//    visible: true
+	// Uncomment if you deside to test dialogs in the Qt Designer
+	// ======= End code for Window =======
+	// ======= Aliases =======
+	property alias preInstantiateDialog: preInstantiateDialog
+	property alias chooseFileDialog: chooseFileDialog
+	property alias saveAsDialog: saveAsDialog
+	property alias bodyBlock: bodyBlock
+	// ======= Recent files properties ========
+	property var recentFileRelPath: function(fPath) {
+		// Default handler. Will be overriden in main.qml
+		var i = fPath.lastIndexOf("/");
+		if (i >= 0)
+			return fPath.substring(i + 1);
+		return fPath;
+	}
 
-    // ======= Selected item properties =======
+	property var recentFilesModel: ListModel {
+
+	}
+
+	// ======= Selected item properties =======
 	property var varListFooterAddClicked: function(listModel) {
 		console.log("varListFooterAddClicked default handler");
 	}
@@ -28,7 +43,7 @@ Item {
 	}
 
 	property var selectedItemSimpleValue: "Test selected item Value"
-    property string selectedItemName: "Selected item"
+	property string selectedItemName: "Selected item"
 	property var selectedItemArrayListModel: ListModel {
 		ListElement {
 			name: "Element 1"
@@ -51,26 +66,26 @@ Item {
 		}
 	}
 	property var selectedItemOwnParamListModel: ListModel {
-        ListElement {
-            name: "Grey"
-            value: "grey"
-        }
+		ListElement {
+			name: "Grey"
+			value: "grey"
+		}
 
-        ListElement {
-            name: "Red"
+		ListElement {
+			name: "Red"
 			value: "red" // {"color": "red", "pale": false, "parent": {}}
-        }
+		}
 
-        ListElement {
-            name: "Blue"
-            value: "blue"
-        }
+		ListElement {
+			name: "Blue"
+			value: "blue"
+		}
 
-        ListElement {
-            name: "Green"
-            value: "green"
-        }
-    }
+		ListElement {
+			name: "Green"
+			value: "green"
+		}
+	}
 	property var selectedItemProtoParamListModel: ListModel {
 		ListElement {
 			name: "Grey"
@@ -92,135 +107,160 @@ Item {
 			value: "green"
 		}
 	}
-    // ======= End of Selected item properties =======
+	// ======= End of Selected item properties =======
 
-    // ======= Content properties =======
-    property int contentCurrentItemIndex: content.contentContainer.currentIndex
-    property var contentDeleteItemClicked: function(i) {
-        console.log("DataModelBuilderUI: contentDeleteItemClicked(" + i + ") default handler")
-    }
+	// ======= Content properties =======
+	property int contentCurrentItemIndex: content.contentContainer.currentIndex
+	property var contentDeleteItemClicked: function(i) {
+		console.log("DataModelBuilderUI: contentDeleteItemClicked(" + i + ") default handler")
+	}
 
-    property var itemClick: function() {
+	property var itemClick: function() {
 		screen.centralBlock.stateItem();
-    }
-    property var instantiateClick: function(i) { console.log("DataModelBuilderUI: instantiateClick(" + i + ") default handler"); }
-    property var contentListModel: ListModel {
-        ListElement {
-            name: "Grey"
-        }
+	}
+	property var instantiateClick: function(i) { console.log("DataModelBuilderUI: instantiateClick(" + i + ") default handler"); }
+	property var contentListModel: ListModel {
+		ListElement {
+			name: "Grey"
+		}
 
-        ListElement {
-            name: "Red"
-        }
+		ListElement {
+			name: "Red"
+		}
 
-        ListElement {
-            name: "Blue"
-        }
+		ListElement {
+			name: "Blue"
+		}
 
-        ListElement {
-            name: "Green"
-        }
+		ListElement {
+			name: "Green"
+		}
 
-        ListElement {
-            name: "Purple"
-        }
-    }
-    // ======= End of Content properties =======
+		ListElement {
+			name: "Purple"
+		}
+	}
+	// ======= End of Content properties =======
 
-    // ======= Types properties =======
-    property var typeClick: function() {
+	// ======= Types properties =======
+	property var typeClick: function() {
 		screen.centralBlock.stateType()
-    }
-    property int libraryCurrentObjectIndex: objectsLibrary.libraryContainer.currentIndex
-    property var libraryAddNewObjectClicked: function() { console.log("Default click handler") }
-    property var libraryDeleteObjectClicked: function(i) { console.log("DataModelBuilderUI: onDeleteObjectClicked(" + i + ") default handler") }
-    property var libraryTypeListModel: ListModel {
-        ListElement {
-            name: "Scheme element"
-        }
+	}
+	property alias objectsLibrary: bodyBlock.objectsLibrary
+	property alias content: bodyBlock.content
+	property int libraryCurrentObjectIndex: objectsLibrary.libraryContainer.currentIndex
+	property var libraryAddNewObjectClicked: function() { console.log("Default click handler") }
+	property var libraryDeleteObjectClicked: function(i) { console.log("DataModelBuilderUI: onDeleteObjectClicked(" + i + ") default handler") }
+	property var libraryTypeListModel: ListModel {
+		ListElement {
+			name: "Scheme element"
+		}
 
-        ListElement {
-            name: "Connection"
-        }
+		ListElement {
+			name: "Connection"
+		}
 
-        ListElement {
-            name: "Back image"
-        }
+		ListElement {
+			name: "Back image"
+		}
 
-        ListElement {
-            name: "Square"
-        }
-    }
-    property var selectedObjParamTypeModel: ["No modifier", "Shift", "Control"]
-    property string selectedObjectName: "Obj name"
-    property var selectedObjectNewParamClicked: function() { console.log("DataModelBuilderUI: onNewParamClicked default handler") }
-    property var selectedObjectDeleteParameterClicked: function(i) { console.log("DataModelBuilderUI: onDeleteParameterClicked(" + i + ") Delete param default handler") }
-    property var selectedObjParamListModel: ListModel {
-        ListElement {
-            name: "Type 1"
-        }
+		ListElement {
+			name: "Square"
+		}
+	}
+	property var propTypeModel: ["No modifier", "Shift", "Control"]
+	property string selectedObjectName: "Obj name"
+	property var selectedObjectNewParamClicked: function() { console.log("DataModelBuilderUI: onNewParamClicked default handler") }
+	property var selectedObjectDeleteParameterClicked: function(i) { console.log("DataModelBuilderUI: onDeleteParameterClicked(" + i + ") Delete param default handler") }
+	property var selectedObjParamListModel: ListModel {
+		ListElement {
+			name: "Type 1"
+		}
 
-        ListElement {
-            name: "Type 2"
-        }
+		ListElement {
+			name: "Type 2"
+		}
 
-        ListElement {
-            name: "Type 3"
-        }
-    }
-    property var storeClicked: function() { console.log("DataModelBuilderUI: btnStore.onClicked default handler"); }
-    // ======= End of Types properties =======
+		ListElement {
+			name: "Type 3"
+		}
+	}
+	property var storeClicked: function() { console.log("DataModelBuilderUI: btnStore.onClicked default handler"); }
+	// ======= End of Types properties =======
 
-    // ======= Screen definition =======
-    Screen01 {
-        id: screen
-        width: root.width
-        height: root.height
-        property alias centralBlock: centralBlock
-        Rectangle {
-            id: topBlock
-            width: parent.width
-            height: 60
-            Button {
-                id: btnStore
-                x: 14
-                text: qsTr("Store")
-                anchors.verticalCenter: parent.verticalCenter
-                onClicked: storeClicked()
-            }
-        }
+	// ======= Screen properties =======
+	property var openFileClicked: function() { console.log("openFileClicked default handler"); }
+	property var saveAsClicked: function() { console.log("saveAsClicked default handler"); }
+	property var saveClicked: function() { console.log("saveClicked default handler"); }
+	property var onOpenFile: function(fPath) { console.log("onOpenFile default handler"); }
+	// ======= Screen definition =======
+	Screen01 {
+		id: screen
+		width: root.width
+		height: root.height
+		property alias centralBlock: bodyBlock.centralBlock
+		Rectangle {
+			id: topBlock
+			width: parent.width
+			height: 60
+			Button {
+				id: btnStore
+				x: 14
+				text: qsTr("Store")
+				anchors.verticalCenter: parent.verticalCenter
+				onClicked: storeClicked()
+			}
+			Button {
+				id: btnFile
+				x: 14
+				text: qsTr("File")
+				anchors.verticalCenter: parent.verticalCenter
+				onClicked: fileMenu.popup()
+			}
+			Menu {
+				id: fileMenu
+				MenuItem {
+					text: "Open"
+					onClicked: openFileClicked()
+				}
+				MenuItem {
+					text: "Save"
+					onClicked: saveClicked()
+				}
+				MenuItem {
+					text: "Save as"
+					onClicked: saveAsClicked()
+				}
+			}
+		}
 
-        ObjectsLibrary {
-            id: objectsLibrary
-            width: parent.width * 0.2
-            height: parent.height - topBlock.height - topBlock.y
-            anchors.left: parent.left
-            y: topBlock.y + topBlock.height
-        }
+		BodyBlock {
+			id: bodyBlock
+		}
 
-        CentralBlock {
-            id: centralBlock
-            width: parent.width * 0.6
-            height: parent.height - topBlock.height - topBlock.y
-            y: topBlock.y + topBlock.height
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
+		PreInstantiateDialog {
+			id: preInstantiateDialog
+		}
 
-        ContentBlock {
-            id: content
-            width: parent.width * 0.2
-            height: parent.height - topBlock.height - topBlock.y
-            anchors.right: parent.right
-            y: topBlock.y + topBlock.height
-        }
+		ChooseFileDialog {
+			id: chooseFileDialog
+		}
 
-        PreInstantiateDialog {
-            id: preInstantiateDialog
-        }
-    }
-    // ======= End of Screen definition =======
+		SaveAsDialog {
+			id: saveAsDialog
+		}
+
+	}
+	// ======= End of Screen definition =======
 }
 
 
 
 
+
+/*##^##
+Designer {
+	D{i:0;formeditorZoom:0.66}D{i:34}D{i:35}D{i:36}D{i:33}D{i:40}D{i:41}D{i:42}D{i:43}
+D{i:32}
+}
+##^##*/

@@ -23,9 +23,6 @@ TextField {
 	height: textToEdit.height * 1.4
 	x: textToEdit.x
 	y: textToEdit.y
-//	anchors.verticalCenter: parent.verticalCenter
-//	anchors.left: parent.left
-//	anchors.leftMargin: 0
 	placeholderText: qsTr("Enter text")
 	Keys.onReturnPressed: focus = false;
 	Keys.onEnterPressed: focus = false;

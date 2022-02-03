@@ -23,9 +23,10 @@ namespace dmb
 	public:
 		// Constructors and initializers
 		explicit VLObjectVarModel(QObject* parent = nullptr);
+		VLObjectVarModel(const vl::Var& v, QObject* parent = nullptr);
 		~VLObjectVarModel();
 		void Init(QObject* parent = nullptr) override;
-		void Init(QObject *parent, const vl::Var& data) override;
+		void Init(QObject *parent, const vl::Var& data, DMBModel* owner) override;
 		void Init(const VLVarModelPtr& parent) override;
 
 	public:
@@ -58,8 +59,7 @@ namespace dmb
 		VLVarModel* getAt(int index);
 		int getChildIndex(const VLVarModel* childPtr) const override;
 		const std::string& getChildId(const VLVarModel* childPtr) const;
-
-	protected:
+		bool removeChild(const VLVarModel* childPtr) override;
 		// Other
 		bool loadPropList();
 
@@ -67,6 +67,7 @@ namespace dmb
 		// Properties
 		VLCollectionModel *propListModel();
 		VLCollectionModel *protoPropListModel();
+		VLCollectionModel& getPropListModel();
 		Q_PROPERTY (VLCollectionModel* propListModel READ propListModel NOTIFY propListChanged)
 		Q_PROPERTY (VLCollectionModel* protoPropListModel READ protoPropListModel NOTIFY protoPropListChanged)
 		// New item will be created. If the passed name exists then a number postfix will be added
@@ -77,6 +78,7 @@ namespace dmb
 		Q_INVOKABLE dmb::VLVarModel* at(int index);
 		Q_INVOKABLE dmb::VLVarModel* get(const QString& propId);
 		Q_INVOKABLE dmb::VLVarModel* set(const QString& propId, VLVarModel* var);
+		Q_INVOKABLE dmb::VLVarModel* set(const QString& propId, const QVariant& data);
 
 	signals:
 		void nameChanged();

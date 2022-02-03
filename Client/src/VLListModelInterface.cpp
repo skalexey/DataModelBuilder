@@ -4,7 +4,6 @@
 #include "VLListModelInterface.h"
 #include "Utils.h"
 #include "vl.h"
-#include "GlobalContext.h"
 #include "VarModelFactory.h"
 #include "VLVarModel.h"
 #include "VLObjectVarModel.h"
@@ -64,25 +63,31 @@ namespace dmb
 				if (id == "proto")
 				{
 					auto& protoData = getDataAt(index).AsObject();
-					auto protoId = GlobalContext::Instance().GetCurrentDataModel().GetTypeId(protoData);
-					ptr = GlobalContext::Instance().GetCurrentModel()->getTypesModel()->getModelSp(protoId);
-					mStorage.put(index, ptr);
+					if (auto dmbModel = parent->getDataModel())
+					{
+						auto protoId = dmbModel->getDataModel().GetTypeId(protoData);
+						ptr = dmbModel->getTypesModel()->getModelSp(protoId);
+						mStorage.put(index, ptr);
+					}
+					else
+					{
+						// Any element in the hierarchy should have a link to the model
+						assert(false);
+					}
 				}
 			}
 			if (!ptr)
 			{
 				// Container should be prepared to fit in the range
-				ptr = VarModelFactory::Instance().Create(getDataAt(index));
+				ptr = VarModelFactory::Instance().CreateEmpty(getDataAt(index));
 				mStorage.put(index, ptr);
 				ptr->Init(parent);
 			}
 		}
 		else
 		{
-			auto& data = getDataAt(index);
-			ptr = VarModelFactory::Instance().Create(data);
-			mStorage.put(index, ptr);
-			ptr->Init(this, data);
+			// Parent should exist
+			assert(false);
 		}
 		if (ptr)
 		{
@@ -210,6 +215,26 @@ namespace dmb
 		return mStorage.getIndex(elementPtr);
 	}
 
+	bool VLListModelInterface::foreachElement(const std::function<bool (int, const VLVarModelPtr &)> &pred) const
+	{
+		auto sz = size();
+		for (int i = 0; i < sz; i++)
+			if (!pred(i, getAtSp(i)))
+				return false;
+		return true;
+	}
+
+	bool VLListModelInterface::foreachElement(const std::function<bool (int, const VLVarModelPtr &)> &pred)
+	{
+		// TODO: optimize performance
+		auto pred2 = [&](int i, const VLVarModelPtr& v) {
+			if (!pred(i, const_cast<const VLVarModelPtr&>(v)))
+				return false;
+			return true;
+		};
+		return const_cast<const VLListModelInterface*>(this)->foreachElement(pred2);
+	}
+
 	bool VLListModelInterface::removeAt(int index)
 	{
 		if (index >= 0 && index < size())
@@ -227,6 +252,12 @@ namespace dmb
 	{
 		QModelIndex index = this->index(i, 0, QModelIndex());
 		emit dataChanged(index, index, QVector<int>() << RoleValue);
+	}
+
+	void VLListModelInterface::onTypeChanged(int i)
+	{
+		QModelIndex index = this->index(i, 0, QModelIndex());
+		emit dataChanged(index, index, QVector<int>() << RoleType << RoleTypeStr << RoleValue);
 	}
 	// ======= End of Public interface =======
 
@@ -261,10 +292,12 @@ namespace dmb
 	{
 		switch (role) {
 			case RoleType:
+				// Emit dataChanged signal
 				return setType(index, qvariant_cast<ObjectProperty::Type>(value));
 			case RoleValue:
 				// Should exist as we have checked the index range in setData
-				return at(index)->setValueInternal(value, false);
+				// Emit dataChanged signal
+				return at(index)->setValue(value);
 		}
 		return false;
 	}
@@ -276,10 +309,7 @@ namespace dmb
 			return false;
 		if (data(index, role) != value)
 			if (doSetData(intIndex, value, role))
-			{
-				emit dataChanged(index, index, QVector<int>() << role);
 				return true;
-			}
 		return false;
 	}
 
@@ -300,6 +330,13 @@ namespace dmb
 		roles[RoleValueStr] = "valueStr";
 		roles[RoleParent] = "parentModel";
 		return roles;
+	}
+
+	void VLListModelInterface::putModel(int index, const VLVarModelPtr &ptr)
+	{
+		if (mStorage.size() <= index)
+			mStorage.resize(index + 1);
+		mStorage.put(index, ptr);
 	}
 
 	int VLListModelInterface::MStorage::getIndex(const VLVarModel *e) const

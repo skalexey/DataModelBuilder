@@ -1,10 +1,14 @@
 import QtQuick
 import QtQuick.Controls
 
-Item {
+Column {
 	property var listModel: null
+	Component.onCompleted: {
+		console.log("addBtn.height: " + addBtn.height)
+	}
+
 	Button {
-		id: addToList
+		id: addBtn
 		text: qsTr("Add")
 		onClicked: {
 			contextMenu.popup();
@@ -24,7 +28,7 @@ Item {
 				MenuItem {
 					text: Object.keys(modelData)[0]
 					onTriggered: {
-						cmd(varListFooterAddClicked(listModel, modelData[Object.keys(modelData)[0]]));
+						varListFooterAddClicked(listModel, modelData[Object.keys(modelData)[0]]);
 					}
 				}
 			}
