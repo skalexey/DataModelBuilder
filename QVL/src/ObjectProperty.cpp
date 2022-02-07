@@ -8,10 +8,21 @@ namespace dmb
 		: QObject{parent}
 	{}
 
-	// ======= Begin of Static interface =======
-	QVariantList ObjectProperty::typeList = composeTypeList();
-	QVariantList ObjectProperty::typeMap = composeTypeMap();
+	const QVariantList &ObjectProperty::vlTypeModel()
+	{
+		if (mTypeList.empty())
+			mTypeList = composeTypeList();
+		return mTypeList;
+	}
 
+	const QVariantList &ObjectProperty::vlTypeModelDetailed()
+	{
+		if (mTypeMap.empty())
+			mTypeMap = composeTypeMap();
+		return mTypeMap;
+	}
+
+	// ======= Begin of Static interface =======
 	ObjectProperty::Type ObjectProperty::ConvertVLType(const vl::Var &var)
 	{
 		if (var.IsBool())

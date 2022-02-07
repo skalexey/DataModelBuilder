@@ -1,4 +1,22 @@
-# Generated from DataModelBuilder.pro.
+# Generated using pro2cmake from DataModelBuilder.pro and then edited
+
+macro(configure_files srcDir destDir)
+    message(STATUS "Configuring directory ${destDir}")
+    message(STATUS "Copy from ${srcDir}")
+    make_directory(${destDir})
+
+    file(GLOB templateFiles RELATIVE ${srcDir} ${srcDir}/*)
+    foreach(templateFile ${templateFiles})
+        set(srcTemplatePath ${srcDir}/${templateFile})
+        if(NOT IS_DIRECTORY ${srcTemplatePath})
+            message(STATUS "Configuring file ${templateFile}")
+            configure_file(
+                    ${srcTemplatePath}
+                    ${destDir}/${templateFile}
+                    COPYONLY)
+        endif(NOT IS_DIRECTORY ${srcTemplatePath})
+    endforeach(templateFile)
+endmacro(configure_files)
 
 cmake_minimum_required(VERSION 3.16)
 project(DataModelBuilder LANGUAGES CXX)
@@ -31,37 +49,10 @@ qt_add_executable(DataModelBuilder WIN32 MACOSX_BUNDLE
 
 target_compile_definitions(DataModelBuilder PRIVATE QT_QML_DEBUG)
 
-target_include_directories(DataModelBuilder PUBLIC
-    ../Core/dependencies/VL/JSONConverter/include
-    ../Core/dependencies/VL/include
-    ../Core/include
-)
-
-#target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Core/Build-g++)
-#target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-g++/dependencies/VL/JSONConverter)
-#target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../???)
-
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    message("=== Set ${CMAKE_BUILD_TYPE} link directories")
-    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Debug/)
-    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Debug)
-    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Debug)
-elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-    message("=== Set ${CMAKE_BUILD_TYPE} link directories")
-    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Release/)
-    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Release)
-    target_link_directories(DataModelBuilder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Release)
-endif()
-
-
-
 target_link_libraries(DataModelBuilder PUBLIC
     Qt::Core
     Qt::Gui
     Qt::Quick
-    DMBCore
-    JSONConverter
-    VL
 )
 
 set (
@@ -85,52 +76,10 @@ qt6_add_resources(DataModelBuilder "qmake_immediate"
 )
 
 message("CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+message("Copy QVL artifacts")
+configure_files(${CMAKE_CURRENT_SOURCE_DIR}/../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/${CMAKE_BUILD_TYPE} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/QVL)
+configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qvl.qmltypes ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/QVL/ COPYONLY)
+configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qmldir ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/QVL/ COPYONLY)
+configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qmldir ${CMAKE_CURRENT_SOURCE_DIR}/imports/QVL/ COPYONLY)
+configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qvl.qmltypes ${CMAKE_CURRENT_SOURCE_DIR}/imports/QVL/ COPYONLY)
 
-#link_directories(
-#    ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Debug/
-#    ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Debug/
-#    ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Debug/
-#)
-
-#target_link_libraries(DataModelBuilder DMBCore)
-#target_link_libraries(DataModelBuilder JSONConverter)
-#target_link_libraries(DataModelBuilder VL)
-
-#if(WIN32 AND CONFIG(release,debug OR release))
-#    target_link_libraries(DataModelBuilder PUBLIC
-        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Release/
-        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Release/
-        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Release/
-#        DMBCore
-#        JSONConverter
-#        VL
-#    )
-#endif()
-
-#if((NOT (WIN32 AND CONFIG(release,debug OR release))) AND (WIN32 AND CONFIG(debug,debug OR release)))
-#    target_link_libraries(DataModelBuilder PUBLIC
-        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/Debug/
-        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build/dependencies/VL/JSONConverter/Debug/
-        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/Debug/
-#        DMBCore
-#        JSONConverter
-#        VL
-#    )
-#endif()
-
-#if(((NOT (WIN32 AND CONFIG(release,debug OR release))) AND (NOT (WIN32 AND CONFIG(debug,debug OR release)))) AND (UNIX))
-#    target_link_libraries(DataModelBuilder PUBLIC
-        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-g++/
-        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-g++/dependencies/VL/JSONConverter/
-        # Remove: L${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build/
-#        DMBCore
-#        JSONConverter
-#        VL
-#    )
-#endif()
-
-install(TARGETS DataModelBuilder
-    RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"
-    BUNDLE DESTINATION "${INSTALL_EXAMPLEDIR}"
-    LIBRARY DESTINATION "${INSTALL_EXAMPLEDIR}"
-)

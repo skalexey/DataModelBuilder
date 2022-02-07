@@ -7,6 +7,7 @@ Item {
 	id: root
 	width: Constants.width
 	height: Constants.height
+
 	// ======= The code for Window =======
 	//    visible: true
 	// Uncomment if you deside to test dialogs in the Qt Designer
@@ -16,6 +17,10 @@ Item {
 	property alias chooseFileDialog: chooseFileDialog
 	property alias saveAsDialog: saveAsDialog
 	property alias bodyBlock: bodyBlock
+	// ======= Types list models
+	property var typesListsModel: ["No modifier", "Shift", "Control"]
+	property var typesListsModelDetailed: [{"No modifier": 0}, {"Shift": 1}, {"Control": 2}]
+
 	// ======= Recent files properties ========
 	property var recentFileRelPath: function(fPath) {
 		// Default handler. Will be overriden in main.qml
@@ -168,7 +173,6 @@ Item {
 			name: "Square"
 		}
 	}
-	property var propTypeModel: ["No modifier", "Shift", "Control"]
 	property string selectedObjectName: "Obj name"
 	property var selectedObjectNewParamClicked: function() { console.log("DataModelBuilderUI: onNewParamClicked default handler") }
 	property var selectedObjectDeleteParameterClicked: function(i) { console.log("DataModelBuilderUI: onDeleteParameterClicked(" + i + ") Delete param default handler") }
@@ -260,7 +264,6 @@ Item {
 
 /*##^##
 Designer {
-	D{i:0;formeditorZoom:0.66}D{i:34}D{i:35}D{i:36}D{i:33}D{i:40}D{i:41}D{i:42}D{i:43}
-D{i:32}
+	D{i:0;formeditorZoom:0.66}D{i:33}D{i:40}D{i:41}D{i:42}D{i:43}D{i:32}
 }
 ##^##*/

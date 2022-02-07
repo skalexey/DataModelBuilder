@@ -17,7 +17,7 @@ Column {
 	Menu {
 		id: contextMenu
 		Instantiator {
-			model: vlTypeModelDetailed
+			model: typesListsModelDetailed
 			onObjectAdded: function(i, o) {
 				contextMenu.insertItem(i, o);
 			}

@@ -1,7 +1,8 @@
 @echo off
 
 set deps=dependencies\
-set build=Build\
+set buildType=Debug
+set buildFolderPrefix=Build
 set cmakeTestsArg= -DDMB_TESTS=ON
 set cmakeLogOnArg= -DLOG_ON=ON
 set cmakeGppArg=
@@ -21,12 +22,17 @@ for %%x in (%*) do (
 		echo --- 'g++' option passed. Build with g++ compiler
 		set cmakeGppArg= -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gpp
 		set gppArg= g++
-		set build=Build-g++\
+		set buildFolderPrefix=Build-g++
 	) else if "%%~x" == "no-log" (
 		echo --- 'no-log' option passed. Turn off LOG_ON compile definition
 		set cmakeLogOnArg=
+	) else if "%%~x" == "release" (
+		echo --- 'release' option passed. Set Release build type
+		set buildType=Release
 	)
 )
+
+set build=%buildFolderPrefix%-cmake-%buildType%\
 
 IF not exist %deps% ( mkdir %deps% )
 cd %deps%
@@ -56,14 +62,7 @@ if not exist %build% (
 
 cd %build%
 
-echo --- Configure DMBCore with CMake
-if "%cmakeGppArg%%cmakeTestsArg%" neq "" (
-	echo --- Arguments are:%cmakeGppArg%%cmakeTestsArg%
-) else (
-	echo --- Arguments are empty
-)	
-
-cmake ..%cmakeLogOnArg%%cmakeGppArg%%cmakeTestsArg%
+cmake .. "-DCMAKE_BUILD_TYPE:STRING=%buildType%"%cmakeLogOnArg%%cmakeGppArg%%cmakeTestsArg%
 
 if %errorlevel% neq 0 (
 	echo --- CMake generation error: %errorlevel%
@@ -75,10 +74,10 @@ echo --- Build DMBCore with CMake
 cmake --build .
 
 if %errorlevel% neq 0 (
-	echo --- CMake build error: %errorlevel%
+	echo --- DMBCore CMake build error: %errorlevel%
 	goto end
 ) else (
-	echo --- CMake build successfully completed
+	echo --- DMBCore CMake build successfully completed
 )
 cd ..
 

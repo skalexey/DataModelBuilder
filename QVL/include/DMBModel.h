@@ -2,6 +2,7 @@
 #define DMBModel_H
 
 #include <unordered_map>
+#include <QtQml/qqml.h>
 #include <QObject>
 #include "DMBCore.h"
 #include "ModelsFwd.h"
@@ -14,6 +15,7 @@ namespace dmb
 	class DMBModel : public QObject
 	{
 		Q_OBJECT
+		QML_NAMED_ELEMENT(DMBModel)
 
 	public:
 		explicit DMBModel(QObject *parent = nullptr);
@@ -40,7 +42,7 @@ namespace dmb
 		dmb::VLVarModelPtr createListPtr();
 		VLVarModelPtr takeStandaloneModel(const VLVarModel* p);
 		bool removeStandaloneModel(const VLVarModel* p);
-
+		
 	protected:
 		const VLVarModelPtr &storeStandalonePtr(const VLVarModelPtr& ptr);
 

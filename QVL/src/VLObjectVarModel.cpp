@@ -8,7 +8,6 @@
 
 namespace dmb
 {
-	VLObjectVarModel* emptyObjectModel = new VLObjectVarModel;
 	const std::string emptyString;
 
 	VLObjectVarModel::VLObjectVarModel(QObject *parent)

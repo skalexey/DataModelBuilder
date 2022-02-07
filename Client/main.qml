@@ -1,5 +1,5 @@
 import QtQuick
-import DMB 1.0
+import QVL 1.0
 import DataModelBuilderUI 1.0
 
 Window {
@@ -45,6 +45,8 @@ Window {
         id: uiRoot
         width: root.width
         height: root.height
+		typesListsModelDetailed: ObjectProperty.vlTypeModelDetailed
+		typesListsModel: ObjectProperty.vlTypeModel
 		// ======= Menu properties ========
 		property var currentlyOpenedFile: "";
 		openFileClicked: function() {
@@ -127,7 +129,6 @@ Window {
 				var obj = getCurrentObj();
 				return obj ? obj.name : "";
 			});
-			propTypeModel = vlTypeModel;
 			selectedObjectNewParamClicked = function() {
 				var obj = getCurrentObj();
 				if (obj)

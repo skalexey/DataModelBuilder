@@ -72,7 +72,7 @@ InteractiveListElement {
 			height: paramType.height * 1.4
 			width: 103
 			visible: false
-			model: propTypeModel
+			model: typesListsModel
 			onActivated: {
 				type = currentValue;
 				console.log("paramValue.state: " + paramValue.state)

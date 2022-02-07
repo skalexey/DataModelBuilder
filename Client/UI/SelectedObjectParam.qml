@@ -58,7 +58,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
         anchors.rightMargin: 6
-		model: propTypeModel
+		model: typesListsModel
         onActivated: type = currentValue
         Component.onCompleted: currentIndex = type
     }
