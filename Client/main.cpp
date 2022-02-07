@@ -40,7 +40,6 @@ int main(int argc, char *argv[])
 	AppObject appObject(app);
 	engine.rootContext()->setContextProperty("app", &appObject);
 	engine.addImportPath("qrc:/imports");
-	engine.addImportPath("qrc:/");
 	QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
 					 &app, [url](QObject *obj, const QUrl &objUrl) {
 		if (!obj && url == objUrl)

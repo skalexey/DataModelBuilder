@@ -57,7 +57,7 @@ target_link_libraries(DataModelBuilder PUBLIC
 
 set (
     QML_IMPORT_PATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/UI/imports
+    ${CMAKE_CURRENT_SOURCE_DIR}/imports ${CMAKE_CURRENT_SOURCE_DIR}/UI/imports
     CACHE
     STRING
     "Path used to locate CMake modules by Qt Creator"
@@ -80,6 +80,6 @@ message("Copy QVL artifacts")
 configure_files(${CMAKE_CURRENT_SOURCE_DIR}/../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/${CMAKE_BUILD_TYPE} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/QVL)
 configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qvl.qmltypes ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/QVL/ COPYONLY)
 configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qmldir ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/QVL/ COPYONLY)
-configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qmldir ${CMAKE_CURRENT_SOURCE_DIR}/imports/QVL/ COPYONLY)
-configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qvl.qmltypes ${CMAKE_CURRENT_SOURCE_DIR}/imports/QVL/ COPYONLY)
+configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qmldir ${CMAKE_CURRENT_SOURCE_DIR}/imports/QVL/qmldir  COPYONLY)
+configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qvl.qmltypes ${CMAKE_CURRENT_SOURCE_DIR}/imports/QVL/qvl.qmltypes COPYONLY)
 
