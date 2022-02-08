@@ -91,12 +91,17 @@ namespace dmb
 		}
 		if (ptr)
 		{
-			//mStorage.put(index, ptr);
-			QObject::connect(ptr.get(), SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+			connectSignals(ptr.get());
 		}
 		return ptr;
 	}
 
+	void VLListModelInterface::connectSignals(VLVarModel* model) const
+	{
+		QObject::connect(model, SIGNAL(idChanged(int)), this, SLOT(onNameChanged(int)));
+		QObject::connect(model, SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+		QObject::connect(model, SIGNAL(typeChanged(int)), this, SLOT(onTypeChanged(int)));
+	}
 	// ======= Begin of Public interface =======
 	vl::Var &VLListModelInterface::getDataAt(int index)
 	{
@@ -248,16 +253,23 @@ namespace dmb
 		return false;
 	}
 
+	void VLListModelInterface::onNameChanged(int i)
+	{
+		// Only objects can use this
+	}
+
 	void VLListModelInterface::onValueChanged(int i)
 	{
 		QModelIndex index = this->index(i, 0, QModelIndex());
-		emit dataChanged(index, index, QVector<int>() << RoleValue);
+		emit dataChanged(index, index, QVector<int>() << RoleValue << RoleValueStr);
 	}
 
 	void VLListModelInterface::onTypeChanged(int i)
 	{
 		QModelIndex index = this->index(i, 0, QModelIndex());
-		emit dataChanged(index, index, QVector<int>() << RoleType << RoleTypeStr << RoleValue);
+		emit dataChanged(index, index, QVector<int>() << RoleType << RoleTypeStr);
+		if (auto model = getAt(i))
+			emit model->valueChanged(i);
 	}
 	// ======= End of Public interface =======
 
@@ -284,7 +296,18 @@ namespace dmb
 	{
 		auto& v = getDataAt(index);
 		if (ObjectProperty::ConvertVLType(v) != type)
-			return setDataAt(index, ObjectProperty::MakeVarPtr(type));
+		{
+			if (auto parentModel = getParentModel())
+			{
+				auto newDataPtr = ObjectProperty::MakeVarPtr(type);
+				auto newModel = VarModelFactory::Instance().Create(*newDataPtr);
+				connectSignals(newModel.get());
+				return setDataAt(index, newDataPtr, [&] (bool modelAlreadyExists) {
+					newModel->Init(parentModel);
+					return newModel;
+				});
+			}
+		}
 		return false;
 	}
 

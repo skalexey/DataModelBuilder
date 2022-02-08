@@ -107,8 +107,9 @@ namespace dmb
 
 	bool DMBModel::store(const QString &filePath, bool pretty)
 	{
-		auto filePathStd = filePath.isEmpty() ? mFilePath : filePath.toStdString();
-		return getDataModel().Store(filePathStd, { pretty });
+		if (!filePath.isEmpty())
+			setCurrentFile(filePath.toStdString());
+		return getDataModel().Store(mFilePath, { pretty });
 	}
 
 	bool DMBModel::load(const QString &url)
@@ -130,7 +131,7 @@ namespace dmb
 				mRoot->getPropListModel().UpdateIdList();
 			// Create new Qt models for types and content
 			mRoot->loadPropList();
-			mFilePath = fPath;
+			setCurrentFile(fPath);
 			emit modelLoaded(url);
 			return true;
 		}
@@ -151,6 +152,12 @@ namespace dmb
 		auto it = mStandaloneModels.emplace(ptr.get(), ptr);
 		ptr->Init(this, const_cast<const VLVarModel&>(*ptr).getData(), this);
 		return it.first->second;
+	}
+
+	void DMBModel::setCurrentFile(const std::string &newFilePath)
+	{
+		mFilePath = newFilePath;
+		emit currentFileChanged();
 	}
 
 	VLVarModel *DMBModel::createFromData(const QVariant& data)
@@ -222,5 +229,15 @@ namespace dmb
 	bool DMBModel::removeStandaloneModel(const VLVarModel *p)
 	{
 		return mStandaloneModels.erase(p) > 0;
+	}
+
+	QString DMBModel::currentFile() const
+	{
+		return QString(mFilePath.c_str());
+	}
+
+	const std::string &DMBModel::getCurrentFile() const
+	{
+		return mFilePath;
 	}
 }

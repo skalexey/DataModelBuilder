@@ -35,7 +35,7 @@ namespace dmb
 		bool doRemove(int index) override;
 
 	protected:
-		vl::Var& setDataAt(int index, const vl::VarPtr& ptr) override;
+		vl::Var& setDataAt(int index, const vl::VarPtr& ptr, const std::function<VLVarModelPtr(bool alreadyExist)>& customModelLoader = nullptr) override;
 
 	public:
 		// Other

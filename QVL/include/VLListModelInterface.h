@@ -39,7 +39,7 @@ namespace dmb
 		virtual bool doRemove(int index) = 0; // return true if success
 
 	protected:
-		virtual vl::Var& setDataAt(int index, const vl::VarPtr& ptr) = 0;
+		virtual vl::Var& setDataAt(int index, const vl::VarPtr& ptr, const std::function<VLVarModelPtr(bool alreadyExist)>& customModelLoader = nullptr) = 0;
 
 	public:
 		// Other
@@ -47,6 +47,7 @@ namespace dmb
 		virtual void clear(); // Clear the list
 		bool elementsLoaded() const;
 		bool loadElementModels();
+		void connectSignals(VLVarModel* model) const;
 		// Role getters
 		virtual QVariant role(const VLVarModel* m, int index, int role) const;
 		virtual QVariant roleType(const VLVarModel* m, int index) const;
@@ -108,6 +109,7 @@ namespace dmb
 		Q_PROPERTY (int size READ size NOTIFY sizeChanged);
 
 	public slots:
+		virtual void onNameChanged(int index);
 		void onValueChanged(int index);
 		void onTypeChanged(int index);
 

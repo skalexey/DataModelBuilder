@@ -45,9 +45,12 @@ namespace dmb
 		return getData().At(index);
 	}
 
-	vl::Var &VLListModel::setDataAt(int index, const vl::VarPtr &ptr)
+	vl::Var &VLListModel::setDataAt(int index, const vl::VarPtr &ptr, const std::function<VLVarModelPtr(bool alreadyExist)>& customModelLoader)
 	{
-		return getData().Set(index, ptr);
+		auto& result = getData().Set(index, ptr);
+		if (customModelLoader)
+			putModel(index, customModelLoader(false));
+		return result;
 	}
 
 	bool VLListModel::doRemove(int index)

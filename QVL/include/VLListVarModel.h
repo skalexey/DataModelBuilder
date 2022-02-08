@@ -12,7 +12,6 @@
 #include "vl.h"
 #include "VLListModel.h" // No forward def instead because of Qt meta object resolution
 #include "VLVarModel.h"
-#include "VLListModel.h"
 
 namespace dmb
 {
@@ -56,13 +55,13 @@ namespace dmb
 		// Public Qt model interface
 		const VLVarModel* getAt(int index) const;
 		const VLListModel *listModel() const;
+		VLListModel *listModel();
 		int getChildIndex(const VLVarModel* childPtr) const override;
 		VLVarModel* add(const dmb::VLVarModel* model, int indexBefore = -1);
 		bool removeChild(const VLVarModel* childPtr) override;
 
 	protected:
 		// Protected Qt model interface
-		VLListModel *listModel();
 		VLVarModel* getAt(int index);
 
 	protected:

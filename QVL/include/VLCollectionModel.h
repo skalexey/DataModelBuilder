@@ -38,7 +38,7 @@ namespace dmb
 		bool doRemove(int index) override;
 
 	protected:
-		vl::Var& setDataAt(int index, const vl::VarPtr& ptr) override;
+		vl::Var& setDataAt(int index, const vl::VarPtr& ptr, const std::function<VLVarModelPtr(bool alreadyExist)>& customModelLoader = nullptr) override;
 
 	public:
 		// Other
@@ -59,7 +59,7 @@ namespace dmb
 		bool hasData(const std::string& propId) const;
 		vl::Var& setData(const std::string& propId);
 		vl::Var& setData(const std::string& propId, const vl::Var& value);
-		vl::Var& setData(const std::string& propId, const vl::VarPtr& value, const std::function<void(bool alreadyExist)>& customModelLoader = nullptr);
+		vl::Var& setData(const std::string& propId, const vl::VarPtr& value, const std::function<VLVarModelPtr(bool alreadyExist)>& customModelLoader = nullptr);
 		template <typename T>
 		vl::Var& setData(const std::string& propId, const T& value)
 		{
@@ -98,7 +98,7 @@ namespace dmb
 		Q_INVOKABLE bool remove(const QString& propId);
 
 	public slots:
-		void onNameChanged(int index);
+		void onNameChanged(int index) override;
 
 	signals:
 		void nameAlreadyTaken();

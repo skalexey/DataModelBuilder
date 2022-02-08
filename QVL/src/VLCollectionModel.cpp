@@ -46,9 +46,9 @@ namespace dmb
 	}
 
 	// overriden pure virtual Base::set(int index, const vl::VarPtr& ptr)
-	vl::Var& VLCollectionModel::setDataAt(int index, const vl::VarPtr& ptr)
+	vl::Var& VLCollectionModel::setDataAt(int index, const vl::VarPtr& ptr, const std::function<VLVarModelPtr(bool alreadyExist)>& customModelLoader)
 	{
-		return setData(getId(index), ptr);
+		return setData(getId(index), ptr, customModelLoader);
 	}
 
 	// Object-specific setters
@@ -62,7 +62,7 @@ namespace dmb
 		return setData(propId, MakePtr(value));
 	}
 
-	vl::Var& VLCollectionModel::setData(const std::string& propId, const vl::VarPtr& ptr, const std::function<void(bool alreadyExist)>& customModelLoader)
+	vl::Var& VLCollectionModel::setData(const std::string& propId, const vl::VarPtr& ptr, const std::function<VLVarModelPtr(bool alreadyExist)>& customModelLoader)
 	{
 		if (!hasData(propId))
 		{
@@ -73,11 +73,13 @@ namespace dmb
 			mPropIndex[propId] = sz;
 			mIdList.push_back(propId);
 			if (customModelLoader)
-				customModelLoader(false);
+			{
+				auto modelPtr = customModelLoader(false);
+				putModel(getIndex(propId), modelPtr);
+			}
 			else
 				loadElementModel(sz);
 			endInsertRows();
-			//onValueChanged(sz);
 			return result;
 		}
 		else
@@ -86,11 +88,15 @@ namespace dmb
 			bool newType = ObjectProperty::ConvertVLType(oldData) != ObjectProperty::ConvertVLType(*ptr);
 			auto& result = getData().Set(propId, ptr);
 			if (customModelLoader)
-				customModelLoader(true);
+			{
+				auto modelPtr = customModelLoader(true);
+				putModel(getIndex(propId), modelPtr);
+			}
 			auto i = getIndex(propId);
 			if (newType)
-				onTypeChanged(i);
-			onValueChanged(i);
+				if (auto model = getModel(propId))
+					// Call VLListModelInterface::onValueChanged
+					emit model->typeChanged(i);
 			return result;
 		}
 	}
@@ -158,7 +164,9 @@ namespace dmb
 		mPropIndex.erase(it);
 		mPropIndex[newId] = index;
 		mIdList[index] = newId;
-		onNameChanged(index);
+		if (auto model = getAt(index))
+			// Call onNameChanged
+			emit model->idChanged(index);
 		return true;
 	}
 
@@ -309,7 +317,7 @@ namespace dmb
 					auto ptr = vl::MakePtr(m->getData());
 					setData(id, ptr, [&] (bool modelAlreadyExists) {
 						modelPtr->Init(parentModel);
-						putModel(getIndex(id), modelPtr);
+						return modelPtr;
 					});
 					return at(getIndex(id));
 				}

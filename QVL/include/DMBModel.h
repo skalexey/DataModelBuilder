@@ -20,12 +20,22 @@ namespace dmb
 	public:
 		explicit DMBModel(QObject *parent = nullptr);
 		~DMBModel();
+		// Public interface
 		VLObjectVarModel* contentModel();
 		const VLObjectVarModel* getContentModel() const;
 		VLObjectVarModel* typesModel();
 		const VLObjectVarModel* getTypesModel() const;
 		const dmb::Model& getDataModel() const;
 		dmb::Model& getDataModel();
+		bool isLoaded() const;
+		dmb::VLVarModelPtr createPtrFromData(const QVariant& data);
+		dmb::VLVarModelPtr createObjectPtr();
+		dmb::VLVarModelPtr createListPtr();
+		VLVarModelPtr takeStandaloneModel(const VLVarModel* p);
+		bool removeStandaloneModel(const VLVarModel* p);
+		QString currentFile() const;
+		const std::string& getCurrentFile() const;
+		// Properties
 		Q_PROPERTY (VLObjectVarModel* contentModel READ contentModel NOTIFY contentModelChanged)
 		Q_PROPERTY (VLObjectVarModel* typesModel READ typesModel NOTIFY typesModelChanged)
 		Q_INVOKABLE void instantiateRequest(int index);
@@ -33,18 +43,14 @@ namespace dmb
 		Q_INVOKABLE bool store(const QString& filePath = "", bool pretty = true);
 		Q_INVOKABLE bool load(const QString& filePath);
 		Q_PROPERTY (bool isLoaded READ isLoaded NOTIFY modelLoaded);
-		bool isLoaded() const;
 		Q_INVOKABLE dmb::VLVarModel* createFromData(const QVariant& data);
 		Q_INVOKABLE dmb::VLVarModel* createObject();
 		Q_INVOKABLE dmb::VLVarModel* createList();
-		dmb::VLVarModelPtr createPtrFromData(const QVariant& data);
-		dmb::VLVarModelPtr createObjectPtr();
-		dmb::VLVarModelPtr createListPtr();
-		VLVarModelPtr takeStandaloneModel(const VLVarModel* p);
-		bool removeStandaloneModel(const VLVarModel* p);
+		Q_PROPERTY (QString currentFile READ currentFile NOTIFY currentFileChanged)
 		
 	protected:
 		const VLVarModelPtr &storeStandalonePtr(const VLVarModelPtr& ptr);
+		void setCurrentFile(const std::string& newFilePath);
 
 	protected:
 		VLObjectVarModelPtr mRoot = nullptr;
@@ -59,6 +65,7 @@ namespace dmb
 		void instantiateRefused(const QString& error);
 		void modelLoaded(const QString& filePath);
 		void modelLoadError(const QString& error);
+		void currentFileChanged();
 	};
 }
 

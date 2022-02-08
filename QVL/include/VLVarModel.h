@@ -66,12 +66,14 @@ namespace dmb
 		Q_PROPERTY (ObjectProperty::Type type READ type WRITE setType NOTIFY typeChanged)
 		Q_PROPERTY (QVariant value READ value WRITE setValue NOTIFY valueChanged)
 		Q_PROPERTY (QVariant valueStr READ valueStr NOTIFY valueChanged)
+		Q_PROPERTY (QVariant typeStr READ typeStr NOTIFY typeChanged)
 		Q_INVOKABLE bool remove();
 
 		QString id() const;
 		bool setId(const QString &newId);
 		bool setId(const std::string &newId);
 		ObjectProperty::Type type() const;
+		QString typeStr() const;
 		void setType(const ObjectProperty::Type &newType);
 		QVariant value() const;
 		bool setValue(const QVariant &newValue);
@@ -81,9 +83,9 @@ namespace dmb
 		bool setValueInternal(const QVariant &newValue, bool emitValueChanged);
 
 	signals:
-		void idChanged(int index);
-		void typeChanged(int index);
-		void valueChanged(int index);
+		void idChanged(int index) const;
+		void typeChanged(int index) const;
+		void valueChanged(int index) const;
 
 	private:
 		// Data

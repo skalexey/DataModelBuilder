@@ -2,6 +2,7 @@
 #include "VLVarModel.h"
 #include "vl.h"
 #include "VLObjectVarModel.h"
+#include "VLListVarModel.h"
 #include "DMBModel.h"
 
 namespace dmb
@@ -175,10 +176,7 @@ namespace dmb
 		if (auto parent = getParentModel())
 			if (parent->isObject())
 				if (parent->asObject()->renameProperty(getId(), newId))
-				{
-					emit idChanged(getIndex());
-					return true;
-				}
+					return true; // idChanged signal emitted by renameProperty call above
 		return false;
 	}
 
@@ -187,13 +185,19 @@ namespace dmb
 		return ObjectProperty::ConvertVLType(getData());
 	}
 
+	QString VLVarModel::typeStr() const
+	{
+		return ObjectProperty::GetTypeStr(getData());
+	}
+
 	void VLVarModel::setType(const ObjectProperty::Type &newType)
 	{
 		if (auto parent = getParentModel())
 		{
 			if (parent->isObject())
-			parent->asObject()->propListModel()->setData(getId(), ObjectProperty::MakeVarPtr(newType));
-			emit typeChanged(getIndex());
+				parent->asObject()->propListModel()->setType(getIndex(), newType);
+			else if (parent->isList())
+				parent->asList()->listModel()->setType(getIndex(), newType);
 		}
 	}
 
@@ -201,7 +205,7 @@ namespace dmb
 	{
 		auto& v = getData();
 		if (v.IsObject())
-			return QVariant::fromValue(this);
+			return QVariant::fromValue(const_cast<VLVarModel*>(this));
 		else if (v.IsBool())
 			return QVariant(v.AsBool().Val());
 		else if (v.IsString())
@@ -209,7 +213,7 @@ namespace dmb
 		else if (v.IsNumber())
 			return QVariant(v.AsNumber().Val());
 		else if (v.IsList())
-			return QVariant::fromValue(this);
+			return QVariant::fromValue(const_cast<VLVarModel*>(this));
 		else
 			return QVariant(v.ToStr().c_str());
 	}
