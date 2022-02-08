@@ -3,13 +3,11 @@ import QtQuick.Controls
 
 Column {
 	property var listModel: null
-	Component.onCompleted: {
-		console.log("addBtn.height: " + addBtn.height)
-	}
+	property string buttonText: qsTr("Add")
 
 	Button {
 		id: addBtn
-		text: qsTr("Add")
+		text: buttonText
 		onClicked: {
 			contextMenu.popup();
 		}

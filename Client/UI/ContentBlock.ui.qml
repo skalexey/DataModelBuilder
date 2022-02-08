@@ -27,6 +27,42 @@ Item {
 			width: contentBlockContainer.width // To fix the error "TypeError: Cannot read property 'width' of null"
 			container: contentBlockContainer
 		}
-		footer: ContentListFooter {}
+		footer: VarListFooter {
+			listModel: contentListModel
+			buttonText: "Add a constant"
+			Item {
+				id: spacer
+				height: 12
+				width: parent.width
+			}
+
+			Button {
+				id: instantiateType
+				text: "Add a type instance"
+				onClicked: {
+					contextMenu.popup();
+				}
+			}
+			Menu {
+				id: contextMenu
+				Instantiator {
+					model: libraryTypeListModel
+					onObjectAdded: function(i, o) {
+						contextMenu.insertItem(i, o);
+					}
+					onObjectRemoved: function(o) {
+						contextMenu.removeItem(o);
+					}
+					delegate: Component {
+						MenuItem {
+							text: name
+							onTriggered: {
+								instantiateClick(index);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
