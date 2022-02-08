@@ -25,6 +25,7 @@ Item {
 		model: contentListModel
 		delegate: ItemInContent {
 			width: contentBlockContainer.width // To fix the error "TypeError: Cannot read property 'width' of null"
+			container: contentBlockContainer
 		}
 		footer: ContentListFooter {}
 	}

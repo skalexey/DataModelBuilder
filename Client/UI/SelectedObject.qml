@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
-Item {
+Column {
     id: item1
     width: parent.width
     height: parent.height
@@ -16,18 +16,13 @@ Item {
         height: 50
     }
 
-	InteractiveListView {
-        id: params
-        y: selectedObjectNameText.y + selectedObjectNameText.height
-        width: parent.width * 0.5
-        height: parent.height - selectedObjectNameText.height
-        anchors.horizontalCenter: parent.horizontalCenter
-        delegate: SelectedObjectParam {
-            width: params.width // To fix the error "TypeError: Cannot read property 'width' of null"
-        }
-        model: selectedObjParamListModel
-        footer: ParamListFooter {}
-    }
+	PropListBlock {
+		id: propListBlock
+		protoPropListModel: null
+		ownPropListModel: selectedObjParamListModel
+		width: parent.width * 0.6
+		anchors.horizontalCenter: parent.horizontalCenter
+	}
 }
 
 /*##^##
