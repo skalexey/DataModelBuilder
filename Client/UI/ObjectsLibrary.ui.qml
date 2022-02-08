@@ -29,6 +29,15 @@ Item {
 		delegate: ObjectInLibrary {
 			width: objectsLibraryContainer.width // To fix the error "TypeError: Cannot read property 'width' of null"
 			container: objectsLibraryContainer
+			getName: function() { return name; }
+			setName: function(val) { name = val; }
+			getValue: function() { return value; }
+			setValue: function(val) { value = val; }
+			getValueStr: function() { return valueStr; }
+			getType: function() { return type; }
+			setType: function(val) { type = val; }
+			getTypeStr: function() { return typeStr; }
+
 		}
 		model: libraryTypeListModel
 		footer: ObjectsLibraryListFooter {}

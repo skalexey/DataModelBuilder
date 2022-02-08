@@ -9,9 +9,9 @@ TextField {
 	property var onNewValue: function(val) {
 		console.log("EditField.onNewValue(" + val + ") default handler");
 	}
-	property var edit: function(value) {
+	property var edit: function(val) {
 		forceActiveFocus();
-		text = value;
+		text = val;
 	}
 
 	QtObject {

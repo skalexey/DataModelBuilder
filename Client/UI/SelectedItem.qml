@@ -10,6 +10,7 @@ Column {
 	property alias propListBlock: propListBlock
 	property var changeState: function(s) {
 		state = s;
+		propListBlock.arrayListModel = selectedItemArrayListModel
 		propListBlock.changeState(getSelectedItemPropListBlockState());
 	}
 
@@ -25,6 +26,7 @@ Column {
 
 	PropListBlock {
 		id: propListBlock
+		visible: false
 		protoPropListModel: selectedItemProtoParamListModel
 		ownPropListModel: selectedItemOwnParamListModel
 		arrayListModel: selectedItemArrayListModel
@@ -32,10 +34,18 @@ Column {
 		anchors.horizontalCenter: parent.horizontalCenter
 	}
 
-	Text {
+	ParamInItem {
 		id: itemValue
-		text: selectedItemSimpleValue
-		font.pixelSize: 12
+		visible: false
+		getName: function() { return selectedItemName; }
+		setName: function(val) { selectedItemChangeName(val); }
+		getValue: function() { return selectedItemValue(); }
+		setValue: function(val) { selectedItemChangeValue(val); }
+		getValueStr: function() { return selectedItemSimpleValue(); }
+		getType: function() { return getSelectedItemType(); }
+		setType: function(val) { setSelectedItemType(val); }
+		getTypeStr: function() { return getSelectedItemTypeStr(); }
+		width: parent.width
 	}
 
 	// TODO: support scrollbar
@@ -53,24 +63,22 @@ Column {
 		State {
 			name: "simpleType"
 			PropertyChanges {
-				target: propListBlock
-				visible: false
+				target: itemValue
+				visible: true
 			}
 		},
 		State {
 			name: "object"
-
 			PropertyChanges {
-				target: itemValue
-				visible: false
+				target: propListBlock
+				visible: true
 			}
 		},
 		State {
 			name: "list"
-
 			PropertyChanges {
-				target: itemValue
-				visible: false
+				target: propListBlock
+				visible: true
 			}
 		}
 	]

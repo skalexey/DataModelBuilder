@@ -22,7 +22,7 @@ InteractiveListElement {
 			title: "Rename"
 			cmd: function(i) {
 				obj.state = "edit";
-				idInput.edit(name);
+				idInput.edit(getName());
 			}
 		}
 		ListElement {
@@ -52,7 +52,7 @@ InteractiveListElement {
 			obj.state = "base"
 		}
 		onNewValue: function(val) {
-			name = val
+			setName(val);
 		}
     }
 

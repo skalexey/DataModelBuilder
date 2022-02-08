@@ -1,12 +1,11 @@
 import QtQuick
 import QtQuick.Controls
 
-Item {
+VarInterface {
 	id: paramValue
 	width: parent.width
 	implicitHeight: childrenRect.height
 
-	property var propVal: "test value"
 	property alias valueInput: textField
 
 	function asString(val) {
@@ -15,8 +14,8 @@ Item {
 		return "<null>"
 	}
 
-	property var getState: function() {
-		switch (typeof propVal)
+	property var getState: function(val) {
+		switch (typeof val)
 		{
 			case "object":
 			case "array":
@@ -31,10 +30,10 @@ Item {
 	}
 
 	function chooseState() {
-		state = getState(propVal);
+		state = getState(getValue());
 	}
 
-	state: getState(propVal)
+	state: getState(getValue())
 
 	Column {
 		id: item1
@@ -47,7 +46,8 @@ Item {
 			Text {
 				id: text1
 				x: 268
-				text: asString(propVal)
+				visible: false
+				text: getValueStr()
 				anchors.verticalCenter: parent.verticalCenter
 				anchors.right: parent.right
 				font.pixelSize: 12
@@ -64,7 +64,7 @@ Item {
 					paramValue.chooseState();
 				}
 				onNewValue: function(val) {
-					value = val
+					setValue(val);
 				}
 			}
 
@@ -104,25 +104,21 @@ Item {
 						function finishCreation() {
 //							console.log("finish creation")
 							if (c.status === Component.Ready) {
-//								console.log("item1.height before adding: " + item1.height);
-//								console.log("typeof propVal: " + typeof propVal);
-//								console.log("propVal: '" + propVal + "'");
-//								console.log("typeStr: " + typeStr);
-								if (typeStr === "List")
+								if (getTypeStr() === "List")
 								{
 									addedPropsBlock = c.createObject(item1, {
 										state: "list",
 										x: 10,
-										arrayListModel: propVal.listModel
+										arrayListModel: getValue().listModel
 									});
 								}
-								else if (typeStr === "Object")
+								else if (getTypeStr() === "Object")
 								{
 									addedPropsBlock = c.createObject(item1, {
 										state: "object",
 										x: 10,
-										ownPropListModel: propVal.propListModel,
-										protoPropListModel: propVal.protoPropListModel
+										ownPropListModel: getValue().propListModel,
+										protoPropListModel: getValue().protoPropListModel
 									});
 								}
 								if (addedPropsBlock == null) {
@@ -158,14 +154,13 @@ Item {
 	states: [
 		State {
 			name: "text"
+			PropertyChanges {
+				target: text1
+				visible: true
+			}
 		},
 		State {
 			name: "textEdit"
-
-			PropertyChanges {
-				target: text1
-				visible: false
-			}
 
 			PropertyChanges {
 				target: textField
@@ -189,11 +184,6 @@ Item {
 			}
 
 			PropertyChanges {
-				target: text1
-				visible: false
-			}
-
-			PropertyChanges {
 				target: expandSwitch
 				visible: true
 				text: qsTr("Expand")
@@ -201,11 +191,6 @@ Item {
 		},
 		State {
 			name: "expanded"
-
-			PropertyChanges {
-				target: text1
-				visible: false
-			}
 
 			PropertyChanges {
 				target: expandSwitch

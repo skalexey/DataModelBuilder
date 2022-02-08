@@ -21,6 +21,8 @@ Item {
 	property var typesListsModel: ["No modifier", "Shift", "Control"]
 	property var typesListsModelDetailed: [{"No modifier": 0}, {"Shift": 1}, {"Control": 2}]
 
+	// ======= Files properties ========
+	property var textCurrentFile: "current file default"
 	// ======= Recent files properties ========
 	property var recentFileRelPath: function(fPath) {
 		// Default handler. Will be overriden in main.qml
@@ -47,28 +49,53 @@ Item {
 		return "object"
 	}
 
-	property var selectedItemSimpleValue: "Test selected item Value"
+	property var selectedItemSimpleValue: function () { return "Test selected item valueStr"; }
+	property var selectedItemValue: function() { return "Test selectedItemValue" };
+
+	property var selectedItemChangeValue: function(val) {
+		console.log("selectedItemChangeValue(" + val + ") default handler");
+	}
+	property var selectedItemChangeName: function(val) {
+		console.log("selectedItemChangeName(" + val + ") default handler");
+	}
+	property var setSelectedItemType: function(val) {
+		console.log("setSelectedItemType(" + val + ") default handler");
+	}
+	property var getSelectedItemType: function() {
+		console.log("getSelectedItemType() default handler");
+	}
+	property var getSelectedItemTypeStr: function() {
+		console.log("getSelectedItemTypeStr() default handler");
+	}
+
 	property string selectedItemName: "Selected item"
-	property var selectedItemArrayListModel: ListModel {
-		ListElement {
-			name: "Element 1"
-			value: "e1"
-		}
+	QtObject {
+		id: local
+		property var selectedItemArrayListModel: ListModel {
+			ListElement {
+				name: "Element 1"
+				value: "e1"
+			}
 
-		ListElement {
-			name: "Element 2"
-			value: "b2"
-		}
+			ListElement {
+				name: "Element 2"
+				value: "b2"
+			}
 
-		ListElement {
-			name: "Element 3"
-			value: "a3"
-		}
+			ListElement {
+				name: "Element 3"
+				value: "a3"
+			}
 
-		ListElement {
-			name: "Element 4"
-			value: "d4"
+			ListElement {
+				name: "Element 4"
+				value: "d4"
+			}
 		}
+	}
+
+	property var selectedItemArrayListModel: function() {
+		return local.selectedItemArrayListModel;
 	}
 	property var selectedItemOwnParamListModel: ListModel {
 		ListElement {
@@ -221,6 +248,12 @@ Item {
 				anchors.verticalCenter: parent.verticalCenter
 				onClicked: fileMenu.popup()
 			}
+			Text {
+				x: btnFile.x + btnFile.width + 12
+				anchors.verticalCenter: parent.verticalCenter
+				text: textCurrentFile
+			}
+
 			Menu {
 				id: fileMenu
 				MenuItem {

@@ -21,28 +21,30 @@ Item {
         id: selectedItem
         width: parent.width
         anchors.fill: parent
+		visible: false
     }
 
     SelectedObject {
         id: selectedObject
         width: parent.width
         anchors.fill: parent
+		visible: false
     }
     states: [
         State {
             name: "selectedType"
 
             PropertyChanges {
-                target: selectedItem
-                visible: false
+				target: selectedObject
+				visible: true
             }
         },
         State {
             name: "selectedItem"
 
             PropertyChanges {
-                target: selectedObject
-                visible: false
+				target: selectedItem
+				visible: true
             }
         }
     ]

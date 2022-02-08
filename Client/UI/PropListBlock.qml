@@ -48,6 +48,14 @@ Column {
 		implicitHeight: contentItem.childrenRect.height
 		delegate: ParamInItem {
 			container: ownPropList
+			getName: function() { return name; }
+			setName: function(val) { name = val; }
+			getValue: function() { return value; }
+			setValue: function(val) { value = val; }
+			getValueStr: function() { return valueStr; }
+			getType: function() { return type; }
+			setType: function(val) { type = val; }
+			getTypeStr: function() { return typeStr; }
 			width: ownPropList.width
 		}
 		model: ownPropListModel
@@ -77,6 +85,14 @@ Column {
 			implicitHeight: contentItem.childrenRect.height
 			delegate: ParamInItem {
 				container: protoPropList
+				getName: function() { return name; }
+				setName: function(val) { name = val; }
+				getValue: function() { return value; }
+				setValue: function(val) { value = val; }
+				getValueStr: function() { return valueStr; }
+				getType: function() { return type; }
+				setType: function(val) { type = val; }
+				getTypeStr: function() { return typeStr; }
 				width: protoPropList.width
 			}
 			model: protoPropListModel
@@ -98,6 +114,12 @@ Column {
 			delegate: VLListElement {
 				container: arrayContentList
 				width: ownPropList.width
+				getValue: function() { return value; }
+				setValue: function(val) { value = val; }
+				getValueStr: function() { return valueStr; }
+				getType: function() { return type; }
+				setType: function(val) { type = val; }
+				getTypeStr: function() { return typeStr; }
 			}
 			model: arrayListModel
 			footer: VarListFooter {
@@ -154,7 +176,7 @@ Column {
 
 			PropertyChanges {
 				target: emptyLabel
-				visible: arrayListModel&& arrayListModel.rowCount() === 0
+				visible: arrayListModel && arrayListModel.rowCount() === 0
 			}
 		}
 	]

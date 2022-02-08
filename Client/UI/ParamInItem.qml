@@ -12,27 +12,27 @@ InteractiveListElement {
 			title: "Rename"
 			cmd: function(i) {
 				obj.state = "editName";
-				idInput.edit(name);
+				idInput.edit(getName());
 			}
 		}
 		ListElement {
 			title: "Edit Value"
 			cmd: function(i) {
 				paramValue.state = "textEdit";
-				paramValue.valueInput.edit(value);
+				paramValue.valueInput.edit(getValueStr());
 			}
 		}
 		ListElement {
 			title: "Edit Type"
 			cmd: function(i) {
-				console.log("paramValue.state: " + paramValue.state)
 				obj.state = "editType";
+				paramTypeInput.currentIndex = getType()
 			}
 		}
 		ListElement {
 			title: "Delete"
 			cmd: function(i) {
-				parentModel.removeAt(index);
+				getParentModel().removeAt(index);
 			}
 		}
 	}
@@ -46,7 +46,7 @@ InteractiveListElement {
 			id: paramId
 			x: 6
 			y: 12
-			text: name
+			text: getName()
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.left: parent.left
 			anchors.leftMargin: 6
@@ -59,7 +59,7 @@ InteractiveListElement {
 			id: paramType
 			x: 154
 			y: 12
-			text: typeStr
+			text: getTypeStr()
 			anchors.verticalCenter: parent.verticalCenter
 			font.pixelSize: 12
 			anchors.horizontalCenter: parent.horizontalCenter
@@ -74,12 +74,11 @@ InteractiveListElement {
 			visible: false
 			model: typesListsModel
 			onActivated: {
-				type = currentValue;
-				console.log("paramValue.state: " + paramValue.state)
-				obj.state = "base";
+				setType(currentValue);
+				obj.state = "base" // Exit from edit state
 				paramValue.chooseState();
 			}
-			Component.onCompleted: currentIndex = type
+			Component.onCompleted: currentIndex = getType()
 		}
 
 		EditField {
@@ -90,14 +89,21 @@ InteractiveListElement {
 				obj.state = "base"
 			}
 			onNewValue: function(val) {
-				name = val
+				setName(val);
 			}
 		}
 	}
 
 	ParamValue {
 		id: paramValue
-		propVal: value // RoleValue
+		getName: obj.getName
+		getValue: obj.getValue
+		getType: obj.getType
+		getTypeStr: obj.getTypeStr
+		getValueStr: obj.getValueStr
+		setName: obj.setName
+		setValue: obj.setValue
+		setType: obj.setType
 	}
 	Text {
 		id: protoName
@@ -105,8 +111,8 @@ InteractiveListElement {
 		y: 12
 		width: 92
 		height: 16
-		visible: name === "proto"
-		text: valueStr
+		visible: getName() === "proto"
+		text: getValueStr()
 		font.pixelSize: 12
 		horizontalAlignment: Text.AlignHCenter
 		verticalAlignment: Text.AlignVCenter

@@ -81,7 +81,7 @@ Window {
 		selectedItemProtoParamListModel: null
 		selectedItemArrayListModel: null
 		recentFilesModel: null
-
+		textCurrentFile: ""
 		// ======= Properties for Relative files =======
 		function getRecentFileInfo(fPath) {
 			return dmbModelRecentFiles.contentModel.get("info").get(fPath);
@@ -199,12 +199,49 @@ Window {
 				else
 					return "simpleType";
 			}
-			selectedItemSimpleValue = Qt.binding(function() {
+			selectedItemSimpleValue = function() {
 				var item = getCurrentItem();
 				if (item)
 					return item.valueStr
 				return "<null>";
-			});
+			};
+			selectedItemValue = function() {
+				var item = getCurrentItem();
+				if (item)
+					return item.value;
+				return "<null>";
+			};
+			selectedItemChangeValue = function(val) {
+				var item = getCurrentItem();
+				if (item)
+					item.value = val;
+			};
+			selectedItemChangeName = function(val) {
+				var item = getCurrentItem();
+				if (item)
+					item.name = val;
+			};
+			getSelectedItemType = function() {
+				var item = getCurrentItem();
+				if (item)
+					return item.type;
+				else
+					return "";
+			};
+			getSelectedItemTypeStr = function() {
+				var item = getCurrentItem();
+				if (item)
+					return item.typeStr;
+				else
+					return "";
+			}
+
+			setSelectedItemType = function(val) {
+				var item = getCurrentItem();
+				if (item)
+					item.type = val;
+			};
+
 			varListFooterAddClicked = function(listModel, type) {
 				listModel.add(type);
 			}
@@ -219,8 +256,14 @@ Window {
 			contentDeleteItemClicked = contentListModel.removeAt;
 			// ======= End of properties for Content functional =======
 			setSelectedObjectBindings();
+
 			setSelectedItemBindings();
+			contentListModel.dataChanged.connect(function(indexTopLeft, indexBottomRight, roles) {
+				setSelectedItemBindings();
+			});
+
 			var relPath = app.relPathFromUrl(fPath);
+			textCurrentFile = relPath;
 			if (!dmbModelRecentFiles.contentModel.get("info").has(relPath))
 			{
 				var o = dmbModelRecentFiles.createObject();

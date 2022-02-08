@@ -12,7 +12,7 @@ InteractiveListElement {
 			title: "Edit Value"
 			cmd: function(i) {
 				paramValue.state = "textEdit";
-				paramValue.valueInput.edit(value);
+				paramValue.valueInput.edit(getValue());
 			}
 		}
 		ListElement {
@@ -44,13 +44,13 @@ InteractiveListElement {
 			y: 12
 			text: "[" + index + "]"
 			font.pixelSize: 12
-		} // RoleValue
+		}
 
 		Text {
 			id: paramType
 			x: 154
 			y: 12
-			text: typeStr
+			text: getTypeStr()
 			anchors.verticalCenter: parent.verticalCenter
 			font.pixelSize: 12
 			anchors.horizontalCenter: parent.horizontalCenter
@@ -59,7 +59,12 @@ InteractiveListElement {
 
 	ParamValue {
 		id: paramValue
-		propVal: value
+		getValue: obj.getValue
+		getType: obj.getType
+		getTypeStr: obj.getTypeStr
+		getValueStr: obj.getValueStr
+		setValue: obj.setValue
+		setType: obj.setType
 	}
 
 	states: [
