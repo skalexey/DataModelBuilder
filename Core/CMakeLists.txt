@@ -9,6 +9,9 @@ if (LOG_ON)
 	add_compile_definitions("LOG_ON")
 endif ()
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 project(DataModelBuilderCore)
 option(USE_JSONCONVERTER "Use JSONConverter lib" ON)
 option(DMB_TESTS "Include DMBTest target" OFF)
