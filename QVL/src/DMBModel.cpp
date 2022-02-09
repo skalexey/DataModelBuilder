@@ -240,4 +240,9 @@ namespace dmb
 	{
 		return mFilePath;
 	}
+
+	bool DMBModel::setLoadFrom(const QString &fPath)
+	{
+		return load(fPath);
+	}
 }

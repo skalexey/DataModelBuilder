@@ -35,6 +35,7 @@ namespace dmb
 		bool removeStandaloneModel(const VLVarModel* p);
 		QString currentFile() const;
 		const std::string& getCurrentFile() const;
+		bool setLoadFrom(const QString& filePath);
 		// Properties
 		Q_PROPERTY (VLObjectVarModel* contentModel READ contentModel NOTIFY contentModelChanged)
 		Q_PROPERTY (VLObjectVarModel* typesModel READ typesModel NOTIFY typesModelChanged)
@@ -47,6 +48,7 @@ namespace dmb
 		Q_INVOKABLE dmb::VLVarModel* createObject();
 		Q_INVOKABLE dmb::VLVarModel* createList();
 		Q_PROPERTY (QString currentFile READ currentFile NOTIFY currentFileChanged)
+		Q_PROPERTY (QString loadFrom WRITE setLoadFrom)
 		
 	protected:
 		const VLVarModelPtr &storeStandalonePtr(const VLVarModelPtr& ptr);
