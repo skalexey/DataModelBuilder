@@ -36,22 +36,21 @@ set build=%buildFolderPrefix%-cmake-%buildType%\
 
 IF not exist %deps% ( mkdir %deps% )
 cd %deps%
-
-IF not exist VL (
-	echo --- Clone VL library from GitHub
-	git clone https://github.com/skalexey/VL.git --branch %vlBranch%
-)
-
-cd VL\JSONConverter
-	echo --- Build JSONConverter library
-	setlocal
-	call build.bat only-deps
-	endlocal
-	if not errorlevel 0 (
-		echo --- JSONConverter preparation failed. Error code: %errorlevel%
-		goto end
+	IF not exist VL (
+		echo --- Clone VL library from GitHub
+		git clone https://github.com/skalexey/VL.git --branch %vlBranch%
 	)
-cd ..\..
+	
+	cd VL\JSONConverter
+		echo --- Build JSONConverter library
+		setlocal
+		call build.bat %* only-deps
+		endlocal
+		if not errorlevel 0 (
+			echo --- JSONConverter preparation failed. Error code: %errorlevel%
+			goto end
+		)
+	cd ..\..
 cd ..
 if not exist %build% (
 	mkdir %build%
