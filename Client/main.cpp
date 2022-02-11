@@ -5,7 +5,6 @@
 #include <QTranslator>
 #include <QQmlContext>
 #include <QObject>
-#include <QtPlugin>
 #include "AppObject.h"
 
 //Q_IMPORT_PLUGIN(QDMBPlugin)

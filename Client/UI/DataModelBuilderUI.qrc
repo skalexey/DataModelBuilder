@@ -34,5 +34,6 @@
 <file>./VarListFooter.qml</file>
 <file>./VLListElement.qml</file>
 <file>./VarInterface.qml</file>
+<file>./TypeInstanceControl.qml</file>
 </qresource>
 </RCC>

@@ -12,22 +12,20 @@ Window {
 
 	DMBModel {
 		id: dmbModel
-		onInstantiateRequested: function(instId, protoId) {
-			uiRoot.preInstantiateDialog.visible = true
-			uiRoot.preInstantiateDialog.initialText = instId
-			uiRoot.preInstantiateDialog.onConfirm = function(enteredText) {
-				console.log("Instantiate '" + enteredText + "' of type '" + protoId + "'")
-				dmbModel.addToContent(enteredText, protoId)
-			}
-		}
-		onInstantiateRefused: function(error) {
-			console.log("Instantiate refused: " + error);
-		}
+
 		onModelLoaded: function(f) {
 			uiRoot.onModelLoaded(f);
 		}
-		onModelLoadError: function(e) {
-			uiRoot.onModelLoadError(e);
+		onModelLoadError: function(f, e) {
+			uiRoot.onModelLoadError(f, e);
+		}
+
+		onModelStored: function(f) {
+			uiRoot.modelStored(f);
+		}
+
+		onModelStoreError: function(f, e) {
+			uiRoot.modelStoreError(f, e);
 		}
 	}
 
@@ -36,8 +34,8 @@ Window {
 		onModelLoaded: function (f) {
 			uiRoot.onRecentFilesModelLoaded(f);
 		}
-		onModelLoadError: function(e) {
-			uiRoot.onRecentFilesModelLoadError(e);
+		onModelLoadError: function(f, e) {
+			uiRoot.onRecentFilesModelLoadError(f, e);
 		}
 	}
 
@@ -50,14 +48,14 @@ Window {
 		// ======= Menu properties ========
 		property var currentlyOpenedFile: "";
 		openFileClicked: function() {
-			chooseFileDialog.visible = true;
+			chooseFileDialog.show();
 		}
 
 		saveAsClicked: function() {
-			uiRoot.saveAsDialog.visible = true
-			uiRoot.saveAsDialog.initialText = ""
+			uiRoot.saveAsDialog.show();
+			uiRoot.saveAsDialog.initialText = "";
 			uiRoot.saveAsDialog.onConfirm = function(enteredText) {
-				console.log("Save current model to a file '" + enteredText + "'")
+				console.log("Save current model to a file '" + enteredText + "'");
 				if (dmbModel.store(enteredText))
 					console.log("Stored successfully");
 				else
@@ -81,7 +79,9 @@ Window {
 		selectedItemProtoParamListModel: null
 		selectedItemArrayListModel: null
 		recentFilesModel: null
+		selectedObjParamListModel: null
 		textCurrentFile: ""
+
 		// ======= Properties for Relative files =======
 		function getRecentFileInfo(fPath) {
 			return dmbModelRecentFiles.contentModel.get("info").get(fPath);
@@ -124,7 +124,6 @@ Window {
 			storeClicked = function () {
 				dmbModel.store("model.json");
 			}
-			instantiateClick = dmbModel.instantiateRequest
 			selectedObjectName = Qt.binding(function() {
 				var obj = getCurrentObj();
 				return obj ? obj.name : "";
@@ -142,7 +141,11 @@ Window {
 			selectedObjParamListModel = Qt.binding(function() {
 				var obj = getCurrentObj();
 				if (obj)
-					return obj.value.propListModel;
+				{
+					var model = obj.value.propListModel;
+					connectInstantiation(model.parent);
+					return model;
+				}
 				else
 					return new ListModel;
 			});
@@ -165,21 +168,30 @@ Window {
 			selectedItemOwnParamListModel = Qt.binding(function() {
 				var item = getCurrentItem();
 				if (item && item.type === ObjectProperty.Object)
+				{
+					connectInstantiation(item.value);
 					return item.value.propListModel;
+				}
 				else
 					return null;
 			});
 			selectedItemProtoParamListModel = Qt.binding(function() {
 				var item = getCurrentItem();
 				if (item && item.type === ObjectProperty.Object)
+				{
+					connectInstantiation(item.value);
 					return item.value.protoPropListModel;
+				}
 				else
 					return null;
 			});
 			selectedItemArrayListModel = Qt.binding(function() {
 				var item = getCurrentItem();
 				if (item && item.type === ObjectProperty.List)
-					return item.value.listModel;
+				{
+					var model = item.value.listModel;
+					return model;
+				}
 				else
 					return null;
 			});
@@ -247,6 +259,31 @@ Window {
 			}
 		}
 
+		function storeRecentFile(fPath) {
+			console.log("Store recent file '" + fPath + "'");
+			var relPath = app.relPath(fPath);
+			textCurrentFile = relPath;
+			if (!dmbModelRecentFiles.contentModel.get("info").has(relPath))
+			{
+				var o = dmbModelRecentFiles.createObject();
+				o.set("name", app.nameFromUrl(fPath));
+				o.set("relPath", relPath);
+				o.set("url", fPath);
+				dmbModelRecentFiles.contentModel.get("info").set(relPath, o);
+				uiRoot.recentFilesModel.add(relPath, 0);
+			}
+			else
+			{
+				console.log("Already exists. Put on top");
+				var list = dmbModelRecentFiles.contentModel.get("list");
+				var entry = list.find(relPath);
+				if (entry)
+					entry.remove();
+				list.add(relPath, 0);
+			}
+			dmbModelRecentFiles.store();
+		}
+
 		property var onModelLoaded: function(fPath) {
 			console.log("DMBModel: File loaded '" + fPath + "'");
 			console.log("fname: " + app.nameFromUrl(fPath));
@@ -262,30 +299,12 @@ Window {
 				setSelectedItemBindings();
 			});
 
-			var relPath = app.relPathFromUrl(fPath);
-			textCurrentFile = relPath;
-			if (!dmbModelRecentFiles.contentModel.get("info").has(relPath))
-			{
-				var o = dmbModelRecentFiles.createObject();
-				o.set("name", app.nameFromUrl(fPath));
-				o.set("relPath", relPath);
-				o.set("url", fPath);
-				dmbModelRecentFiles.contentModel.get("info").set(relPath, o);
-				recentFilesModel.add(relPath, 0);
-			}
-			else
-			{
-				var list = dmbModelRecentFiles.contentModel.get("list");
-				var entry = list.find(fPath);
-				if (entry)
-					entry.remove();
-				list.add(fPath, 0);
-				console.log("Already exists");
-			}
-			dmbModelRecentFiles.store();
+			connectInstantiation(dmbModel.contentModel);
+			connectInstantiation(dmbModel.typesModel);
+			storeRecentFile(fPath);
 		}
 
-		property var onModelLoadError: function(error) {
+		property var onModelLoadError: function(f, error) {
 			console.log("Load file error: " + error);
         }
 
@@ -294,8 +313,33 @@ Window {
 			recentFilesModel = dmbModelRecentFiles.contentModel.get("list").listModel
 		}
 
-		property var onRecentFilesModelLoadError: function(error) {
-			console.log("onRecentFilesModelLoadError('" + error + "')");
+		QtObject {
+			id: local
+			property bool recentFilesLoadError: false
+		}
+
+		property var onRecentFilesModelLoadError: function(f, error) {
+			if (!local.recentFilesLoadError)
+			{
+				local.recentFilesLoadError = true;
+				console.log("Create recent files storage recent.json");
+				dmbModelRecentFiles.contentModel.add("list", ObjectProperty.List);
+				dmbModelRecentFiles.contentModel.add("info", ObjectProperty.Object);
+				if (!dmbModelRecentFiles.store(f))
+					onRecentFilesModelLoadError(f, "Can't store recent files storage");
+				else
+					onRecentFilesModelLoaded(f);
+			}
+			else
+				console.log("Load recent files storage error: " + error);
+		}
+
+		property var modelStored: function(f) {
+			storeRecentFile(f);
+		}
+
+		property var modelStoreError: function(f, e) {
+			console.log("Store model error: " + e);
 		}
 
 		Component.onCompleted: {
@@ -304,13 +348,8 @@ Window {
 			else
 			{
 				var fPath = "recent.json";
-				if (!dmbModelRecentFiles.load(fPath))
-				{
-					console.log("Create recent files storage recent.json");
-					dmbModelRecentFiles.contentModel.add("list", ObjectProperty.List);
-					dmbModelRecentFiles.contentModel.add("info", ObjectProperty.Object);
-					dmbModelRecentFiles.store(fPath);
-				}
+				dmbModelRecentFiles.load(fPath);
+
 				bodyBlock.stateChooseFile();
 			}
 //			if (!dmbModel.load("model.json"))

@@ -5,7 +5,7 @@ Item {
     id: item1
     width: 500
     height: parent.height
-    state: "selectedType"
+	state: "noSelection"
 
 	function stateItem() {
 		state = "selectedItem";
@@ -31,6 +31,9 @@ Item {
 		visible: false
     }
     states: [
+		State {
+			name: "noSelection"
+		},
         State {
             name: "selectedType"
 

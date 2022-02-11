@@ -15,7 +15,7 @@ InteractiveListElement {
 		ListElement {
 			title: "Instantiate"
 			cmd: function(i) {
-				instantiateClick(index)
+				libraryTypeListModel.parent.instantiate(getName());
 			}
 		}
 		ListElement {

@@ -150,7 +150,20 @@ Item {
 	property var itemClick: function() {
 		screen.centralBlock.stateItem();
 	}
-	property var instantiateClick: function(i) { console.log("DataModelBuilderUI: instantiateClick(" + i + ") default handler"); }
+	property var connectInstantiation: function(model) {
+		console.log("connectInstantiation");
+		model.onInstantiateRequested.connect(function(instId, protoId) {
+			preInstantiateDialog.show();
+			preInstantiateDialog.initialText = instId
+			preInstantiateDialog.onConfirm = function(enteredText) {
+				console.log("Instantiate '" + enteredText + "' of type '" + protoId + "'");
+				model.instantiate(protoId, enteredText);
+			}
+		});
+		model.onInstantiateRefused.connect(function(error) {
+			console.log("Instantiate refused: " + error);
+		});
+	}
 	property var contentListModel: ListModel {
 		ListElement {
 			name: "Grey"
@@ -176,7 +189,7 @@ Item {
 
 	// ======= Types properties =======
 	property var typeClick: function() {
-		screen.centralBlock.stateType()
+		screen.centralBlock.stateType();
 	}
 	property alias objectsLibrary: bodyBlock.objectsLibrary
 	property alias content: bodyBlock.content

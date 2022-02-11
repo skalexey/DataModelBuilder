@@ -78,7 +78,9 @@ InteractiveListElement {
 				obj.state = "base" // Exit from edit state
 				paramValue.chooseState();
 			}
-			Component.onCompleted: currentIndex = getType()
+			Component.onCompleted: {
+				currentIndex = getType();
+			}
 		}
 
 		EditField {

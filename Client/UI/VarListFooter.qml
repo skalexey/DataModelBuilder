@@ -32,6 +32,11 @@ Column {
 			}
 		}
 	}
+	TypeInstanceControl {
+		buttonClick: function(propId) {
+			listModel.parent.instantiate(propId);
+		};
+	}
 }
 /*##^##
 Designer {

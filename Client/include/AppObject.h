@@ -14,7 +14,8 @@ public:
 	// Properties
 	Q_INVOKABLE void refresh();
 	Q_INVOKABLE QString nameFromUrl(const QString& s) const;
-	Q_INVOKABLE QString relPathFromUrl(const QString& s) const;
+	Q_INVOKABLE QString relPath(const QString& s) const;
+	Q_INVOKABLE QString fullPathUrl(const QString& s) const;
 
 protected:
 	QGuiApplication& mApp;

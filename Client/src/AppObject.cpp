@@ -2,6 +2,7 @@
 #include <QUrl>
 #include <QDir>
 #include "AppObject.h"
+#include "Utils.h"
 
 void AppObject::refresh()
 {
@@ -15,11 +16,28 @@ QString AppObject::nameFromUrl(const QString &s) const
 	return u.fileName();
 }
 
-QString AppObject::relPathFromUrl(const QString &s) const
+QString AppObject::relPath(const QString &s) const
 {
-	QDir currentDir = QDir::currentPath();
 	QUrl u(s);
-	auto fPath = u.isRelative() ? s.toStdString() : u.toLocalFile().toStdString();
-	auto result = currentDir.relativeFilePath(fPath.c_str());
+	QString fPath;
+	QDir currentDir = QDir::currentPath();
+	if (u.scheme() == "file")
+	{
+		if (u.isRelative())
+			fPath = s;
+		else
+			fPath = u.toLocalFile();
+	}
+	else
+	{
+		fPath = s;
+	}
+	auto result = currentDir.relativeFilePath(fPath);
 	return result;
+}
+
+QString AppObject::fullPathUrl(const QString &s) const
+{
+	QFileInfo f(s);
+	return Utils::FormatStr("file:///%s", f.path().toStdString().c_str()).c_str();
 }
