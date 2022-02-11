@@ -39,6 +39,7 @@ namespace dmb
 	public:
 		// Public data interface
 		const vl::ObjectVar& getData() const;
+		bool has(const std::string& propId) const;
 		const std::string& getId(int index) const;
 		int getIndex(const std::string& propId) const;
 		bool renameProperty(const std::string& propId, const std::string& newId);
@@ -53,6 +54,7 @@ namespace dmb
 	public:
 		// Public Qt model interface
 		const VLVarModelPtr& getModelSp(const std::string& propId) const;
+		const VLVarModelPtr& setModel(const std::string& propId, const VLVarModelPtr& modelPtr);
 		const VLVarModel* getModel(const std::string& propId) const;
 		const VLVarModel* getAt(int index) const;
 		VLVarModel* getModel(const std::string& propId);
@@ -62,6 +64,7 @@ namespace dmb
 		bool removeChild(const VLVarModel* childPtr) override;
 		// Other
 		bool loadPropList();
+		bool setPrototype(const std::string& protoId);
 
 	public:
 		// Properties
@@ -79,11 +82,15 @@ namespace dmb
 		Q_INVOKABLE dmb::VLVarModel* get(const QString& propId);
 		Q_INVOKABLE dmb::VLVarModel* set(const QString& propId, VLVarModel* var);
 		Q_INVOKABLE dmb::VLVarModel* set(const QString& propId, const QVariant& data);
+		Q_INVOKABLE void instantiateRequest(const QString& typeId);
+		Q_INVOKABLE bool setPrototype(const QString& protoId);
 
 	signals:
 		void nameChanged();
 		void propListChanged();
 		void protoPropListChanged();
+		void instantiateRequested(const QString& instId, const QString& protoId);
+		void instantiateRefused(const QString& error);
 
 	private:
 		// Data

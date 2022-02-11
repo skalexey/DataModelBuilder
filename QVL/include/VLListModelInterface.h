@@ -87,6 +87,7 @@ namespace dmb
 	public:
 		// Public Qt model interface
 		const dmb::VLVarModelPtr& getAtSp(int index) const;
+		const dmb::VLVarModelPtr& setAt(int index, const dmb::VLVarModelPtr& modelPtr);
 		const dmb::VLVarModel* getAt(int index) const;
 		const VLVarModelPtr getParentModel() const;
 		int getElementIndex(const VLVarModel* elementPtr) const;
@@ -95,7 +96,7 @@ namespace dmb
 
 	protected:
 		// Protected Qt model interface
-		VLVarModelPtr loadElementModel(int index, bool resize = true);
+		VLVarModelPtr loadElementModel(int index, int indexBefore = -1);
 		VLVarModelPtr getParentModel();
 
 	protected:
@@ -117,7 +118,7 @@ namespace dmb
 		void sizeChanged(int newSize);
 
 	protected:
-		void putModel(int index, const VLVarModelPtr& ptr);
+		const VLVarModelPtr& putModel(int index, const VLVarModelPtr& ptr, int indexBefore = -1);
 
 	private:
 		// Data
@@ -128,7 +129,7 @@ namespace dmb
 			int size() const;
 			void resize(int newSize);
 			void clear();
-			void put(int index, const VLVarModelPtr& ptr);
+			const VLVarModelPtr& put(int index, const VLVarModelPtr& ptr, int indexBefore = -1);
 			const VLVarModelPtr& operator[](int index) const;
 			VLVarModelPtr& at(int index);
 			void remove(int index);

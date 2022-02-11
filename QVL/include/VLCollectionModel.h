@@ -74,8 +74,10 @@ namespace dmb
 
 	public:
 		// Public Qt model interface
+		bool has(const std::string& propId) const;
 		const VLObjectVarModel* getParentModel() const;
 		const VLVarModelPtr& getModelSp(const std::string& propId) const;
+		const VLVarModelPtr& setModel(const std::string& propId, const VLVarModelPtr& modelPtr);
 		VLVarModel* getModel(const std::string& propId);
 		const VLVarModel* getModel(const std::string& propId) const;
 		bool renameElement(const std::string& propId, const std::string& newId);

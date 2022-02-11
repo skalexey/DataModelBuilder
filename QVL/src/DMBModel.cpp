@@ -1,4 +1,6 @@
 #include <QUrl>
+#include <QFileInfo>
+#include <QDir>
 #include "DMBModel.h"
 #include "DMBCore.h"
 #include "Utils.h"
@@ -8,6 +10,35 @@
 namespace
 {
 	const dmb::VLVarModelPtr emptyVarModelPtr = nullptr;
+
+	std::string getAbsolutePath(const QString& filePath)
+	{
+		QUrl u(filePath);
+		std::string fPath;
+		if (u.scheme() == "file")
+		{
+			if (u.isRelative())
+			{
+				auto p = u.path();
+				QDir currentDir = QDir::currentPath();
+				fPath = currentDir.absoluteFilePath(p).toStdString();
+			}
+			else
+				fPath = u.toLocalFile().toStdString();
+		}
+		else
+		{
+			QFileInfo f(filePath);
+			if (f.isRelative())
+			{
+				QDir currentDir = QDir::currentPath();
+				fPath = currentDir.absoluteFilePath(filePath).toStdString();
+			}
+			else
+				fPath = filePath.toStdString();
+		}
+		return fPath;
+	}
 }
 
 namespace dmb
@@ -64,29 +95,6 @@ namespace dmb
 		return mDataModel;
 	}
 
-	void DMBModel::instantiateRequest(int index)
-	{
-		if (auto m = typesModel())
-			if (index >= 0 && index < m->propListModel()->size())
-			{
-				const auto& id = m->getId(index);
-				auto instId = id;
-				auto& content = getDataModel().GetContent();
-				bool success = true;
-				if (content.Has(instId))
-				{
-					std::string tpl = instId;
-					for (int i = 1; i < std::numeric_limits<short>::max(); i++)
-						if ((success = !content.Has(instId = Utils::FormatStr("%s %d", tpl.c_str(), i))))
-							break;
-				}
-				if (success)
-					emit instantiateRequested(QString(instId.c_str()), QString(id.c_str()));
-				else
-					emit instantiateRefused("Name error");
-			}
-	}
-
 	VLVarModel* DMBModel::addToContent(const QString &instId, const QString &qProtoId)
 	{
 		if (auto m = contentModel())
@@ -107,9 +115,19 @@ namespace dmb
 
 	bool DMBModel::store(const QString &filePath, bool pretty)
 	{
+		auto fPath = getAbsolutePath(filePath);
 		if (!filePath.isEmpty())
-			setCurrentFile(filePath.toStdString());
-		return getDataModel().Store(mFilePath, { pretty });
+			setCurrentFile(fPath);
+		if (getDataModel().Store(mFilePath, { pretty }))
+		{
+			emit modelStored(QString(mFilePath.c_str()));
+			return true;
+		}
+		else
+		{
+			emit modelStoreError(QString(mFilePath.c_str()), Utils::FormatStr("Can't store the model to the file '%s'", fPath.c_str()).c_str());
+			return false;
+		}
 	}
 
 	bool DMBModel::load(const QString &url)
@@ -121,8 +139,7 @@ namespace dmb
 			m.clear();
 			firstLoad = false;
 		}
-		QUrl u(url);
-		auto fPath = u.isRelative() ? url.toStdString() : u.toLocalFile().toStdString();
+		auto fPath = getAbsolutePath(url);
 		if (getDataModel().Load(fPath))
 		{
 			if (!firstLoad)
@@ -131,13 +148,13 @@ namespace dmb
 				mRoot->getPropListModel().UpdateIdList();
 			// Create new Qt models for types and content
 			mRoot->loadPropList();
-			setCurrentFile(fPath);
-			emit modelLoaded(url);
+			setCurrentFile(fPath.c_str());
+			emit modelLoaded(QString(fPath.c_str()));
 			return true;
 		}
 		else
 		{
-			emit modelLoadError(Utils::FormatStr("Can't load the file '%s'", fPath.c_str()).c_str());
+			emit modelLoadError(url, Utils::FormatStr("Can't load the file '%s'", fPath.c_str()).c_str());
 		}
 		return false;
 	}

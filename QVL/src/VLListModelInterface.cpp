@@ -43,16 +43,13 @@ namespace dmb
 		auto sz = dataSize();
 		mStorage.resize(sz);
 		for (int i = 0; i < sz; i++)
-			if (!loadElementModel(i, false))
+			if (!loadElementModel(i))
 				return false;
 		return true;
 	}
 
-	VLVarModelPtr VLListModelInterface::loadElementModel(int index, bool resize)
+	VLVarModelPtr VLListModelInterface::loadElementModel(int index, int indexBefore)
 	{
-		if (resize)
-			if (mStorage.size() <= index)
-				mStorage.resize(index + 1);
 		VLVarModelPtr ptr(nullptr);
 		if (auto parent = getParentModel())
 		{
@@ -67,7 +64,7 @@ namespace dmb
 					{
 						auto protoId = dmbModel->getDataModel().GetTypeId(protoData);
 						ptr = dmbModel->getTypesModel()->getModelSp(protoId);
-						mStorage.put(index, ptr);
+						mStorage.put(index, ptr, indexBefore);
 					}
 					else
 					{
@@ -80,7 +77,7 @@ namespace dmb
 			{
 				// Container should be prepared to fit in the range
 				ptr = VarModelFactory::Instance().CreateEmpty(getDataAt(index));
-				mStorage.put(index, ptr);
+				mStorage.put(index, ptr, indexBefore);
 				ptr->Init(parent);
 			}
 		}
@@ -198,6 +195,16 @@ namespace dmb
 	{
 		if (index < 0 || index >= size())
 			return nullVarModelPtr;
+		return mStorage[index];
+	}
+
+	const VLVarModelPtr &VLListModelInterface::setAt(int index, const VLVarModelPtr &modelPtr)
+	{
+		if (index < 0 || index >= size())
+			mStorage.resize(index + 1);
+		setDataAt(index, vl::MakePtr(modelPtr->getData()), [&](bool) {
+			return modelPtr;
+		});
 		return mStorage[index];
 	}
 
@@ -355,11 +362,9 @@ namespace dmb
 		return roles;
 	}
 
-	void VLListModelInterface::putModel(int index, const VLVarModelPtr &ptr)
+	const VLVarModelPtr& VLListModelInterface::putModel(int index, const VLVarModelPtr &ptr, int indexBefore)
 	{
-		if (mStorage.size() <= index)
-			mStorage.resize(index + 1);
-		mStorage.put(index, ptr);
+		return mStorage.put(index, ptr, indexBefore);
 	}
 
 	int VLListModelInterface::MStorage::getIndex(const VLVarModel *e) const
@@ -386,10 +391,24 @@ namespace dmb
 		mElementIndex.clear();
 	}
 
-	void VLListModelInterface::MStorage::put(int index, const VLVarModelPtr& ptr)
+	const VLVarModelPtr& VLListModelInterface::MStorage::put(int index, const VLVarModelPtr& ptr, int indexBefore)
 	{
-		mElements[index] = ptr;
+		auto sz = mElements.size();
+		if (indexBefore >= 0)
+		{
+			for (auto& [p, i] : mElementIndex)
+				if (i >= index)
+					i++;
+			mElements.resize(sz + 1);
+			for (int i = sz - 2; i >= index && i >= 0; i--)
+				mElements[i + 1] = mElements[i];
+
+		}
+		else if (index >= sz)
+			resize(index + 1);
+		auto& result = mElements[index] = ptr;
 		mElementIndex[ptr.get()] = index;
+		return result;
 	}
 
 	const VLVarModelPtr &VLListModelInterface::MStorage::operator[](int index) const
@@ -407,6 +426,9 @@ namespace dmb
 		auto e = mElements[index].get();
 		mElementIndex.erase(e);
 		mElements.erase(mElements.begin() + index);
+		for (auto& [_, i] : mElementIndex)
+			if (i > index)
+				i--;
 	}
 
 	// ====== End of QAbstractListModel interface ======

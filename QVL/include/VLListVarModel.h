@@ -84,6 +84,7 @@ namespace dmb
 		// Data
 		VLListModel mListModel;
 	};
+	typedef std::shared_ptr<VLListVarModel> VLListVarModelPtr;
 }
 
 Q_DECLARE_METATYPE(dmb::VLListVarModel)

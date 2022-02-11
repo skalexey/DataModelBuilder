@@ -5,6 +5,7 @@
 #include "VLListModel.h"
 #include "VLVarModel.h"
 #include "DMBModel.h"
+#include "Utils.h"
 
 namespace dmb
 {
@@ -78,7 +79,12 @@ namespace dmb
 
 	bool VLObjectVarModel::has(const QString &propId) const
 	{
-		return getData().Has(propId.toStdString());
+		return has(propId.toStdString());
+	}
+
+	bool VLObjectVarModel::has(const std::string &propId) const
+	{
+		return getData().Has(propId);
 	}
 
 	const vl::ObjectVar &VLObjectVarModel::getData() const
@@ -149,6 +155,11 @@ namespace dmb
 		return mPropListModel.getModelSp(propId);
 	}
 
+	const VLVarModelPtr &VLObjectVarModel::setModel(const std::string &propId, const VLVarModelPtr &modelPtr)
+	{
+		return mPropListModel.setModel(propId, modelPtr);
+	}
+
 	const VLVarModel *VLObjectVarModel::getModel(const std::string &propId) const
 	{
 		return mPropListModel.getModel(propId);
@@ -217,5 +228,40 @@ namespace dmb
 	vl::Var& VLObjectVarModel::setData(const std::string &propId, const vl::Var &v)
 	{
 		return mPropListModel.setData(propId, v);
+	}
+
+	void VLObjectVarModel::instantiateRequest(const QString& typeId)
+	{
+		if (auto owner = getDataModel())
+			if (auto types =  owner->typesModel())
+			{
+				auto instId = Utils::FormatStr("Concrete_%s", typeId.toStdString().c_str());
+				bool success = true;
+				if (has(instId))
+				{
+					std::string tpl = instId;
+					for (int i = 1; i < std::numeric_limits<short>::max(); i++)
+						if ((success = !has(instId = Utils::FormatStr("%s %d", tpl.c_str(), i))))
+							break;
+				}
+				if (success)
+					emit instantiateRequested(QString(instId.c_str()), typeId);
+				else
+					emit instantiateRefused("Name error");
+			}
+	}
+
+	bool VLObjectVarModel::setPrototype(const QString& protoId)
+	{
+		return setPrototype(protoId.toStdString());
+	}
+
+	bool VLObjectVarModel::setPrototype(const std::string &protoId)
+	{
+		if (auto owner = getDataModel())
+			if (auto types =  owner->typesModel())
+				if (auto modelPtr = types->getModelSp(protoId))
+					return setModel("proto", modelPtr) != nullptr;
+		return false;
 	}
 }

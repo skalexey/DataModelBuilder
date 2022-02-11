@@ -37,7 +37,7 @@ namespace dmb
 	{
 		setParent(parent);
 		mVarPtr = vl::MakePtr(data);
-		mDMBModel = owner;
+		setDataModel(owner);
 	}
 
 	void VLVarModel::Init(const VLVarModelPtr& parent)
@@ -47,7 +47,7 @@ namespace dmb
 			mVarPtr.reset();
 		mParentModel = parent;
 		if (parent)
-			mDMBModel = parent->mDMBModel;
+			setDataModel(parent->mDMBModel);
 	}
 
 	const VLObjectVarModel* VLVarModel::asObject() const
@@ -115,6 +115,12 @@ namespace dmb
 	DMBModel *VLVarModel::getDataModel()
 	{
 		return mDMBModel;
+	}
+
+	void VLVarModel::setDataModel(DMBModel *m)
+	{
+		mDMBModel = m;
+		emit ownerChanged(m);
 	}
 
 	vl::Var &VLVarModel::getChildData(const VLVarModel *childPtr)

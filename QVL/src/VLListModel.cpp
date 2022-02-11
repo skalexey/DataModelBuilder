@@ -8,21 +8,16 @@ namespace dmb
 		: Base(parent)
 	{}
 
-	const VLListVarModel *VLListModel::getParentModel() const
+	VLListVarModelPtr VLListModel::getParentModel() const
 	{
 		if (auto parentModel = Base::getParentModel())
-			return parentModel->asList();
+			return std::dynamic_pointer_cast<VLListVarModel>(parentModel);
 		return nullptr;
-	}
-
-	VLListVarModel *VLListModel::getParentModel()
-	{
-		return const_cast<VLListVarModel*>(const_cast<const VLListModel*>(this)->getParentModel());
 	}
 
 	int VLListModel::dataSize() const
 	{
-		if (auto parentModel = getParentModel())
+		if (const auto* parentModel = getParentModel().get())
 			return parentModel->getData().Size();
 		return 0;
 	}
@@ -30,7 +25,7 @@ namespace dmb
 	// ======= Begin of VLListModelInterface interface =======
 	const vl::List &VLListModel::getData() const
 	{
-		if (auto parentModel = getParentModel())
+		if (const auto* parentModel = getParentModel().get())
 			return parentModel->getData();
 		return vl::emptyList;
 	}
@@ -91,7 +86,7 @@ namespace dmb
 					addData(vl::MakePtr(m->getData()), indexBefore, [&] (int newIndex) {
 						index = newIndex;
 						modelPtr->Init(parentModel);
-						putModel(index, modelPtr);
+						putModel(index, modelPtr, indexBefore);
 					});
 					return at(index);
 				}
@@ -105,10 +100,11 @@ namespace dmb
 		QModelIndex index = this->index(sz, 0, QModelIndex());
 		beginInsertRows(index, sz, sz);
 		auto& result = getData().Add(ptr, indexBefore);
+		auto newIndex = indexBefore >= 0 ? indexBefore : sz;
 		if (customModelLoader)
-			customModelLoader(sz);
+			customModelLoader(newIndex);
 		else
-			loadElementModel(sz);
+			loadElementModel(newIndex, indexBefore);
 		endInsertRows();
 		return result;
 	}

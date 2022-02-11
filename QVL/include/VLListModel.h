@@ -55,7 +55,7 @@ namespace dmb
 
 	public:
 		// Public Qt model interface
-		const VLListVarModel* getParentModel() const;
+		VLListVarModelPtr getParentModel() const;
 		VLVarModel* add(const dmb::VLVarModel* model, int indexBefore = -1);
 
 	public:
@@ -63,10 +63,6 @@ namespace dmb
 		Q_INVOKABLE dmb::VLVarModel* add(ObjectProperty::Type type, int indexBefore = -1);
 		Q_INVOKABLE dmb::VLVarModel* add(const QVariant& data, int indexBefore = -1);
 		Q_INVOKABLE dmb::VLVarModel* find(const QVariant& data);
-
-	protected:
-		// Protected Qt model interface
-		VLListVarModel* getParentModel();
 	};
 }
 #endif // VLLISTMODEL_H

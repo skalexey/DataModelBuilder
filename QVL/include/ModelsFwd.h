@@ -11,6 +11,7 @@ namespace dmb {
 	typedef std::shared_ptr<VLObjectVarModel> VLObjectVarModelPtr;
 
 	class VLListVarModel;
+	typedef std::shared_ptr<VLListVarModel> VLListVarModelPtr;
 
 	class VLListModelInterface;
 	class VLListModel;

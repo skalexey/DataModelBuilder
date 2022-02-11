@@ -39,7 +39,6 @@ namespace dmb
 		// Properties
 		Q_PROPERTY (VLObjectVarModel* contentModel READ contentModel NOTIFY contentModelChanged)
 		Q_PROPERTY (VLObjectVarModel* typesModel READ typesModel NOTIFY typesModelChanged)
-		Q_INVOKABLE void instantiateRequest(int index);
 		Q_INVOKABLE dmb::VLVarModel* addToContent(const QString& instId, const QString& protoId);
 		Q_INVOKABLE bool store(const QString& filePath = "", bool pretty = true);
 		Q_INVOKABLE bool load(const QString& filePath);
@@ -63,10 +62,10 @@ namespace dmb
 	signals:
 		void contentModelChanged();
 		void typesModelChanged();
-		void instantiateRequested(const QString& instId, const QString& protoId);
-		void instantiateRefused(const QString& error);
 		void modelLoaded(const QString& filePath);
-		void modelLoadError(const QString& error);
+		void modelLoadError(const QString& filePath, const QString& error);
+		void modelStored(const QString& filePath);
+		void modelStoreError(const QString& filePath, const QString& error);
 		void currentFileChanged();
 	};
 }

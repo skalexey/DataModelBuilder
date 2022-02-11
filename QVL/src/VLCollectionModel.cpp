@@ -6,6 +6,7 @@
 #include "Utils.h"
 #include "vl.h"
 #include "DMBModel.h"
+#include "Log.h"
 
 namespace dmb
 {
@@ -40,7 +41,7 @@ namespace dmb
 	// ======= Begin of Base interface =======
 	const vl::Var& VLCollectionModel::getDataAt(int index) const
 	{
-		if (index >= 0 && index < size())
+		if (index >= 0 && index < mIdList.size())
 			return getData().Get(getId(index));
 		return vl::emptyVar;
 	}
@@ -279,9 +280,12 @@ namespace dmb
 
 	bool VLCollectionModel::has(const QString& propId) const
 	{
-		if (auto parentModel = getParentModel())
-			return parentModel->has(propId);
-		return false;
+		return has(propId.toStdString());
+	}
+
+	bool VLCollectionModel::has(const std::string &propId) const
+	{
+		return getData().Has(propId);
 	}
 
 	VLVarModel *VLCollectionModel::getModel(const std::string &propId)
@@ -294,6 +298,16 @@ namespace dmb
 	const VLVarModelPtr& VLCollectionModel::getModelSp(const std::string &propId) const
 	{
 		return getAtSp(getIndex(propId));
+	}
+
+	const VLVarModelPtr &VLCollectionModel::setModel(const std::string &propId, const VLVarModelPtr &modelPtr)
+	{
+		const VLVarModel* m = modelPtr.get();
+		auto dataPtr = vl::MakePtr(m);
+		setData(propId, dataPtr, [&] (bool) {
+			return modelPtr;
+		});
+		return getModelSp(propId);
 	}
 
 	const VLVarModel *VLCollectionModel::getModel(const std::string &propId) const
@@ -310,17 +324,19 @@ namespace dmb
 	{
 		if (auto parentModel = getParentModel()) {
 			if (auto dataModel = parentModel->getDataModel())
+			{
+				const VLVarModel* m = v;
+				auto id = propId.toStdString();
+				auto dataPtr = vl::MakePtr(m->getData());
 				if (auto modelPtr = dataModel->takeStandaloneModel(v))
 				{
-					const VLVarModel* m = modelPtr.get();
-					auto id = propId.toStdString();
-					auto ptr = vl::MakePtr(m->getData());
-					setData(id, ptr, [&] (bool modelAlreadyExists) {
+					setData(id, dataPtr, [&] (bool modelAlreadyExists) {
 						modelPtr->Init(parentModel);
 						return modelPtr;
 					});
-					return at(getIndex(id));
 				}
+				return at(getIndex(id));
+			}
 		}
 		return nullptr;
 	}

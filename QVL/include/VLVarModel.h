@@ -50,6 +50,7 @@ namespace dmb
 		// Protected data interface
 		vl::Var& getData();
 		virtual vl::Var& getChildData(const VLVarModel* childPtr);
+		void setDataModel(DMBModel* m);
 
 	public:
 		// Public Qt model interface
@@ -67,6 +68,7 @@ namespace dmb
 		Q_PROPERTY (QVariant value READ value WRITE setValue NOTIFY valueChanged)
 		Q_PROPERTY (QVariant valueStr READ valueStr NOTIFY valueChanged)
 		Q_PROPERTY (QVariant typeStr READ typeStr NOTIFY typeChanged)
+		Q_PROPERTY (QObject* owner READ getDataModel NOTIFY ownerChanged)
 		Q_INVOKABLE bool remove();
 
 		QString id() const;
@@ -86,6 +88,7 @@ namespace dmb
 		void idChanged(int index) const;
 		void typeChanged(int index) const;
 		void valueChanged(int index) const;
+		void ownerChanged(DMBModel* newOwner) const;
 
 	private:
 		// Data
