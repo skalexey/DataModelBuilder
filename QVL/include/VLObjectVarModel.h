@@ -82,7 +82,9 @@ namespace dmb
 		Q_INVOKABLE dmb::VLVarModel* get(const QString& propId);
 		Q_INVOKABLE dmb::VLVarModel* set(const QString& propId, VLVarModel* var);
 		Q_INVOKABLE dmb::VLVarModel* set(const QString& propId, const QVariant& data);
-		Q_INVOKABLE void instantiateRequest(const QString& typeId);
+		// Creates an instance of a type typeId with name instanceName
+		// If instanceName is not set then instantiateRequested signal with generated suggested name is called
+		Q_INVOKABLE void instantiate(const QString& typeId, const QString& instanceName = "");
 		Q_INVOKABLE bool setPrototype(const QString& protoId);
 
 	signals:
@@ -91,6 +93,7 @@ namespace dmb
 		void protoPropListChanged();
 		void instantiateRequested(const QString& instId, const QString& protoId);
 		void instantiateRefused(const QString& error);
+		void instantiated(const QString& instId, const QString& protoId);
 
 	private:
 		// Data

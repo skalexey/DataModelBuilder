@@ -7,6 +7,8 @@
 #include "DMBCore.h"
 #include "ModelsFwd.h"
 #include "VLObjectVarModel.h"
+// Needed for Q_INVOKABLE dmb::VLListVarModel*
+#include "VLListVarModel.h"
 
 namespace dmb
 {
@@ -29,8 +31,8 @@ namespace dmb
 		dmb::Model& getDataModel();
 		bool isLoaded() const;
 		dmb::VLVarModelPtr createPtrFromData(const QVariant& data);
-		dmb::VLVarModelPtr createObjectPtr();
-		dmb::VLVarModelPtr createListPtr();
+		dmb::VLObjectVarModelPtr createObjectSp();
+		dmb::VLListVarModelPtr createListSp();
 		VLVarModelPtr takeStandaloneModel(const VLVarModel* p);
 		bool removeStandaloneModel(const VLVarModel* p);
 		QString currentFile() const;
@@ -44,8 +46,8 @@ namespace dmb
 		Q_INVOKABLE bool load(const QString& filePath);
 		Q_PROPERTY (bool isLoaded READ isLoaded NOTIFY modelLoaded);
 		Q_INVOKABLE dmb::VLVarModel* createFromData(const QVariant& data);
-		Q_INVOKABLE dmb::VLVarModel* createObject();
-		Q_INVOKABLE dmb::VLVarModel* createList();
+		Q_INVOKABLE dmb::VLObjectVarModel* createObject();
+		Q_INVOKABLE dmb::VLListVarModel* createList();
 		Q_PROPERTY (QString currentFile READ currentFile NOTIFY currentFileChanged)
 		Q_PROPERTY (QString loadFrom WRITE setLoadFrom)
 		

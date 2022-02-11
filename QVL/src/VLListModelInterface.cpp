@@ -431,5 +431,10 @@ namespace dmb
 				i--;
 	}
 
+	dmb::VLVarModel *VLListModelInterface::getParentModelProp() const
+	{
+		return getParentModel().get();
+	}
+
 	// ====== End of QAbstractListModel interface ======
 }

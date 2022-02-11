@@ -1,9 +1,9 @@
 #include <QObject>
 #include "VLObjectVarModel.h"
 #include "VLCollectionModel.h"
-#include "vl.h"
 #include "VLListModel.h"
 #include "VLVarModel.h"
+#include "vl.h"
 #include "DMBModel.h"
 #include "Utils.h"
 
@@ -230,24 +230,44 @@ namespace dmb
 		return mPropListModel.setData(propId, v);
 	}
 
-	void VLObjectVarModel::instantiateRequest(const QString& typeId)
+	void VLObjectVarModel::instantiate(const QString& typeId, const QString& instanceName)
 	{
 		if (auto owner = getDataModel())
 			if (auto types =  owner->typesModel())
 			{
-				auto instId = Utils::FormatStr("Concrete_%s", typeId.toStdString().c_str());
-				bool success = true;
-				if (has(instId))
+				if (instanceName.isEmpty())
 				{
-					std::string tpl = instId;
-					for (int i = 1; i < std::numeric_limits<short>::max(); i++)
-						if ((success = !has(instId = Utils::FormatStr("%s %d", tpl.c_str(), i))))
-							break;
+					auto instId = Utils::FormatStr("Concrete_%s", typeId.toStdString().c_str());
+					bool success = true;
+					if (has(instId))
+					{
+						std::string tpl = instId;
+						for (int i = 1; i < std::numeric_limits<short>::max(); i++)
+							if ((success = !has(instId = Utils::FormatStr("%s %d", tpl.c_str(), i))))
+								break;
+					}
+					if (success)
+						emit instantiateRequested(QString(instId.c_str()), typeId);
+					else
+						emit instantiateRefused("Name error");
 				}
-				if (success)
-					emit instantiateRequested(QString(instId.c_str()), typeId);
 				else
-					emit instantiateRefused("Name error");
+				{
+					auto instId = instanceName.toStdString();
+					if (has(instId))
+						emit instantiateRefused("Name error");
+					else
+					{
+						auto o = owner->createObjectSp();
+						if (o->setPrototype(typeId))
+						{
+							setModel(instId, o);
+							emit instantiated(typeId, instanceName);
+						}
+						else
+							emit instantiateRefused("Type error");
+					}
+				}
 			}
 	}
 

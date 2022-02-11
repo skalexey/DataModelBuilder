@@ -5,6 +5,7 @@
 #include "DMBCore.h"
 #include "Utils.h"
 #include "VLObjectVarModel.h"
+#include "VLListVarModel.h"
 #include "VarModelFactory.h"
 
 namespace
@@ -184,18 +185,14 @@ namespace dmb
 		return nullptr;
 	}
 
-	VLVarModel *DMBModel::createObject()
+	VLObjectVarModel *DMBModel::createObject()
 	{
-		if (auto ptr = createObjectPtr())
-			return storeStandalonePtr(ptr).get();
-		return nullptr;
+		return createObjectSp().get();
 	}
 
-	VLVarModel *DMBModel::createList()
+	VLListVarModel *DMBModel::createList()
 	{
-		if (auto ptr = createListPtr())
-			return storeStandalonePtr(ptr).get();
-		return nullptr;
+		return createListSp().get();
 	}
 
 	VLVarModelPtr DMBModel::createPtrFromData(const QVariant &data)
@@ -217,18 +214,22 @@ namespace dmb
 		return VarModelFactory::Instance().Create(*v);
 	}
 
-	VLVarModelPtr DMBModel::createObjectPtr()
+	VLObjectVarModelPtr DMBModel::createObjectSp()
 	{
-		vl::Object v;
-		auto m = VarModelFactory::Instance().Create(v);
-		return m;
+		auto ptr = VarModelFactory::Instance().CreateObject();
+		if (ptr)
+			if (storeStandalonePtr(ptr))
+				return ptr;
+		return nullptr;
 	}
 
-	VLVarModelPtr DMBModel::createListPtr()
+	VLListVarModelPtr DMBModel::createListSp()
 	{
-		vl::List v;
-		auto m = VarModelFactory::Instance().Create(v);
-		return m;
+		auto ptr = VarModelFactory::Instance().CreateList();
+		if (ptr)
+			if (storeStandalonePtr(ptr))
+				return ptr;
+		return nullptr;
 	}
 
 	VLVarModelPtr DMBModel::takeStandaloneModel(const VLVarModel *p)

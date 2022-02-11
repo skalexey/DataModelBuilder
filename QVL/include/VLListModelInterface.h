@@ -108,6 +108,11 @@ namespace dmb
 		Q_INVOKABLE dmb::VLVarModel* at(int index);
 		Q_INVOKABLE bool removeAt(int index);
 		Q_PROPERTY (int size READ size NOTIFY sizeChanged);
+		Q_PROPERTY (dmb::VLVarModel* parent READ getParentModelProp NOTIFY parentModelChanged);
+
+	protected:
+		// Properties implementation
+		dmb::VLVarModel *getParentModelProp() const;
 
 	public slots:
 		virtual void onNameChanged(int index);
@@ -116,6 +121,7 @@ namespace dmb
 
 	signals:
 		void sizeChanged(int newSize);
+		void parentModelChanged();
 
 	protected:
 		const VLVarModelPtr& putModel(int index, const VLVarModelPtr& ptr, int indexBefore = -1);

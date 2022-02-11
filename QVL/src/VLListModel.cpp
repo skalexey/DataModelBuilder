@@ -2,6 +2,11 @@
 #include "VLListVarModel.h"
 #include "DMBModel.h"
 
+namespace
+{
+	dmb::VLVarModelPtr emptyModelPtr = nullptr;
+}
+
 namespace dmb
 {
 	VLListModel::VLListModel(QObject *parent)
@@ -77,21 +82,32 @@ namespace dmb
 
 	VLVarModel *VLListModel::add(const VLVarModel *m, int indexBefore)
 	{
-		if (auto parentModel = getParentModel()) {
+		if (auto parentModel = getParentModel())
 			if (auto dataModel = parentModel->getDataModel())
 				if (auto modelPtr = dataModel->takeStandaloneModel(m))
-				{
-					const VLVarModel* m = modelPtr.get();
-					int index = -1;
-					addData(vl::MakePtr(m->getData()), indexBefore, [&] (int newIndex) {
-						index = newIndex;
-						modelPtr->Init(parentModel);
-						putModel(index, modelPtr, indexBefore);
-					});
-					return at(index);
-				}
-		}
+					return addModel(modelPtr, indexBefore).get();
 		return nullptr;
+	}
+
+	const VLVarModelPtr& VLListModel::addModel(const VLVarModelPtr& modelPtr, int indexBefore)
+	{
+		if (auto parentModel = getParentModel()) {
+			if (auto dataModel = parentModel->getDataModel())
+			{
+				auto standaloneModelPtr = dataModel->takeStandaloneModel(modelPtr.get());
+				if (!standaloneModelPtr) // Already taken
+					standaloneModelPtr = modelPtr;
+				const VLVarModel* m = standaloneModelPtr.get();
+				int index = -1;
+				addData(vl::MakePtr(m->getData()), indexBefore, [&] (int newIndex) {
+					index = newIndex;
+					putModel(index, standaloneModelPtr, indexBefore);
+					standaloneModelPtr->Init(parentModel);
+				});
+				return getAtSp(index);
+			}
+		}
+		return emptyModelPtr;
 	}
 
 	vl::Var &VLListModel::addData(const vl::VarPtr &ptr, int indexBefore, const std::function<void(int newIndex)>& customModelLoader)

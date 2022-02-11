@@ -16,6 +16,8 @@ namespace dmb
 	public:
 		VLVarModelPtr Create(const vl::Var& var);
 		VLVarModelPtr CreateEmpty(const vl::Var& var);
+		VLObjectVarModelPtr CreateObject();
+		VLListVarModelPtr CreateList();
 
 	protected:
 		// ====== End of User interface =======

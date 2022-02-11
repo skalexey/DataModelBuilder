@@ -57,6 +57,7 @@ namespace dmb
 		// Public Qt model interface
 		VLListVarModelPtr getParentModel() const;
 		VLVarModel* add(const dmb::VLVarModel* model, int indexBefore = -1);
+		const VLVarModelPtr& addModel(const VLVarModelPtr& modelPtr, int indexBefore = -1);
 
 	public:
 		// Properties

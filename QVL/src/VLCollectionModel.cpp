@@ -74,10 +74,7 @@ namespace dmb
 			mPropIndex[propId] = sz;
 			mIdList.push_back(propId);
 			if (customModelLoader)
-			{
-				auto modelPtr = customModelLoader(false);
-				putModel(getIndex(propId), modelPtr);
-			}
+				customModelLoader(false);
 			else
 				loadElementModel(sz);
 			endInsertRows();
@@ -201,7 +198,7 @@ namespace dmb
 
 	const vl::Object &VLCollectionModel::getData() const
 	{
-		if (auto parentModel = getParentModel())
+		if (const auto* parentModel = getParentModel().get())
 			return parentModel->getData();
 		return vl::nullObject;
 	}
@@ -266,16 +263,16 @@ namespace dmb
 		return const_cast<vl::Object&>(const_cast<const VLCollectionModel*>(this)->getData());
 	}
 
-	const VLObjectVarModel *VLCollectionModel::getParentModel() const
+	VLObjectVarModelPtr VLCollectionModel::getParentModel() const
 	{
 		if (auto parentModel = Base::getParentModel())
-			return parentModel->asObject();
+			return std::dynamic_pointer_cast<VLObjectVarModel>(parentModel);
 		return nullptr;
 	}
 
-	VLObjectVarModel *VLCollectionModel::getParentModel()
+	VLObjectVarModelPtr VLCollectionModel::getParentModel()
 	{
-		return const_cast<VLObjectVarModel*>(const_cast<const VLCollectionModel*>(this)->getParentModel());
+		return const_cast<const VLCollectionModel*>(this)->getParentModel();
 	}
 
 	bool VLCollectionModel::has(const QString& propId) const
@@ -304,7 +301,22 @@ namespace dmb
 	{
 		const VLVarModel* m = modelPtr.get();
 		auto dataPtr = vl::MakePtr(m->getData());
+		auto parent = getParentModel();
 		setData(propId, dataPtr, [&] (bool) {
+			if (!modelPtr->getParentModel())
+			{
+				if (auto owner = modelPtr->getDataModel())
+					if (auto standaloneModel = owner->takeStandaloneModel(modelPtr.get()))
+					{
+						putModel(getIndex(propId), standaloneModel);
+						standaloneModel->Init(parent);
+						return standaloneModel;
+					}
+				putModel(getIndex(propId), modelPtr);
+				modelPtr->Init(parent);
+				return modelPtr;
+			}
+			putModel(getIndex(propId), modelPtr);
 			return modelPtr;
 		});
 		return getModelSp(propId);
@@ -332,6 +344,7 @@ namespace dmb
 				{
 					setData(id, dataPtr, [&] (bool modelAlreadyExists) {
 						modelPtr->Init(parentModel);
+						putModel(getIndex(id), modelPtr);
 						return modelPtr;
 					});
 				}

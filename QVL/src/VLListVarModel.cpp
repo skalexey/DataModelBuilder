@@ -5,6 +5,7 @@
 #include "VLListModel.h"
 #include "VLVarModel.h"
 #include "VarModelFactory.h"
+#include "DMBModel.h"
 
 namespace dmb
 {
@@ -106,6 +107,11 @@ namespace dmb
 		return mListModel.add(model, indexBefore);
 	}
 
+	const VLVarModelPtr &VLListVarModel::addModel(const VLVarModelPtr &modelPtr, int indexBefore)
+	{
+		return mListModel.addModel(modelPtr, indexBefore);
+	}
+
 	bool VLListVarModel::removeChild(const VLVarModel *childPtr)
 	{
 		return removeAt(getChildIndex(childPtr));
@@ -119,6 +125,22 @@ namespace dmb
 	VLVarModel *VLListVarModel::find(const QVariant &data)
 	{
 		return mListModel.find(data);
+	}
+
+	void VLListVarModel::instantiate(const QString &typeId)
+	{
+		if (auto owner = getDataModel())
+			if (auto types =  owner->typesModel())
+			{
+				auto o = owner->createObjectSp();
+				if (o->setPrototype(typeId))
+				{
+					addModel(o);
+					emit instantiated(typeId);
+				}
+				else
+					emit instantiateRefused("Type error");
+			}
 	}
 
 	dmb::VLVarModel *VLListVarModel::at(int index)

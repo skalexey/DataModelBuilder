@@ -58,6 +58,7 @@ namespace dmb
 		VLListModel *listModel();
 		int getChildIndex(const VLVarModel* childPtr) const override;
 		VLVarModel* add(const dmb::VLVarModel* model, int indexBefore = -1);
+		const VLVarModelPtr& addModel(const VLVarModelPtr& modelPtr, int indexBefore = -1);
 		bool removeChild(const VLVarModel* childPtr) override;
 
 	protected:
@@ -75,10 +76,14 @@ namespace dmb
 		Q_INVOKABLE dmb::VLVarModel* add(const QVariant& data, int indexBefore = -1);
 		Q_INVOKABLE bool removeAt(int index);
 		Q_INVOKABLE dmb::VLVarModel* find(const QVariant& data);
+		// Creates an instance of a type typeId
+		Q_INVOKABLE void instantiate(const QString& typeId);
 		Q_PROPERTY (VLListModel* listModel READ listModel NOTIFY listChanged)
 
 	signals:
 		void listChanged();
+		void instantiated(const QString& instId);
+		void instantiateRefused(const QString& error);
 
 	private:
 		// Data

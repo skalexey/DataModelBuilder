@@ -22,6 +22,16 @@ namespace dmb
 		return ptr;
 	}
 
+	VLObjectVarModelPtr VarModelFactory::CreateObject()
+	{
+		return std::make_shared<VLObjectVarModel>(vl::Object());
+	}
+
+	VLListVarModelPtr VarModelFactory::CreateList()
+	{
+		return std::make_shared<VLListVarModel>(vl::List());
+	}
+
 	VLVarModelPtr VarModelFactory::Create(const vl::Var &v)
 	{
 		VLVarModelPtr ptr = nullptr;
