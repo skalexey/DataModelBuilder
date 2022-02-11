@@ -303,7 +303,7 @@ namespace dmb
 	const VLVarModelPtr &VLCollectionModel::setModel(const std::string &propId, const VLVarModelPtr &modelPtr)
 	{
 		const VLVarModel* m = modelPtr.get();
-		auto dataPtr = vl::MakePtr(m);
+		auto dataPtr = vl::MakePtr(m->getData());
 		setData(propId, dataPtr, [&] (bool) {
 			return modelPtr;
 		});
