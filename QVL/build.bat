@@ -4,6 +4,7 @@ set buildType=Debug
 set buildFolderPrefix=Build
 set cmakeGppArg=
 set gppArg=
+set cmakeLogOnArg= -DLOG_ON=ON
 
 echo --- Build type: %buildType% ---
 set argCount=0
@@ -49,7 +50,7 @@ if not exist %build% (
 
 cd %build%
 
-cmake -S .. "-DCMAKE_BUILD_TYPE:STRING=%buildType%" -DCMAKE_PREFIX_PATH="C:/Qt/6.2.1/msvc2019_64/lib/cmake"%cmakeGppArg%
+cmake -S .. "-DCMAKE_BUILD_TYPE:STRING=%buildType%" -DCMAKE_PREFIX_PATH="C:/Qt/6.2.1/msvc2019_64/lib/cmake"%cmakeGppArg%%cmakeLogOnArg%
 
 if %errorlevel% neq 0 (
 	echo --- CMake generation error: %errorlevel%
