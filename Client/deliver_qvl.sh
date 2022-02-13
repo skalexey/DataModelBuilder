@@ -17,14 +17,17 @@ if [ "${1,,}" == "release" ]; then
 fi
 
 qvlBuildPath="$qvlPath$buildFolder"
-rm -rf "Build-cmake/$buildConfig/QVL"
+
+buildConfigFolder="$buildFolder/$buildConfig"
+
+rm -rf "$buildConfigFolder/QVL"
 echo "Copy QVL artifacts from $qvlBuildPath/$buildConfig"
-cp -r "$qvlBuildPath/$buildConfig" "Build-cmake/$buildConfig"
-mv "Build-cmake/$buildConfig/$buildConfig" "Build-cmake/$buildConfig/QVL"
+cp -r "$qvlBuildPath/$buildConfig" "$buildConfigFolder"
+mv "Build-cmake/$buildConfig/$buildConfig" "$buildConfigFolder/QVL"
 echo "Copy $qvlBuildPath/qvl.qmltypes"
-cp "$qvlBuildPath/qvl.qmltypes" "Build-cmake/$buildConfig/QVL/"
+cp "$qvlBuildPath/qvl.qmltypes" "$buildConfigFolder/QVL/"
 echo "Copy $qvlBuildPath/qmldir"
-cp "$qvlBuildPath/qmldir" "Build-cmake/$buildConfig/QVL/"
+cp "$qvlBuildPath/qmldir" "$buildConfigFolder/QVL/"
 
 if [ ! -d "imports" ]; then
 	echo "Create imports directory"
