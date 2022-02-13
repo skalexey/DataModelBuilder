@@ -27,6 +27,7 @@ qt6_add_qml_module(qvl
     VERSION 1.0
     URI "QVL"
     PLUGIN_TARGET qvl
+    DESIGNER_SUPPORTED
 )
 
 include_directories("include")
