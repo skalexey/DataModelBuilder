@@ -16,6 +16,8 @@ project(DataModelBuilderCore)
 option(USE_JSONCONVERTER "Use JSONConverter lib" ON)
 option(DMB_TESTS "Include DMBTest target" OFF)
 
+#message("DMBCore CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
 set(DEPS "dependencies")
 
 include_directories(${PROJECT_BINARY_DIR})

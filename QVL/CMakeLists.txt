@@ -1,5 +1,7 @@
 # Generated from qdmb.pro.
 
+message("CMake version: ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}")
+
 cmake_minimum_required(VERSION 3.16)
 project(qvl LANGUAGES CXX)
 
@@ -52,16 +54,6 @@ target_link_libraries(qvl PUBLIC
 
 #target_compile_definitions(qvl PRIVATE QT_QML_DEBUG)
 
-message("CMake build type: ${CMAKE_BUILD_TYPE}")
-
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    message("=== Set ${CMAKE_BUILD_TYPE} link directories")
-    target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-cmake-Debug/Debug)
-    target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-cmake-Debug/dependencies/VL/JSONConverter/Debug)
-    target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build-cmake-Debug/Debug)
-elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-    message("=== Set ${CMAKE_BUILD_TYPE} link directories")
-    target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-cmake-Release/Release/)
-    target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-cmake-Release/dependencies/VL/JSONConverter/Release)
-    target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build-cmake-Release/Release)
-endif()
+target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-cmake/$<CONFIG>)
+target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-cmake/dependencies/VL/JSONConverter/$<CONFIG>)
+target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build-cmake/$<CONFIG>)

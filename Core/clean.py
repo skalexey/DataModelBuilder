@@ -2,8 +2,9 @@ import shutil
 import os
 import sys
 
-buildPrefix = "Build"
-buildType = "Debug"
+buildPrefix = "Build-cmake"
+buildConfig = "Debug"
+
 deps = "dependencies"
 
 def systemRemoveDir(path):
@@ -34,13 +35,17 @@ def removeDir(path):
 
 for a in sys.argv:
     if a == "release":
-        buildType = "Release"
-    elif a == "g++":
+        buildConfig = "Release"
+    if a == "g++":
         buildPrefix="Build-g++"
+    if a == "full":
+    	   buildConfig = ""
 
-build = buildPrefix + "-cmake-" + buildType
+build = buildPrefix + "/" + buildConfig
 
 removeDir(build)
+removeDir(deps + "/VL/" + build)
+removeDir(buildPrefix + "/" + deps + "/VL/JSONConverter/" + buildConfig)
 
 if len(sys.argv) > 1 and sys.argv[1] == "deps":
     removeDir(deps)

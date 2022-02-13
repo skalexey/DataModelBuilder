@@ -1,12 +1,13 @@
 @echo off
 
-set buildType=Debug
+set build=Build-cmake
+set buildConfig=Debug
 set buildFolderPrefix=Build
 set cmakeGppArg=
 set gppArg=
 set cmakeLogOnArg= -DLOG_ON=ON
 
-echo --- Build type: %buildType% ---
+echo --- Build config: %buildConfig% ---
 set argCount=0
 for %%x in (%*) do (
 	set /A argCount+=1
@@ -18,10 +19,11 @@ for %%x in (%*) do (
 	) else if "%%~x" == "no-log" (
 		echo --- 'no-log' option passed. Turn off LOG_ON compile definition
 		set cmakeLogOnArg=
+	) else if "%%~x" == "release" (
+		echo --- 'release' option passed. Use Release build type
+		set buildConfig=Release
 	)
 )
-
-set build=%buildFolderPrefix%-cmake-%buildType%\
 
 echo --- Build DMBCore
 
@@ -50,7 +52,7 @@ if not exist %build% (
 
 cd %build%
 
-cmake -S .. "-DCMAKE_BUILD_TYPE:STRING=%buildType%" -DCMAKE_PREFIX_PATH="C:/Qt/6.2.1/msvc2019_64/lib/cmake"%cmakeGppArg%%cmakeLogOnArg%
+cmake -S .. -DCMAKE_BUILD_TYPE:STRING=%buildConfig% -DCMAKE_PREFIX_PATH="C:/Qt/6.2.1/msvc2019_64/lib/cmake"%cmakeGppArg%%cmakeLogOnArg%
 
 if %errorlevel% neq 0 (
 	echo --- CMake generation error: %errorlevel%
@@ -59,7 +61,7 @@ if %errorlevel% neq 0 (
 
 echo --- Build QVL with CMake
 
-cmake --build .
+cmake --build . --config=%buildConfig%
 
 if %errorlevel% neq 0 (
 	echo --- QVL CMake build error: %errorlevel%

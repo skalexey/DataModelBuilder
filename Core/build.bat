@@ -1,7 +1,8 @@
 @echo off
 
+set build=Build-cmake
 set deps=dependencies\
-set buildType=Debug
+set buildConfig=Debug
 set buildFolderPrefix=Build
 set cmakeTestsArg= -DDMB_TESTS=ON
 set cmakeLogOnArg= -DLOG_ON=ON
@@ -28,11 +29,9 @@ for %%x in (%*) do (
 		set cmakeLogOnArg=
 	) else if "%%~x" == "release" (
 		echo --- 'release' option passed. Set Release build type
-		set buildType=Release
+		set buildConfig=Release
 	)
 )
-
-set build=%buildFolderPrefix%-cmake-%buildType%\
 
 IF not exist %deps% ( mkdir %deps% )
 cd %deps%
@@ -61,7 +60,7 @@ if not exist %build% (
 
 cd %build%
 
-cmake .. "-DCMAKE_BUILD_TYPE:STRING=%buildType%"%cmakeLogOnArg%%cmakeGppArg%%cmakeTestsArg%
+cmake ..%cmakeLogOnArg%%cmakeGppArg%%cmakeTestsArg%
 
 if %errorlevel% neq 0 (
 	echo --- CMake generation error: %errorlevel%
@@ -70,7 +69,7 @@ if %errorlevel% neq 0 (
 
 echo --- Build DMBCore with CMake
 
-cmake --build .
+cmake --build . --config=%buildConfig%
 
 if %errorlevel% neq 0 (
 	echo --- DMBCore CMake build error: %errorlevel%

@@ -72,11 +72,10 @@ qt6_add_resources(DataModelBuilder "qmake_immediate"
         ${qmake_immediate_resource_files}
 )
 
-message("CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
-message("Copy QVL artifacts")
-configure_files(${CMAKE_CURRENT_SOURCE_DIR}/../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/${CMAKE_BUILD_TYPE} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/QVL)
-configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qvl.qmltypes ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/QVL/ COPYONLY)
-configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qmldir ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/QVL/ COPYONLY)
-configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qmldir ${CMAKE_CURRENT_SOURCE_DIR}/imports/QVL/qmldir  COPYONLY)
-configure_file(../QVL/Build-cmake-${CMAKE_BUILD_TYPE}/qvl.qmltypes ${CMAKE_CURRENT_SOURCE_DIR}/imports/QVL/qvl.qmltypes COPYONLY)
+add_custom_command(
+    TARGET DataModelBuilder POST_BUILD
+    COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/deliver_qvl.sh ${CMAKE_CFG_INTDIR} "${CMAKE_CURRENT_SOURCE_DIR}"
+    VERBATIM
+)
+
 
