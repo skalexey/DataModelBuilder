@@ -151,7 +151,6 @@ Item {
 		screen.centralBlock.stateItem();
 	}
 	property var connectInstantiation: function(model) {
-		console.log("connectInstantiation");
 		model.onInstantiateRequested.connect(function(instId, protoId) {
 			preInstantiateDialog.show();
 			preInstantiateDialog.initialText = instId

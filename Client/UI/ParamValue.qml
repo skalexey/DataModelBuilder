@@ -106,7 +106,6 @@ VarInterface {
 							if (c.status === Component.Ready) {
 								if (getTypeStr() === "List")
 								{
-									connectInstantiation(getValue());
 									addedPropsBlock = c.createObject(item1, {
 										state: "list",
 										x: 10,
