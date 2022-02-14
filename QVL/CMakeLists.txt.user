@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 6.0.0, 2022-02-13T11:01:39. -->
+<!-- Written by QtCreator 6.0.0, 2022-02-14T13:57:59. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -101,7 +101,7 @@
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
-    <value type="QString" key="CMake.Build.Type">Debug</value>
+    <value type="QString" key="CMake.Build.Type">Release</value>
     <value type="QString" key="CMake.Initial.Parameters">-GNinja
 -DCMAKE_BUILD_TYPE:STRING=Debug
 -DCMAKE_PROJECT_INCLUDE_BEFORE:PATH=%{IDE:ResourcePath}/package-manager/auto-setup.cmake
@@ -109,11 +109,11 @@
 -DCMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}
 -DCMAKE_C_COMPILER:STRING=%{Compiler:Executable:C}
 -DCMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:/Users/skoro/Projects/SkillBuilder/dependencies/DataModelBuilder/QVL/Build-cmake-Debug</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:/Users/skoro/Projects/SkillBuilder/dependencies/DataModelBuilder/QVL/Build-cmake</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <valuelist type="QVariantList" key="CMakeProjectManager.MakeStep.BuildTargets">
-       <value type="QString">all</value>
+       <value type="QString">ALL_BUILD</value>
       </valuelist>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
@@ -155,11 +155,11 @@
 -DCMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}
 -DCMAKE_C_COMPILER:STRING=%{Compiler:Executable:C}
 -DCMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}</value>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:/Users/skoro/Projects/SkillBuilder/dependencies/DataModelBuilder/QVL/Build-cmake-Release</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:/Users/skoro/Projects/SkillBuilder/dependencies/DataModelBuilder/QVL/Build-cmake</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <valuelist type="QVariantList" key="CMakeProjectManager.MakeStep.BuildTargets">
-       <value type="QString">all</value>
+       <value type="QString">ALL_BUILD</value>
       </valuelist>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Build</value>
