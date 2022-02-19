@@ -16,7 +16,7 @@ namespace
 	{
 		QUrl u(filePath);
 		std::string fPath;
-		if (u.scheme() == "file")
+		if (u.scheme() == "file" || u.scheme() == "qrc")
 		{
 			if (u.isRelative())
 			{

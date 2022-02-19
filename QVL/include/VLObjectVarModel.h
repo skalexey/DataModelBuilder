@@ -86,6 +86,7 @@ namespace dmb
 		// If instanceName is not set then instantiateRequested signal with generated suggested name is called
 		Q_INVOKABLE void instantiate(const QString& typeId, const QString& instanceName = "");
 		Q_INVOKABLE bool setPrototype(const QString& protoId);
+		Q_INVOKABLE bool setPrototype(VLObjectVarModel* model);
 
 	signals:
 		void nameChanged();

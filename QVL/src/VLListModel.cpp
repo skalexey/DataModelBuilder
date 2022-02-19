@@ -74,6 +74,8 @@ namespace dmb
 
 	VLVarModel *VLListModel::add(const QVariant &data, int indexBefore)
 	{
+		if (data.canConvert<VLVarModel*>())
+			return add(qvariant_cast<VLVarModel*>(data), indexBefore);
 		if (auto parent = getParentModel())
 			if (auto dataModel = parent->getDataModel())
 				return add(dataModel->createFromData(data), indexBefore);

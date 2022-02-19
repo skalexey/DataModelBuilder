@@ -276,6 +276,13 @@ namespace dmb
 		return setPrototype(protoId.toStdString());
 	}
 
+	bool VLObjectVarModel::setPrototype(VLObjectVarModel *model)
+	{
+		if (auto modelPtr = model->shared_from_this())
+			return setModel("proto", modelPtr) != nullptr;
+		return false;
+	}
+
 	bool VLObjectVarModel::setPrototype(const std::string &protoId)
 	{
 		if (auto owner = getDataModel())
