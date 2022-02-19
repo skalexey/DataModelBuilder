@@ -4,6 +4,8 @@
 #include <string>
 #include "vl.h"
 #include "JSONDefs.h"
+#include "VLBackwardTraversable.h"
+#include "TypeResolver.h"
 
 namespace dmb
 {
@@ -33,6 +35,8 @@ namespace dmb
 		vl::Object mData;
 	};
 
+	class Model;
+
 	class Content
 	{
 		friend class Model;
@@ -57,17 +61,18 @@ namespace dmb
 		const vl::Object& GetData() const;
 
 	protected:
-		void Init(const vl::Object& data, const vl::Object& context);
+		void Init(const vl::Object& data, const TypeResolver& typeResolver);
 
 	protected:
 		vl::Object mData;
-		vl::Object mContext;
+		TypeResolver mTypeResolver;
 	};
 
+	// Model
 	class Model
 	{
 	public:
-		Model() { Init(); }
+		Model();
 		Registry& GetRegistry() { return mRegistry; }
 		Registry& GetPrivateScope() { return mPrivate; }
 		Content& GetContent() { return mContent; }
@@ -87,6 +92,8 @@ namespace dmb
 		Registry mRegistry;
 		Registry mPrivate;
 		Content mContent;
+		vl::VarNodeRegistry mVarNodeRegistry;
+		TypeResolver mTypeResolver;
 		bool mIsLoaded = false;
 	};
 }

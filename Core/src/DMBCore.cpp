@@ -1,5 +1,18 @@
+#include <cstdlib>
 #include "JSONConverter.h"
 #include "DMBCore.h"
+#include "Log.h"
+#ifdef LOG_ON
+	#include "Utils.h"
+#endif
+#define DMB_LOG_ON
+#ifdef DMB_LOG_ON
+#include <iostream>
+#define DMB_LOG_INFO(msg) std::cout << "[DMB I] " << msg << "\n"
+#else
+#define DMB_LOG_INFO(msg)
+#endif
+
 
 vl::Object& dmb::Registry::CreateType(const std::string& typeName)
 {
@@ -132,13 +145,13 @@ bool dmb::Content::ForeachItem(const std::function<bool(const std::string&, cons
 bool dmb::Content::Store(const std::string& filePath, const vl::CnvParams& params)
 {
 	vl::JSONConverter converter;
-	return converter.Store(mData, mContext, filePath, { params.pretty, false, params.storeTypeId });
+	return converter.Store(mData, mTypeResolver, filePath, { params.pretty, false, params.storeTypeId });
 }
 
 std::string dmb::Content::JSONStr(const vl::CnvParams& params)
 {
 	vl::JSONConverter converter;
-	return converter.JSONStr(mData, mContext, { params.pretty, false, params.storeTypeId });
+	return converter.JSONStr(mData, mTypeResolver, { params.pretty, false, params.storeTypeId });
 }
 
 vl::Object& dmb::Content::GetData()
@@ -151,22 +164,43 @@ const vl::Object& dmb::Content::GetData() const
 	return mData;
 }
 
-void dmb::Content::Init(const vl::Object& data, const vl::Object& context)
+void dmb::Content::Init(const vl::Object& data, const TypeResolver& typeResolver)
 {
 	mData = data;
-	mContext = context;
+	mTypeResolver = typeResolver;
 }
 
-vl::Object& dmb::Model::GetType(const std::string& typeName)
+dmb::Model::Model()
+	: mVarNodeRegistry(&mData)
+	, mTypeResolver([&](const vl::Object& o) {
+			return GetTypeId(o);
+		}, [&](const std::string& typeRef) {
+			if (auto node = mVarNodeRegistry.GetNode(typeRef))
+			{
+				if (auto data = node->GetData())
+					return data->AsObject();
+				else
+					LOG_ERROR(Utils::FormatStr("Found node with null data during type resolution of '%s'", typeRef.c_str()));
+			}
+			return vl::nullObject;
+		}
+	)
+{
+	Init();
+}
+
+vl::Object& dmb::Model::GetType(const std::string& typeName) 
 {
 	return mRegistry.GetType(typeName).AsObject();
 }
 
 bool dmb::Model::Load(const std::string& fileName)
 {
+	DMB_LOG_INFO(Utils::FormatStr("dmb::Model::Load(%s)", fileName.c_str()));
 	mIsLoaded = false;
 	vl::JSONConverter converter;
-	if (!converter.Load(mData, fileName))
+	mData.Attach(&mVarNodeRegistry.GetTree());
+	if (!converter.Load(mData, fileName, mTypeResolver))
 		return false;
 	Init();
 	mIsLoaded = true;
@@ -181,18 +215,41 @@ bool dmb::Model::IsLoaded() const
 bool dmb::Model::Store(const std::string& fileName, const vl::CnvParams& params)
 {
 	vl::JSONConverter converter;
-	return converter.Store(mData, mData, fileName, params);
+	return converter.Store(mData, mTypeResolver, fileName, params);
 }
 
 std::string dmb::Model::JSONStr(const vl::CnvParams& params)
 {
 	vl::JSONConverter converter;
-	return converter.JSONStr(mData, mData, params);
+	return converter.JSONStr(mData, mTypeResolver, params);
 }
 
 std::string dmb::Model::GetTypeId(const vl::Object& obj) const
 {
-	return vl::GetTypeId(obj, mData);
+	// TODO: avoid iteration
+	auto& context = mData;
+	std::string type;
+	auto search = [&](const vl::Var& r) {
+		if (r.IsNull())
+			return false;
+		return !r.AsObject().ForeachProp(
+			[&](const std::string& propName, const vl::Var& propVal) {
+				if (propVal.AsObject() == obj)
+				{
+					type = propName;
+					return false;
+				}
+				return true;
+			});
+	};
+	if (search(context.Get("types")))
+		return type;
+	else if (search(context.Get("private")))
+		return type;
+	else // Construct a path to the object recursively
+		if (auto node = mVarNodeRegistry.GetNode(obj))
+			return node->GetPath();
+	return type;
 }
 
 const vl::Object& dmb::Model::GetData()
@@ -213,7 +270,8 @@ void dmb::Model::Init()
 		mPrivate.Init(mData.Set("private", vl::Object()).AsObject());
 
 	if (mData.Has("content"))
-		mContent.Init(mData.Get("content").AsObject(), mData);
+		mContent.Init(mData.Get("content").AsObject(), mTypeResolver);
 	else
-		mContent.Init(mData.Set("content", vl::Object()).AsObject(), mData);
+		mContent.Init(mData.Set("content", vl::Object()).AsObject(), mTypeResolver);
 }
+
