@@ -73,9 +73,11 @@ namespace dmb
 		VLCollectionModel& getPropListModel();
 		Q_PROPERTY (VLCollectionModel* propListModel READ propListModel NOTIFY propListChanged)
 		Q_PROPERTY (VLCollectionModel* protoPropListModel READ protoPropListModel NOTIFY protoPropListChanged)
+		Q_PROPERTY (QVariant protoId READ protoId NOTIFY protoIdChanged)
+		Q_PROPERTY (QVariant typeId READ typeId NOTIFY typeIdChanged)
 		// New item will be created. If the passed name exists then a number postfix will be added
 		Q_INVOKABLE void add(const QString& propId, ObjectProperty::Type type);
-		Q_INVOKABLE bool remove(const QString& propName);
+		Q_INVOKABLE bool removeProp(const QString& propName);
 		Q_INVOKABLE bool removeAt(int index);
 		Q_INVOKABLE bool has(const QString& propId) const;
 		Q_INVOKABLE dmb::VLVarModel* at(int index);
@@ -88,6 +90,9 @@ namespace dmb
 		Q_INVOKABLE bool setPrototype(const QString& protoId);
 		Q_INVOKABLE bool setPrototype(VLObjectVarModel* model);
 
+		QVariant protoId() const;
+		QVariant typeId() const;
+
 	signals:
 		void nameChanged();
 		void propListChanged();
@@ -95,6 +100,8 @@ namespace dmb
 		void instantiateRequested(const QString& instId, const QString& protoId);
 		void instantiateRefused(const QString& error);
 		void instantiated(const QString& instId, const QString& protoId);
+		void protoIdChanged() const;
+		void typeIdChanged() const;
 
 	private:
 		// Data

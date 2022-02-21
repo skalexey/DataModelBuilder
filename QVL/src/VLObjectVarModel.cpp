@@ -195,7 +195,7 @@ namespace dmb
 		mPropListModel.add(propId, type);
 	}
 
-	bool VLObjectVarModel::remove(const QString& propName)
+	bool VLObjectVarModel::removeProp(const QString& propName)
 	{
 		return mPropListModel.remove(propName);
 	}
@@ -291,4 +291,18 @@ namespace dmb
 					return setModel("proto", modelPtr) != nullptr;
 		return false;
 	}
+
+	QVariant VLObjectVarModel::protoId() const
+	{
+		if (auto protoModel = getModel("proto"))
+			return protoModel->asObject()->typeId();
+		return QVariant();
+	}
+
+	QVariant VLObjectVarModel::typeId() const
+	{
+		return QVariant(QString(getTypeId().c_str()));
+	}
+
+
 }

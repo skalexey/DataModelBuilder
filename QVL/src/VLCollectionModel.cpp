@@ -294,7 +294,14 @@ namespace dmb
 	{
 		//return const_cast<VLVarModel*>(const_cast<const VLCollectionModel*>(this)->getAt(getIndex(propId)));
 		// Better to use at instead of const_cast
-		return at(getIndex(propId));
+
+		if (auto m = at(getIndex(propId)))
+			return m;
+		if (propId == "proto")
+			return nullptr;
+		if (auto proto = at(getIndex("proto")))
+			return proto->asObject()->getModel(propId);
+		return nullptr;
 	}
 
 	const VLVarModelPtr &VLCollectionModel::setModel(const std::string &propId, const VLVarModelPtr &modelPtr)
