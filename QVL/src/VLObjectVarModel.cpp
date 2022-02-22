@@ -155,6 +155,11 @@ namespace dmb
 		return mPropListModel.getModelSp(propId);
 	}
 
+	const VLVarModelPtr& VLObjectVarModel::modelSp(const std::string &propId)
+	{
+		return mPropListModel.modelSp(propId);
+	}
+
 	const VLVarModelPtr &VLObjectVarModel::setModel(const std::string &propId, const VLVarModelPtr &modelPtr)
 	{
 		return mPropListModel.setModel(propId, modelPtr);
@@ -165,9 +170,9 @@ namespace dmb
 		return mPropListModel.getModel(propId);
 	}
 
-	VLVarModel *VLObjectVarModel::getModel(const std::string &propId)
+	VLVarModel *VLObjectVarModel::model(const std::string &propId)
 	{
-		return mPropListModel.getModel(propId);
+		return mPropListModel.model(propId);
 	}
 
 	VLCollectionModel* VLObjectVarModel::propListModel()
@@ -179,7 +184,7 @@ namespace dmb
 
 	VLCollectionModel *VLObjectVarModel::protoPropListModel()
 	{
-		if (auto protoModel = getModel("proto"))
+		if (auto protoModel = model("proto"))
 			if (auto objectModel = protoModel->asObject())
 				return objectModel->propListModel();
 		return nullptr;
@@ -287,7 +292,7 @@ namespace dmb
 	{
 		if (auto owner = getDataModel())
 			if (auto types =  owner->typesModel())
-				if (auto modelPtr = types->getModelSp(protoId))
+				if (auto modelPtr = types->modelSp(protoId))
 					return setModel("proto", modelPtr) != nullptr;
 		return false;
 	}

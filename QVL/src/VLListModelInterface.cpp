@@ -9,6 +9,11 @@
 #include "VLObjectVarModel.h"
 #include "VLListVarModel.h"
 #include "DMBModel.h"
+#include "Log.h"
+
+namespace {
+	dmb::VLVarModelPtr emptyVarModelPtr;
+}
 
 namespace dmb
 {
@@ -48,9 +53,9 @@ namespace dmb
 		return true;
 	}
 
-	VLVarModelPtr VLListModelInterface::loadElementModel(int index, int indexBefore)
+	const VLVarModelPtr& VLListModelInterface::loadElementModel(int index, int indexBefore)
 	{
-		VLVarModelPtr ptr(nullptr);
+		bool complete = false;
 		if (auto parent = getParentModel())
 		{
 			if (parent->isObject())
@@ -63,8 +68,22 @@ namespace dmb
 					if (auto dmbModel = parent->getDataModel())
 					{
 						auto protoId = dmbModel->getDataModel().GetTypeId(protoData);
-						ptr = dmbModel->getTypesModel()->getModelSp(protoId);
-						mStorage.put(index, ptr, indexBefore);
+						if (auto& p = dmbModel->typesModel()->modelSp(protoId))
+						{
+							auto& ptr = mStorage.put(index, p, indexBefore);
+							connectSignals(ptr.get());
+							return ptr;
+						}
+						// TODO: implement searching model by paths like
+						// content.skillLibrary[1]
+						// If the proto model cannot be retrieved
+						// then a new model will be created
+						// for this data. The data model will work normally
+						// but it won't be updated when the proto data is updated
+						else
+						{
+							LOG_WARNING(Utils::FormatStr("Can't create model for proto '%s'", protoId.c_str()));
+						}
 					}
 					else
 					{
@@ -73,12 +92,15 @@ namespace dmb
 					}
 				}
 			}
-			if (!ptr)
+			if (!complete)
 			{
 				// Container should be prepared to fit in the range
-				ptr = VarModelFactory::Instance().CreateEmpty(getDataAt(index));
-				mStorage.put(index, ptr, indexBefore);
+				auto& ptr = mStorage.put(index
+							 , VarModelFactory::Instance().CreateEmpty(getDataAt(index))
+							 , indexBefore);
 				ptr->Init(parent);
+				connectSignals(ptr.get());
+				return ptr;
 			}
 		}
 		else
@@ -86,11 +108,7 @@ namespace dmb
 			// Parent should exist
 			assert(false);
 		}
-		if (ptr)
-		{
-			connectSignals(ptr.get());
-		}
-		return ptr;
+		return emptyVarModelPtr;
 	}
 
 	void VLListModelInterface::connectSignals(VLVarModel* model) const
@@ -181,14 +199,7 @@ namespace dmb
 
 	VLVarModel *VLListModelInterface::at(int index)
 	{
-		if (index < 0)
-			return nullptr;
-		else if (index >= size())
-			return loadElementModel(index).get();
-		else if (auto& ptr = mStorage.at(index))
-			return ptr.get();
-		else
-			return loadElementModel(index).get();
+		return atSp(index).get();
 	}
 
 	const VLVarModelPtr& VLListModelInterface::getAtSp(int index) const
@@ -196,6 +207,18 @@ namespace dmb
 		if (index < 0 || index >= size())
 			return nullVarModelPtr;
 		return mStorage[index];
+	}
+
+	const VLVarModelPtr& VLListModelInterface::atSp(int index)
+	{
+		if (index < 0)
+			return nullVarModelPtr;
+		else if (index >= size())
+			return loadElementModel(index);
+		else if (auto& ptr = mStorage.at(index))
+			return ptr;
+		else
+			return loadElementModel(index);
 	}
 
 	const VLVarModelPtr &VLListModelInterface::setAt(int index, const VLVarModelPtr &modelPtr)

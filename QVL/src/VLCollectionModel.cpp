@@ -290,7 +290,7 @@ namespace dmb
 		return getData().Has(propId);
 	}
 
-	VLVarModel *VLCollectionModel::getModel(const std::string &propId)
+	VLVarModel *VLCollectionModel::model(const std::string &propId)
 	{
 		//return const_cast<VLVarModel*>(const_cast<const VLCollectionModel*>(this)->getAt(getIndex(propId)));
 		// Better to use at instead of const_cast
@@ -300,7 +300,7 @@ namespace dmb
 		if (propId == "proto")
 			return nullptr;
 		if (auto proto = at(getIndex("proto")))
-			return proto->asObject()->getModel(propId);
+			return proto->asObject()->model(propId);
 		return nullptr;
 	}
 
@@ -345,16 +345,20 @@ namespace dmb
 		return emptyModelPtr;
 	}
 
+	const VLVarModelPtr& VLCollectionModel::modelSp(const std::string &propId)
+	{
+		if (auto& m = atSp(getIndex(propId)))
+			return m;
+		if (propId == "proto")
+			return emptyModelPtr;
+		if (auto proto = model("proto"))
+			return proto->asObject()->modelSp(propId);
+		return emptyModelPtr;
+	}
+
 	VLVarModel *VLCollectionModel::get(const QString& propId)
 	{
-		std::string propIdStd = propId.toStdString();
-		if (auto m = at(getIndex(propIdStd)))
-			return m;
-		if (propIdStd == "proto")
-			return nullptr;
-		if (auto proto = getModel("proto"))
-			return proto->asObject()->getModel(propIdStd);
-		return nullptr;
+		return modelSp(propId.toStdString()).get();
 	}
 
 	VLVarModel *VLCollectionModel::set(const QString &propId, VLVarModel *v)

@@ -87,6 +87,7 @@ namespace dmb
 	public:
 		// Public Qt model interface
 		const dmb::VLVarModelPtr& getAtSp(int index) const;
+		const dmb::VLVarModelPtr& atSp(int index);
 		const dmb::VLVarModelPtr& setAt(int index, const dmb::VLVarModelPtr& modelPtr);
 		const dmb::VLVarModel* getAt(int index) const;
 		const VLVarModelPtr getParentModel() const;
@@ -96,7 +97,7 @@ namespace dmb
 
 	protected:
 		// Protected Qt model interface
-		VLVarModelPtr loadElementModel(int index, int indexBefore = -1);
+		const VLVarModelPtr& loadElementModel(int index, int indexBefore = -1);
 		VLVarModelPtr getParentModel();
 
 	protected:

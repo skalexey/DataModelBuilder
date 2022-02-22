@@ -54,10 +54,12 @@ namespace dmb
 	public:
 		// Public Qt model interface
 		const VLVarModelPtr& getModelSp(const std::string& propId) const;
+		// Non-const version of getModelSp
+		const VLVarModelPtr& modelSp(const std::string& propId);
 		const VLVarModelPtr& setModel(const std::string& propId, const VLVarModelPtr& modelPtr);
 		const VLVarModel* getModel(const std::string& propId) const;
 		const VLVarModel* getAt(int index) const;
-		VLVarModel* getModel(const std::string& propId);
+		VLVarModel* model(const std::string& propId);
 		VLVarModel* getAt(int index);
 		int getChildIndex(const VLVarModel* childPtr) const override;
 		const std::string& getChildId(const VLVarModel* childPtr) const;

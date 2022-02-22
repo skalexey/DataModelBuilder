@@ -65,7 +65,7 @@ namespace dmb
 	VLObjectVarModel *DMBModel::contentModel()
 	{
 		// Invoke non-const version of getModel
-		if (auto model = mRoot->getModel("content"))
+		if (auto model = mRoot->model("content"))
 			return model->asObject();
 		return nullptr;
 	}
@@ -73,7 +73,7 @@ namespace dmb
 	const VLObjectVarModel *DMBModel::getTypesModel() const
 	{
 		// Invoke const version of getModel
-		if (auto model = mRoot->getModel("types"))
+		if (auto model = mRoot->model("types"))
 			return model->asObject();
 		return nullptr;
 	}
@@ -81,7 +81,7 @@ namespace dmb
 	VLObjectVarModel *DMBModel::typesModel()
 	{
 		// Invoke non-const version of getModel
-		if (auto model = mRoot->getModel("types"))
+		if (auto model = mRoot->model("types"))
 			return model->asObject();
 		return nullptr;
 	}

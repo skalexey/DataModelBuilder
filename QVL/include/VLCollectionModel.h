@@ -77,9 +77,12 @@ namespace dmb
 		bool has(const std::string& propId) const;
 		VLObjectVarModelPtr getParentModel() const;
 		const VLVarModelPtr& getModelSp(const std::string& propId) const;
+		// Non-const version of getModelSp
+		const VLVarModelPtr& modelSp(const std::string& propId);
 		const VLVarModelPtr& setModel(const std::string& propId, const VLVarModelPtr& modelPtr);
-		VLVarModel* getModel(const std::string& propId);
 		const VLVarModel* getModel(const std::string& propId) const;
+		// Non-const version of getModel()
+		VLVarModel* model(const std::string& propId);
 		bool renameElement(const std::string& propId, const std::string& newId);
 		bool renameElement(int index, const std::string& newId);
 		bool remove(const std::string& propId);
