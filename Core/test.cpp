@@ -402,12 +402,18 @@ void DatabaseTest()
 	Load("database_test.json");
 }
 
+void DatabaseTest2()
+{
+	Load("database_test_2.json");
+}
+
 int main(int argc, const char* argv[])
 {
 	std::cout << "DataModelBuilderCore Test Project\n";
 	//RemoveTest();
-	RemoveTestProtoShift();
+	DatabaseTest2();
 	return 0;
+	RemoveTestProtoShift();
 	SimpleRemoveTest();
 	SimpleRemoveArrayTest();
 	//return 0;

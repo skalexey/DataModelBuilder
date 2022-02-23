@@ -88,7 +88,8 @@ namespace dmb
 		void idChanged(int index) const;
 		void typeChanged(int index) const;
 		void valueChanged(int index) const;
-		void ownerChanged(DMBModel* newOwner) const;
+		void ownerChanged(dmb::DMBModel* newOwner) const;
+		void beforeRemove() const;
 
 	private:
 		// Data

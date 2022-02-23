@@ -63,6 +63,36 @@ namespace dmb
 		}
 	}
 
+	ObjectProperty::Type ObjectProperty::typeFromQVariant(const QVariant &data)
+	{
+		switch (data.userType())
+		{
+		case QMetaType::QString:
+			return Type::String;
+		case QMetaType::Int:
+			return Type::Int;
+		case QMetaType::Bool:
+			return Type::Bool;
+		default:
+			return Type::Object;
+		}
+	}
+
+	vl::VarPtr ObjectProperty::makeVarFromData(const QVariant &data)
+	{
+		switch (data.userType())
+		{
+		case QMetaType::QString:
+			return vl::MakePtr(data.toString().toStdString());
+		case QMetaType::Int:
+			return vl::MakePtr(data.toInt());
+		case QMetaType::Bool:
+			return vl::MakePtr(data.toBool());
+		default:
+			return vl::MakePtr(data.toString().toStdString());
+		}
+	}
+
 	QVariantList ObjectProperty::composeTypeList()
 	{
 		QVariantList list;

@@ -159,6 +159,7 @@ namespace dmb
 
 	bool VLVarModel::remove()
 	{
+		emit beforeRemove();
 		if (auto parent = getParentModel())
 			return parent->removeChild(this);
 		else if (auto owner = getDataModel())

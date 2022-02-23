@@ -180,20 +180,7 @@ namespace dmb
 
 	VLVarModelPtr DMBModel::createPtrFromData(const QVariant &data)
 	{
-		vl::VarPtr v;
-		switch (data.userType())
-		{
-		case QMetaType::QString:
-			v = vl::MakePtr(data.toString().toStdString());
-			break;
-		case QMetaType::Int:
-			v = vl::MakePtr(data.toInt());
-			break;
-		case QMetaType::Bool:
-			v = vl::MakePtr(data.toBool());
-		default:
-			v = vl::MakePtr(data.toString().toStdString());
-		}
+		vl::VarPtr v = ObjectProperty::makeVarFromData(data);
 		return VarModelFactory::Instance().Create(*v);
 	}
 

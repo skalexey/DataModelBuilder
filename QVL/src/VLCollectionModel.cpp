@@ -96,10 +96,16 @@ namespace dmb
 				putModel(getIndex(propId), modelPtr);
 			}
 			auto i = getIndex(propId);
-			if (newType)
-				if (auto model = getModel(propId))
-					// Call VLListModelInterface::onValueChanged
+			if (auto model = getModel(propId))
+			{
+				if (newType)
+					// Call VLListModelInterface::onTypeChanged
+					// + VLListModelInterface::onValueChanged
 					emit model->typeChanged(i);
+				else
+					// Call VLListModelInterface::onValueChanged
+					emit model->valueChanged(i);
+			}
 			return result;
 		}
 	}
@@ -388,8 +394,21 @@ namespace dmb
 		if (data.canConvert<VLVarModel*>())
 			return set(propId, qvariant_cast<VLVarModel*>(data));
 		if (auto parent = getParentModel())
+		{
 			if (auto dataModel = parent->getDataModel())
+			{
+				auto propIdStd = propId.toStdString();
+				if (auto model = getModel(propIdStd))
+					if (ObjectProperty::typeFromQVariant(data) == model->type())
+					{
+						setData(propIdStd, ObjectProperty::makeVarFromData(data));
+						// Return through the const method (without creation)
+						// to be sure that the model has been created through setData
+						return getModelSp(propIdStd).get();
+					}
 				return set(propId, dataModel->createFromData(data));
+			}
+		}
 		return nullptr;
 	}
 
