@@ -156,6 +156,8 @@ namespace dmb
 						result = model.get();
 					break;
 				case QMetaType::Int:
+				case QMetaType::Double:
+				case QMetaType::Float:
 					if (m->getData().AsNumber().Val() == data.toInt())
 						result = model.get();
 					break;

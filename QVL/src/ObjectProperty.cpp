@@ -70,6 +70,8 @@ namespace dmb
 		case QMetaType::QString:
 			return Type::String;
 		case QMetaType::Int:
+		case QMetaType::Double:
+		case QMetaType::Float:
 			return Type::Int;
 		case QMetaType::Bool:
 			return Type::Bool;
@@ -85,6 +87,8 @@ namespace dmb
 		case QMetaType::QString:
 			return vl::MakePtr(data.toString().toStdString());
 		case QMetaType::Int:
+		case QMetaType::Double:
+		case QMetaType::Float:
 			return vl::MakePtr(data.toInt());
 		case QMetaType::Bool:
 			return vl::MakePtr(data.toBool());
