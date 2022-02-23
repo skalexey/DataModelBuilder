@@ -276,19 +276,19 @@ namespace vl
 		auto dotPos = std::string::npos;
 		size_t cursor = 0;
 		std::string lastId;
-		VarTreeNodePtr node = nullTreeNodePtr;
+		VarTreeNode* node = nullptr;
 		do {
 			dotPos = path.find_first_of('.', cursor);
 			auto id = dotPos == std::string::npos ? 
 				path.substr(cursor) : path.substr(cursor, dotPos - cursor);
-			auto n = node ? node.get() : &mTree;
+			auto n = node ? node : &mTree;
 			if (auto o = n->AsObject())
-				node = o->Get(id);
+				node = o->Get(id).get();
 			else if (auto l = n->AsList())
 			{
 				auto index = parseIndex(id);
 				if (index >= 0 && index < l->ChildCount())
-					node = l->At(index);
+					node = l->At(index).get();
 				else
 				{
 					LOG_ERROR(Utils::FormatStr("Wrong index %d in the path '%s' used for node '%s'", index, path.c_str(), lastId.c_str()));
@@ -304,7 +304,7 @@ namespace vl
 			lastId = id;
 
 		} while (dotPos != std::string::npos && node != nullptr);
-		return node.get();
+		return node;
 	}
 
 	vl::ObjectTreeNode::ObjectTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent)
