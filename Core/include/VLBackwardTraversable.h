@@ -44,6 +44,9 @@ namespace vl
 		inline bool IsRoot() const {
 			return mParent == nullptr;
 		}
+		inline const VarTreeNode* GetParent() const {
+			return mParent;
+		}
 		inline const void* DataPtr() const {
 			return mDataPtr;
 		}

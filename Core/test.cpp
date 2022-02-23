@@ -295,6 +295,39 @@ void SimpleRemoveArrayTest()
 	Load(fName);
 }
 
+void RemoveTestProtoShift()
+{
+	std::cout << "Remove test proto shift begin\n";
+	dmb::Model m;
+	auto& registry = m.GetRegistry();
+	auto& privateScope = m.GetPrivateScope();
+	auto fruit = vl::Object();
+	fruit.Set("title", "Fruit");
+	auto veg = vl::Object();
+	veg.Set("title", "Vegetable");
+	auto orange = vl::Object();
+	orange.Set("title", "Orange");
+	orange.SetPrototype(fruit);
+	auto apple = vl::Object();
+	apple.Set("title", "Apple");
+	apple.SetPrototype(fruit);
+	auto cucumber = vl::Object();
+	cucumber.Set("title", "Cucumber");
+	cucumber.SetPrototype(veg);
+	auto& content = m.GetContent();
+	auto& list = content.GetData().Set("list", vl::List()).AsList();
+	list.Add(fruit);
+	list.Add(orange);
+	list.Add(apple);
+	list.Add(veg);
+	list.Add(cucumber);
+	list.Remove(0);
+	const char* fName = "remove_test_proto_shift_out.json";
+	m.Store(fName, { true, true });
+	std::cout << m.JSONStr({ true }) << "\n";
+	Load(fName);
+}
+
 void RemoveTest()
 {
 	std::cout << "Remove test begin\n";
@@ -320,7 +353,7 @@ void RemoveTest()
 	fruitList.Add(orange);
 	fruitList.Add(apple);
 	content.Remove("fruit");
-	const char* fName = "remove_test.json";
+	const char* fName = "remove_test_out.json";
 	m.Store(fName, { true, true });
 	std::cout << m.JSONStr({ true }) << "\n";
 	Load(fName);
@@ -372,7 +405,9 @@ void DatabaseTest()
 int main(int argc, const char* argv[])
 {
 	std::cout << "DataModelBuilderCore Test Project\n";
-	RemoveTest();
+	//RemoveTest();
+	RemoveTestProtoShift();
+	return 0;
 	SimpleRemoveTest();
 	SimpleRemoveArrayTest();
 	//return 0;

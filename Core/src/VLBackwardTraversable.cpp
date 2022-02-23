@@ -195,10 +195,42 @@ namespace vl
 					result = true;
 					break;
 				}
-		if (node->IsObject())
-			result &= (mNamedNodes.erase(node) > 0);
-		else if (node->IsList())
-			result &= (mIndexedNodes.erase(node) > 0);
+		if (auto parent = node->GetParent())
+		{
+			if (parent->IsObject())
+				result &= (mNamedNodes.erase(node) > 0);
+			else if (parent->IsList())
+			{
+				auto it = mIndexedNodes.find(node);
+				if (it != mIndexedNodes.end())
+				{
+					auto index = it->second;
+					auto parentList = parent->AsList();
+					auto sz = parentList->ChildCount();
+					for (int i = 0; i < sz; i++)
+					{
+						auto child = parentList->At(i).get();
+						auto it = mIndexedNodes.find(child);
+						if (it != mIndexedNodes.end())
+						{
+							if (it->second > index)
+								it->second--;
+						}
+						else
+						{
+							//LOG_ERROR(Utils::FormatStr("Trying to reindex an indexed node %p which is not registered as indexed node", child));
+						}
+					}
+					//LOG_INFO(Utils::FormatStr("Remove %p from indexed nodes", node));
+					mIndexedNodes.erase(it);
+					result &= true;
+				}
+				else
+				{
+					//LOG_ERROR(Utils::FormatStr("Trying to remove an indexed node %p which is not registered as indexed node", node));
+				}
+			}
+		}
 		return result;
 	}
 
@@ -285,9 +317,7 @@ namespace vl
 	}
 
 	ObjectTreeNode::~ObjectTreeNode()
-	{
-		mRegistry.RemoveNode(this);
-	}
+	{}
 
 	void vl::ObjectTreeNode::Update(vl::VarPtr info)
 	{
@@ -341,9 +371,7 @@ namespace vl
 	}
 
 	ListTreeNode::~ListTreeNode()
-	{
-		mRegistry.RemoveNode(this);
-	}
+	{}
 
 	void vl::ListTreeNode::Update(vl::VarPtr info)
 	{
@@ -384,10 +412,17 @@ namespace vl
 					for (int i = listSize; i < count; i++)
 						Remove(count - 1 - i);
 				else // index < listSize // Data exists
+				{
+					if (count > listSize)
+					{
+						Remove(index);
+					}
+					else
 					{
 						Clear(index);
 						Set(index, mRegistry.CreateIndexedNode(index, mData->AsList().At(index), this));
 					}
+				}
 			}
 		}
 		else
