@@ -68,21 +68,15 @@ namespace dmb
 					if (auto dmbModel = parent->getDataModel())
 					{
 						auto protoId = dmbModel->getDataModel().GetTypeId(protoData);
-						if (auto& p = dmbModel->typesModel()->modelSp(protoId))
+						if (auto& p = dmbModel->modelByTypeId(protoId))
 						{
 							auto& ptr = mStorage.put(index, p, indexBefore);
 							connectSignals(ptr.get());
 							return ptr;
 						}
-						// TODO: implement searching model by paths like
-						// content.skillLibrary[1]
-						// If the proto model cannot be retrieved
-						// then a new model will be created
-						// for this data. The data model will work normally
-						// but it won't be updated when the proto data is updated
 						else
 						{
-							LOG_WARNING(Utils::FormatStr("Can't create model for proto '%s'", protoId.c_str()));
+							qDebug() << Utils::FormatStr("Can't find or create a model for proto '%s'", protoId.c_str()).c_str();
 						}
 					}
 					else

@@ -48,13 +48,15 @@ namespace dmb
 
 	protected:
 		// Protected data interface
-		vl::List& getData();
-		vl::Var& getData(int index);
+		vl::List& data();
+		vl::Var& data(int index);
 
 	public:
 		// Public Qt model interface
 		const VLVarModel* getAt(int index) const;
-		const VLListModel *listModel() const;
+		const VLListModel *getListModel() const;
+		const VLVarModelPtr& getAtSp(int index) const;
+		const VLVarModelPtr& atSp(int index);
 		VLListModel *listModel();
 		int getChildIndex(const VLVarModel* childPtr) const override;
 		VLVarModel* add(const dmb::VLVarModel* model, int indexBefore = -1);
@@ -63,7 +65,6 @@ namespace dmb
 
 	protected:
 		// Protected Qt model interface
-		VLVarModel* getAt(int index);
 
 	protected:
 		// Other

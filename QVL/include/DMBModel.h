@@ -38,10 +38,10 @@ namespace dmb
 		QString currentFile() const;
 		const std::string& getCurrentFile() const;
 		bool setLoadFrom(const QString& filePath);
+		const VLVarModelPtr& modelByTypeId(const std::string& typeId);
 		// Properties
 		Q_PROPERTY (VLObjectVarModel* contentModel READ contentModel NOTIFY contentModelChanged)
 		Q_PROPERTY (VLObjectVarModel* typesModel READ typesModel NOTIFY typesModelChanged)
-		Q_INVOKABLE dmb::VLVarModel* addToContent(const QString& instId, const QString& protoId);
 		Q_INVOKABLE bool store(const QString& filePath = "", bool pretty = true);
 		Q_INVOKABLE bool load(const QString& filePath);
 		Q_PROPERTY (bool isLoaded READ isLoaded NOTIFY modelLoaded);

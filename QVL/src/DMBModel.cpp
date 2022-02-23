@@ -7,6 +7,7 @@
 #include "VLObjectVarModel.h"
 #include "VLListVarModel.h"
 #include "VarModelFactory.h"
+#include "Log.h"
 
 namespace
 {
@@ -94,24 +95,6 @@ namespace dmb
 	Model &DMBModel::getDataModel()
 	{
 		return mDataModel;
-	}
-
-	VLVarModel* DMBModel::addToContent(const QString &instId, const QString &qProtoId)
-	{
-		if (auto m = contentModel())
-		{
-			auto protoId = qProtoId.toStdString();
-			if (auto proto = const_cast<const DMBModel*>(this)->
-					getTypesModel()->getData().Get(protoId).AsObject())
-			{
-				vl::Object o;
-				o.SetPrototype(proto);
-				m->propListModel()->setData(instId.toStdString(), o);
-				if (auto newModel = m->get(instId))
-					return newModel;
-			}
-		}
-		return nullptr;
 	}
 
 	bool DMBModel::store(const QString &filePath, bool pretty)
@@ -262,5 +245,54 @@ namespace dmb
 	bool DMBModel::setLoadFrom(const QString &fPath)
 	{
 		return load(fPath);
+	}
+
+	const VLVarModelPtr &DMBModel::modelByTypeId(const std::string &path)
+	{
+		// Find in types if this is not a path but just a token
+		if (path.find_first_of('.') == std::string::npos)
+			if (auto types = typesModel())
+				if (auto& m = types->modelSp(path))
+					return m;
+
+		// Parse the path
+		auto parseIndex = [](const std::string& id) {
+			if (id.size() < 3)
+				return -1;
+			return std::atoi(id.substr(1, id.size() - 2).c_str());
+		};
+		auto dotPos = std::string::npos;
+		size_t cursor = 0;
+		std::string lastId;
+		const VLVarModelPtr* node = &nullVarModelPtr;
+		auto root = std::dynamic_pointer_cast<VLVarModel>(mRoot);
+		do {
+			dotPos = path.find_first_of('.', cursor);
+			auto id = dotPos == std::string::npos ?
+				path.substr(cursor) : path.substr(cursor, dotPos - cursor);
+			auto n = ((node && *node) ? node : &root)->get();
+			if (auto o = n->asObject())
+				node = &o->modelSp(id);
+			else if (auto l = n->asList())
+			{
+				auto index = parseIndex(id);
+				if (index >= 0 && index < l->getData().Size())
+					node = &l->atSp(index);
+				else
+				{
+					qDebug() << Utils::FormatStr("QVL: Wrong index %d in the path '%s' used for node '%s'", index, path.c_str(), lastId.c_str()).c_str();
+					return nullVarModelPtr;
+				}
+			}
+			else
+			{
+				qDebug() << Utils::FormatStr("QVL: Wrong container type during parsing the node path '%s'", path.c_str()).c_str();
+				return nullVarModelPtr;
+			}
+			cursor = dotPos + 1;
+			lastId = id;
+
+		} while (dotPos != std::string::npos && node != nullptr);
+		return *node;
 	}
 }

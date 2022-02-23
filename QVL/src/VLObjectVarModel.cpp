@@ -238,42 +238,41 @@ namespace dmb
 	void VLObjectVarModel::instantiate(const QString& typeId, const QString& instanceName)
 	{
 		if (auto owner = getDataModel())
-			if (auto types =  owner->typesModel())
+		{
+			if (instanceName.isEmpty())
 			{
-				if (instanceName.isEmpty())
+				auto instId = Utils::FormatStr("Concrete_%s", typeId.toStdString().c_str());
+				bool success = true;
+				if (has(instId))
 				{
-					auto instId = Utils::FormatStr("Concrete_%s", typeId.toStdString().c_str());
-					bool success = true;
-					if (has(instId))
-					{
-						std::string tpl = instId;
-						for (int i = 1; i < std::numeric_limits<short>::max(); i++)
-							if ((success = !has(instId = Utils::FormatStr("%s %d", tpl.c_str(), i))))
-								break;
-					}
-					if (success)
-						emit instantiateRequested(QString(instId.c_str()), typeId);
-					else
-						emit instantiateRefused("Name error");
+					std::string tpl = instId;
+					for (int i = 1; i < std::numeric_limits<short>::max(); i++)
+						if ((success = !has(instId = Utils::FormatStr("%s %d", tpl.c_str(), i))))
+							break;
 				}
+				if (success)
+					emit instantiateRequested(QString(instId.c_str()), typeId);
+				else
+					emit instantiateRefused("Name error");
+			}
+			else
+			{
+				auto instId = instanceName.toStdString();
+				if (has(instId))
+					emit instantiateRefused("Name error");
 				else
 				{
-					auto instId = instanceName.toStdString();
-					if (has(instId))
-						emit instantiateRefused("Name error");
-					else
+					auto o = owner->createObjectSp();
+					if (o->setPrototype(typeId))
 					{
-						auto o = owner->createObjectSp();
-						if (o->setPrototype(typeId))
-						{
-							setModel(instId, o);
-							emit instantiated(typeId, instanceName);
-						}
-						else
-							emit instantiateRefused("Type error");
+						setModel(instId, o);
+						emit instantiated(typeId, instanceName);
 					}
+					else
+						emit instantiateRefused("Type error");
 				}
 			}
+		}
 	}
 
 	bool VLObjectVarModel::setPrototype(const QString& protoId)
@@ -291,9 +290,8 @@ namespace dmb
 	bool VLObjectVarModel::setPrototype(const std::string &protoId)
 	{
 		if (auto owner = getDataModel())
-			if (auto types =  owner->typesModel())
-				if (auto modelPtr = types->modelSp(protoId))
-					return setModel("proto", modelPtr) != nullptr;
+			if (auto modelPtr = owner->modelByTypeId(protoId))
+				return setModel("proto", modelPtr) != nullptr;
 		return false;
 	}
 

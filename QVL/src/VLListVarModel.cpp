@@ -62,7 +62,7 @@ namespace dmb
 		return getData().At(index);
 	}
 
-	vl::Var &VLListVarModel::getData(int index)
+	vl::Var &VLListVarModel::data(int index)
 	{
 		return const_cast<vl::Var&>(const_cast<const VLListVarModel*>(this)->getData(index));
 	}
@@ -77,7 +77,7 @@ namespace dmb
 		return mListModel.getElementIndex(childPtr);
 	}
 
-	vl::List &VLListVarModel::getData()
+	vl::List &VLListVarModel::data()
 	{
 		return const_cast<vl::List&>(const_cast<const VLListVarModel*>(this)->getData());
 	}
@@ -87,9 +87,19 @@ namespace dmb
 		return mListModel.getAt(index);
 	}
 
-	VLVarModel *VLListVarModel::getAt(int index)
+	dmb::VLVarModel *VLListVarModel::at(int index)
 	{
 		return mListModel.at(index);
+	}
+
+	const VLVarModelPtr &VLListVarModel::getAtSp(int index) const
+	{
+		return mListModel.getAtSp(index);
+	}
+
+	const VLVarModelPtr &VLListVarModel::atSp(int index)
+	{
+		return mListModel.atSp(index);
 	}
 
 	VLVarModel* VLListVarModel::add(ObjectProperty::Type type, int indexBefore)
@@ -130,25 +140,19 @@ namespace dmb
 	void VLListVarModel::instantiate(const QString &typeId)
 	{
 		if (auto owner = getDataModel())
-			if (auto types =  owner->typesModel())
+		{
+			auto o = owner->createObjectSp();
+			if (o->setPrototype(typeId))
 			{
-				auto o = owner->createObjectSp();
-				if (o->setPrototype(typeId))
-				{
-					addModel(o);
-					emit instantiated(typeId);
-				}
-				else
-					emit instantiateRefused("Type error");
+				addModel(o);
+				emit instantiated(typeId);
 			}
+			else
+				emit instantiateRefused("Type error");
+		}
 	}
 
-	dmb::VLVarModel *VLListVarModel::at(int index)
-	{
-		return getAt(index);
-	}
-
-	const VLListModel *VLListVarModel::listModel() const
+	const VLListModel *VLListVarModel::getListModel() const
 	{
 		return &mListModel;
 	}
