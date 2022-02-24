@@ -26,16 +26,26 @@ namespace dmb
 	VLListModelInterface::~VLListModelInterface()
 	{
 		setParent(nullptr);
+		auto sz = mStorage.size();
+		for (int i = 0; i < sz; i++)
+			if (auto ptr = mStorage.at(i))
+				emit ptr->beforeRemove();
 	}
 
-	void VLListModelInterface::Init(QObject* parent)
+	bool VLListModelInterface::Init(QObject* p)
 	{
-		setParent(parent);
+		if (parent() == p)
+			return false;
+		setParent(p);
+		return true;
 	}
 
-	void VLListModelInterface::Init(const VLVarModelPtr& parentModel)
+	bool VLListModelInterface::Init(const VLVarModelPtr& parentModel)
 	{
+		if (getParentModel() == parentModel)
+			return false;
 		mParentModel = parentModel;
+		return true;
 	}
 
 	bool VLListModelInterface::elementsLoaded() const
@@ -410,6 +420,9 @@ namespace dmb
 
 	const VLVarModelPtr& VLListModelInterface::MStorage::put(int index, const VLVarModelPtr& ptr, int indexBefore)
 	{
+		if (!ptr)
+			qDebug() << "Warning! An attemption to put nullptr in the container chilren models storage";
+
 		auto sz = mElements.size();
 		if (indexBefore >= 0)
 		{
@@ -419,7 +432,6 @@ namespace dmb
 			mElements.resize(sz + 1);
 			for (int i = sz - 2; i >= index && i >= 0; i--)
 				mElements[i + 1] = mElements[i];
-
 		}
 		else if (index >= sz)
 			resize(index + 1);

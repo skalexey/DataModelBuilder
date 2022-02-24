@@ -44,6 +44,7 @@ namespace dmb
 		int getIndex(const std::string& propId) const;
 		bool renameProperty(const std::string& propId, const std::string& newId);
 		const vl::Var& getChildData(const VLVarModel* childPtr) const override;
+		std::string getFreeId(const std::string& desiredId) const;
 
 	protected:
 		// Protected data interface
@@ -64,9 +65,11 @@ namespace dmb
 		int getChildIndex(const VLVarModel* childPtr) const override;
 		const std::string& getChildId(const VLVarModel* childPtr) const;
 		bool removeChild(const VLVarModel* childPtr) override;
+		const VLVarModelPtr& getChildPtr(const VLVarModel* p) const override;
 		// Other
 		bool loadPropList();
 		bool setPrototype(const std::string& protoId);
+		VLVarModelPtr getPtr() override;
 
 	public:
 		// Properties
@@ -91,6 +94,7 @@ namespace dmb
 		Q_INVOKABLE void instantiate(const QString& typeId, const QString& instanceName = "");
 		Q_INVOKABLE bool setPrototype(const QString& protoId);
 		Q_INVOKABLE bool setPrototype(VLObjectVarModel* model);
+		Q_INVOKABLE int size() const;
 
 		QVariant protoId() const;
 		QVariant typeId() const;

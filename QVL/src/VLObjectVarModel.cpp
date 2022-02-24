@@ -125,6 +125,11 @@ namespace dmb
 		return emptyString;
 	}
 
+	const VLVarModelPtr &VLObjectVarModel::getChildPtr(const VLVarModel *p) const
+	{
+		return getModelSp(getChildId(p));
+	}
+
 	bool VLObjectVarModel::removeChild(const VLVarModel *childPtr)
 	{
 		return mPropListModel.remove(getChildId(childPtr));
@@ -235,22 +240,30 @@ namespace dmb
 		return mPropListModel.setData(propId, v);
 	}
 
+	std::string VLObjectVarModel::getFreeId(const std::string& desiredId) const
+	{
+		auto newId = desiredId.empty() ? "new_prop" : desiredId;
+		bool success = true;
+		if (has(newId))
+		{
+			std::string tpl = newId;
+			for (int i = 1; i < std::numeric_limits<short>::max(); i++)
+				if ((success = !has(newId = Utils::FormatStr("%s %d", tpl.c_str(), i))))
+					break;
+		}
+		if (success)
+			return newId;
+		return "";
+	}
+
 	void VLObjectVarModel::instantiate(const QString& typeId, const QString& instanceName)
 	{
 		if (auto owner = getDataModel())
 		{
 			if (instanceName.isEmpty())
 			{
-				auto instId = Utils::FormatStr("Concrete_%s", typeId.toStdString().c_str());
-				bool success = true;
-				if (has(instId))
-				{
-					std::string tpl = instId;
-					for (int i = 1; i < std::numeric_limits<short>::max(); i++)
-						if ((success = !has(instId = Utils::FormatStr("%s %d", tpl.c_str(), i))))
-							break;
-				}
-				if (success)
+				auto instId = getFreeId(Utils::FormatStr("Concrete_%s", typeId.toStdString().c_str()));
+				if (!instId.empty())
 					emit instantiateRequested(QString(instId.c_str()), typeId);
 				else
 					emit instantiateRefused("Name error");
@@ -287,12 +300,24 @@ namespace dmb
 		return false;
 	}
 
+	int VLObjectVarModel::size() const
+	{
+		return mPropListModel.dataSize();
+	}
+
 	bool VLObjectVarModel::setPrototype(const std::string &protoId)
 	{
 		if (auto owner = getDataModel())
 			if (auto modelPtr = owner->modelByTypeId(protoId))
 				return setModel("proto", modelPtr) != nullptr;
 		return false;
+	}
+
+	VLVarModelPtr VLObjectVarModel::getPtr()
+	{
+		if (auto ptr = Base::getPtr())
+			return ptr;
+		return std::dynamic_pointer_cast<VLVarModel>(shared_from_this());
 	}
 
 	QVariant VLObjectVarModel::protoId() const

@@ -62,6 +62,8 @@ namespace dmb
 		VLVarModel* add(const dmb::VLVarModel* model, int indexBefore = -1);
 		const VLVarModelPtr& addModel(const VLVarModelPtr& modelPtr, int indexBefore = -1);
 		bool removeChild(const VLVarModel* childPtr) override;
+		const VLVarModelPtr& getChildPtr(const VLVarModel* p) const override;
+		VLVarModelPtr getPtr() override;
 
 	protected:
 		// Protected Qt model interface
@@ -80,6 +82,7 @@ namespace dmb
 		// Creates an instance of a type typeId
 		Q_INVOKABLE void instantiate(const QString& typeId);
 		Q_PROPERTY (VLListModel* listModel READ listModel NOTIFY listChanged)
+		Q_INVOKABLE int size() const;
 
 	signals:
 		void listChanged();

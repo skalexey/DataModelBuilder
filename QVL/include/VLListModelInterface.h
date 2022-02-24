@@ -31,8 +31,8 @@ namespace dmb
 		// Constructors and initializers
 		explicit VLListModelInterface(QObject* parentModel);
 		~VLListModelInterface();
-		virtual void Init(QObject* parentModel);
-		virtual void Init(const VLVarModelPtr& parentModel);
+		virtual bool Init(QObject* parentModel);
+		virtual bool Init(const VLVarModelPtr& parentModel);
 		// Strictly necessary
 		virtual int dataSize() const = 0;
 		virtual const vl::Var& getDataAt(int index) const = 0;

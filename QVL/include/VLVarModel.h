@@ -54,11 +54,15 @@ namespace dmb
 
 	public:
 		// Public Qt model interface
-		const VLVarModel* getParentModel() const;
-		VLVarModel* getParentModel();
+		QVariant parentModelProp();
+		VLVarModelPtr getParentModel() const;
+		VLVarModelPtr parentModel();
+		bool setParentModel(const QVariant& data);
 		int getIndex() const;
 		virtual int getChildIndex(const VLVarModel* childPtr) const;
 		virtual bool removeChild(const VLVarModel* childPtr);
+		virtual const VLVarModelPtr& getChildPtr(const VLVarModel* p) const;
+		virtual VLVarModelPtr getPtr();
 
 	public:
 		// Properties
@@ -69,7 +73,9 @@ namespace dmb
 		Q_PROPERTY (QVariant valueStr READ valueStr NOTIFY valueChanged)
 		Q_PROPERTY (QVariant typeStr READ typeStr NOTIFY typeChanged)
 		Q_PROPERTY (QObject* owner READ getDataModel NOTIFY ownerChanged)
+		Q_PROPERTY (QVariant parent READ parentModelProp WRITE setParentModel NOTIFY parentChanged)
 		Q_INVOKABLE bool remove();
+		Q_INVOKABLE bool removeFromParent();
 
 		QString id() const;
 		bool setId(const QString &newId);
@@ -90,6 +96,7 @@ namespace dmb
 		void valueChanged(int index) const;
 		void ownerChanged(dmb::DMBModel* newOwner) const;
 		void beforeRemove() const;
+		void parentChanged() const;
 
 	private:
 		// Data

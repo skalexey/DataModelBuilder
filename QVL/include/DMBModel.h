@@ -16,6 +16,7 @@ namespace dmb
 
 	class DMBModel : public QObject
 	{
+		friend class VLVarModel;
 		Q_OBJECT
 		QML_NAMED_ELEMENT(DMBModel)
 
@@ -52,7 +53,7 @@ namespace dmb
 		Q_PROPERTY (QString loadFrom WRITE setLoadFrom)
 		
 	protected:
-		const VLVarModelPtr &storeStandalonePtr(const VLVarModelPtr& ptr);
+		const VLVarModelPtr &storeStandaloneModel(const VLVarModelPtr& ptr);
 		void setCurrentFile(const std::string& newFilePath);
 
 	protected:

@@ -128,14 +128,55 @@ namespace dmb
 		return const_cast<vl::Var&>(const_cast<const VLVarModel*>(this)->getChildData(childPtr));
 	}
 
-	const VLVarModel *VLVarModel::getParentModel() const
+	VLVarModelPtr VLVarModel::getParentModel() const
 	{
-		return mParentModel.lock().get();
+		return mParentModel.lock();
 	}
 
-	VLVarModel *VLVarModel::getParentModel()
+	VLVarModelPtr VLVarModel::parentModel()
 	{
-		return mParentModel.lock().get();
+		return mParentModel.lock();
+	}
+
+	QVariant VLVarModel::parentModelProp()
+	{
+		return QVariant::fromValue(mParentModel.lock().get());
+	}
+
+	bool VLVarModel::removeFromParent()
+	{
+		if (auto parent = getParentModel())
+			if (auto owner = getDataModel())
+			{
+				auto ptr = parent->getChildPtr(this);
+				owner->storeStandaloneModel(ptr);
+				parent->removeChild(this);
+				return true;
+			}
+		return false;
+	}
+
+	bool VLVarModel::setParentModel(const QVariant& data)
+	{
+		VLVarModel* newParent = nullptr;
+		if (data.canConvert<VLVarModel*>())
+			newParent = qvariant_cast<VLVarModel*>(data);
+
+		auto currentParent = getParentModel();
+		auto currentId = getId();
+		if (removeFromParent())
+			if (auto ptr = getDataModel()->takeStandaloneModel(this))
+			{
+				if (auto newParentObject = newParent->asObject())
+					newParentObject->setModel(newParentObject->getFreeId(currentId), ptr);
+				else if (newParent->isList())
+					newParent->asList()->addModel(ptr);
+				else
+					return false;
+				emit parentChanged();
+				return true;
+			}
+		return false;
 	}
 
 	int VLVarModel::getIndex() const
@@ -157,10 +198,24 @@ namespace dmb
 		return false;
 	}
 
+	const VLVarModelPtr &VLVarModel::getChildPtr(const VLVarModel *p) const
+	{
+		// Only objects and lists can use this method
+		return nullVarModelPtr;
+	}
+
+	VLVarModelPtr VLVarModel::getPtr()
+	{
+		if (auto parent = getParentModel())
+			return parent->getChildPtr(this);
+		else // Objects and lists can return shared_from_this
+			return nullptr;
+	}
+
 	bool VLVarModel::remove()
 	{
 		emit beforeRemove();
-		if (auto parent = getParentModel())
+		if (auto parent = parentModel())
 			return parent->removeChild(this);
 		else if (auto owner = getDataModel())
 			return owner->removeStandaloneModel(this);
@@ -180,7 +235,7 @@ namespace dmb
 	bool VLVarModel::setId(const std::string &newId)
 	{
 		// TODO: make warnings about proto changing
-		if (auto parent = getParentModel())
+		if (auto parent = parentModel())
 			if (parent->isObject())
 				if (parent->asObject()->renameProperty(getId(), newId))
 					return true; // idChanged signal emitted by renameProperty call above
@@ -199,7 +254,7 @@ namespace dmb
 
 	void VLVarModel::setType(const ObjectProperty::Type &newType)
 	{
-		if (auto parent = getParentModel())
+		if (auto parent = parentModel())
 		{
 			if (parent->isObject())
 				parent->asObject()->propListModel()->setType(getIndex(), newType);

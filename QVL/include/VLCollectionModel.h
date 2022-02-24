@@ -27,7 +27,7 @@ namespace dmb
 	public:
 		// Constructors and initializers
 		explicit VLCollectionModel(QObject *parent = nullptr);
-		void Init(const VLVarModelPtr& objectPtr) override;
+		bool Init(const VLVarModelPtr& objectPtr) override;
 		void UpdateIdList();
 
 	public:

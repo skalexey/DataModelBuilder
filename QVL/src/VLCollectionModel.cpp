@@ -19,10 +19,12 @@ namespace dmb
 		: Base(parent)
 	{}
 
-	void VLCollectionModel::Init(const VLVarModelPtr& objectPtr)
+	bool VLCollectionModel::Init(const VLVarModelPtr& objectPtr)
 	{
-		Base::Init(objectPtr);
+		if (!Base::Init(objectPtr))
+			return false;
 		UpdateIdList();
+		return true;
 	}
 
 	void VLCollectionModel::UpdateIdList()

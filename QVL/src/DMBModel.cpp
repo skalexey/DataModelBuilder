@@ -148,7 +148,7 @@ namespace dmb
 		return mDataModel.IsLoaded();
 	}
 
-	const VLVarModelPtr &DMBModel::storeStandalonePtr(const VLVarModelPtr &ptr)
+	const VLVarModelPtr &DMBModel::storeStandaloneModel(const VLVarModelPtr &ptr)
 	{
 		auto it = mStandaloneModels.emplace(ptr.get(), ptr);
 		ptr->Init(this, const_cast<const VLVarModel&>(*ptr).getData(), this);
@@ -164,7 +164,7 @@ namespace dmb
 	VLVarModel *DMBModel::createFromData(const QVariant& data)
 	{
 		if (auto ptr = createPtrFromData(data))
-			return storeStandalonePtr(ptr).get();
+			return storeStandaloneModel(ptr).get();
 		return nullptr;
 	}
 
@@ -188,7 +188,7 @@ namespace dmb
 	{
 		auto ptr = VarModelFactory::Instance().CreateObject();
 		if (ptr)
-			if (storeStandalonePtr(ptr))
+			if (storeStandaloneModel(ptr))
 				return ptr;
 		return nullptr;
 	}
@@ -197,7 +197,7 @@ namespace dmb
 	{
 		auto ptr = VarModelFactory::Instance().CreateList();
 		if (ptr)
-			if (storeStandalonePtr(ptr))
+			if (storeStandaloneModel(ptr))
 				return ptr;
 		return nullptr;
 	}

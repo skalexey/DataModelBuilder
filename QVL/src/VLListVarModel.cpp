@@ -127,6 +127,18 @@ namespace dmb
 		return removeAt(getChildIndex(childPtr));
 	}
 
+	const VLVarModelPtr &VLListVarModel::getChildPtr(const VLVarModel *p) const
+	{
+		return getAtSp(getChildIndex(p));
+	}
+
+	VLVarModelPtr VLListVarModel::getPtr()
+	{
+		if (auto ptr = Base::getPtr())
+			return ptr;
+		return std::dynamic_pointer_cast<VLVarModel>(shared_from_this());
+	}
+
 	bool VLListVarModel::removeAt(int index)
 	{
 		return mListModel.removeAt(index);
@@ -150,6 +162,11 @@ namespace dmb
 			else
 				emit instantiateRefused("Type error");
 		}
+	}
+
+	int VLListVarModel::size() const
+	{
+		return mListModel.dataSize();
 	}
 
 	const VLListModel *VLListVarModel::getListModel() const
