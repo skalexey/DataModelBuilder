@@ -94,7 +94,7 @@ Window {
 			else
 			{
 				console.log("Can't find recent file info for '" + fPath + "'");
-				return fPath;
+				return fPath ? fPath : typeof fPath;
 			}
 		}
 

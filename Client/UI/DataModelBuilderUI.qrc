@@ -35,5 +35,6 @@
 <file>./VLListElement.qml</file>
 <file>./VarInterface.qml</file>
 <file>./TypeInstanceControl.qml</file>
+<file>./RecentFilesMenu.qml</file>
 </qresource>
 </RCC>

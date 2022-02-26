@@ -280,6 +280,9 @@ Item {
 					text: "Save as"
 					onClicked: saveAsClicked()
 				}
+				RecentFilesMenu {
+					model: recentFilesModel
+				}
 			}
 		}
 

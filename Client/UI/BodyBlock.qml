@@ -95,12 +95,12 @@ Item {
 					container: recentFilesList
 					onClick: function() {
 						console.log("recentFileClicked");
-						onOpenFile(valueStr);
+						onOpenFile(value);
 					}
 					Text {
 						leftPadding: 6
 						id: nameText
-						text: recentFileRelPath(valueStr)
+						text: recentFileRelPath(value)
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.left: parent.left
 						font.bold: true
