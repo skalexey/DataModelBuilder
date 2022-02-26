@@ -305,6 +305,25 @@ namespace dmb
 		if (auto model = getAt(i))
 			emit model->valueChanged(i);
 	}
+
+	void VLListModelInterface::onModelChanged(int i, int last)
+	{
+		auto roles = roleNames();
+		QVector<int> rolesList;
+		QHashIterator<int, QByteArray> it(roles);
+		while (it.hasNext()) {
+			it.next();
+			rolesList << it.key();
+		}
+		QModelIndex index = this->index(i, 0, QModelIndex());
+		if (last < 0)
+			emit dataChanged(index, index, rolesList);
+		else
+		{
+			QModelIndex indexLast = this->index(last, 0, QModelIndex());
+			emit dataChanged(index, indexLast, rolesList);
+		}
+	}
 	// ======= End of Public interface =======
 
 	// ====== Begin of QAbstractListModel interface ======
@@ -430,6 +449,7 @@ namespace dmb
 				if (i >= index)
 					i++;
 			mElements.resize(sz + 1);
+			sz++;
 			for (int i = sz - 2; i >= index && i >= 0; i--)
 				mElements[i + 1] = mElements[i];
 		}

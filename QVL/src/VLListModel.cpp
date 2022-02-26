@@ -115,15 +115,22 @@ namespace dmb
 	vl::Var &VLListModel::addData(const vl::VarPtr &ptr, int indexBefore, const std::function<void(int newIndex)>& customModelLoader)
 	{
 		auto sz = size();
+		auto newIndex = indexBefore >= 0 ? indexBefore : sz;
 		QModelIndex index = this->index(sz, 0, QModelIndex());
 		beginInsertRows(index, sz, sz);
+		sz++;
 		auto& result = getData().Add(ptr, indexBefore);
-		auto newIndex = indexBefore >= 0 ? indexBefore : sz;
+
 		if (customModelLoader)
 			customModelLoader(newIndex);
 		else
 			loadElementModel(newIndex, indexBefore);
 		endInsertRows();
+
+		if (indexBefore >= 0)
+			for (int i = indexBefore; i < sz; i++)
+				onModelChanged(i);
+			//onModelChanged(indexBefore, sz);
 		return result;
 	}
 

@@ -119,6 +119,7 @@ namespace dmb
 		virtual void onNameChanged(int index);
 		void onValueChanged(int index);
 		void onTypeChanged(int index);
+		void onModelChanged(int indexFirst, int indexLast = -1);
 
 	signals:
 		void sizeChanged(int newSize);
