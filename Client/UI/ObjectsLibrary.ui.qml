@@ -37,6 +37,7 @@ Item {
 			getType: function() { return type; }
 			setType: function(val) { type = val; }
 			getTypeStr: function() { return typeStr; }
+			getParentModel: function() { return parentModel; }
 
 		}
 		model: libraryTypeListModel

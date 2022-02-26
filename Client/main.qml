@@ -147,7 +147,7 @@ Window {
 					return model;
 				}
 				else
-					return new ListModel;
+					return new null;
 			});
 		}
 		// ======= End of properties for Type library functional =======
@@ -246,6 +246,13 @@ Window {
 					return item.typeStr;
 				else
 					return "";
+			}
+			getSelectedItemParentModel = function() {
+				var item = getCurrentItem();
+				if (item)
+					return item.parentModel;
+				else
+					return null;
 			}
 
 			setSelectedItemType = function(val) {

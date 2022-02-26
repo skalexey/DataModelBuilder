@@ -67,6 +67,9 @@ Item {
 	property var getSelectedItemTypeStr: function() {
 		console.log("getSelectedItemTypeStr() default handler");
 	}
+	property var getSelectedItemParentModel: function() {
+		console.log("getSelectedItemParentModel() default handler");
+	}
 
 	property string selectedItemName: "Selected item"
 	QtObject {

@@ -53,9 +53,11 @@ Column {
 			getValue: function() { return value; }
 			setValue: function(val) { value = val; }
 			getValueStr: function() { return valueStr; }
+			getParentModel: function() { return parentModel; }
 			getType: function() { return type; }
 			setType: function(val) { type = val; }
 			getTypeStr: function() { return typeStr; }
+
 			width: ownPropList.width
 		}
 		model: ownPropListModel
@@ -93,6 +95,8 @@ Column {
 				getType: function() { return type; }
 				setType: function(val) { type = val; }
 				getTypeStr: function() { return typeStr; }
+				getParentModel: function() { return parentModel; }
+
 				width: protoPropList.width
 			}
 			model: protoPropListModel
@@ -120,6 +124,7 @@ Column {
 				getType: function() { return type; }
 				setType: function(val) { type = val; }
 				getTypeStr: function() { return typeStr; }
+				getParentModel: function() { return parentModel; }
 			}
 			model: arrayListModel
 			footer: VarListFooter {

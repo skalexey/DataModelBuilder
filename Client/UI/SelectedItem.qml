@@ -45,6 +45,7 @@ Column {
 		getType: function() { return getSelectedItemType(); }
 		setType: function(val) { setSelectedItemType(val); }
 		getTypeStr: function() { return getSelectedItemTypeStr(); }
+		getParentModel: function() { return getSelectedItemParentModel(); }
 		width: parent.width
 	}
 

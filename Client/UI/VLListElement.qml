@@ -65,6 +65,7 @@ InteractiveListElement {
 		getValueStr: obj.getValueStr
 		setValue: obj.setValue
 		setType: obj.setType
+		getParentModel: obj.getParentModel
 	}
 
 	states: [

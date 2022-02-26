@@ -106,6 +106,7 @@ InteractiveListElement {
 		setName: obj.setName
 		setValue: obj.setValue
 		setType: obj.setType
+		getParentModel: obj.getParentModel
 	}
 	Text {
 		id: protoName
