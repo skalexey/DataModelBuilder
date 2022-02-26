@@ -14,29 +14,34 @@ Column {
 	}
 	Menu {
 		id: contextMenu
-		Instantiator {
-			model: typesListsModelDetailed
-			onObjectAdded: function(i, o) {
-				contextMenu.insertItem(i, o);
-			}
-			onObjectRemoved: function(o) {
-				contextMenu.removeItem(o);
-			}
-			delegate: Component {
-				MenuItem {
-					text: Object.keys(modelData)[0]
-					onTriggered: {
-						varListFooterAddClicked(listModel, modelData[Object.keys(modelData)[0]]);
+		Menu {
+			title: "Basic type"
+			id: basicTypesMenu
+			Instantiator {
+				model: typesListsModelDetailed
+				onObjectAdded: function(i, o) {
+					basicTypesMenu.insertItem(i, o);
+				}
+				onObjectRemoved: function(o) {
+					basicTypesMenu.removeItem(o);
+				}
+				delegate: Component {
+					MenuItem {
+						text: Object.keys(modelData)[0]
+						onTriggered: {
+							varListFooterAddClicked(listModel, modelData[Object.keys(modelData)[0]]);
+						}
 					}
 				}
 			}
 		}
+		TypeInstanceMenu {
+			onClicked: function(propId) {
+				listModel.parent.instantiate(propId);
+			};
+		}
 	}
-	TypeInstanceControl {
-		buttonClick: function(propId) {
-			listModel.parent.instantiate(propId);
-		};
-	}
+
 }
 /*##^##
 Designer {

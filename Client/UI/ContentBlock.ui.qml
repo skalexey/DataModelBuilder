@@ -38,7 +38,7 @@ Item {
 		}
 		footer: VarListFooter {
 			listModel: contentListModel
-			buttonText: "Add a constant"
+			buttonText: "Add"
 
 			Item {
 				id: spacer
