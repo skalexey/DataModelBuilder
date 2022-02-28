@@ -54,7 +54,7 @@ Window {
 		saveAsClicked: function() {
 			uiRoot.saveAsDialog.show();
 			uiRoot.saveAsDialog.initialText = "";
-			uiRoot.saveAsDialog.onConfirm = function(enteredText) {
+			uiRoot.saveAsDialog.onOk = function(enteredText) {
 				console.log("Save current model to a file '" + enteredText + "'");
 				if (dmbModel.store(enteredText))
 					console.log("Stored successfully");

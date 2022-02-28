@@ -13,22 +13,14 @@ DialogTemplate {
 
 	property alias initialText: textInput.text
 	property alias placeholderText: textInput.placeholderText
-	property var onConfirm: function(enteredText) {
-		log("onConfirm('" + enteredText + "') default handler")
-	}
 
 	title: "Enter a text"
-	onOk: function() {
-		onConfirm(textInput.text);
-	}
-	onCancel: function() {
-		log("Cancel clicked");
-	}
+
 	TextField {
 		id: textInput
 		placeholderText: "Enter text"
 		Keys.onReturnPressed: {
-			onConfirm(text);
+			dialog.onOk(text);
 			dialog.close();
 		}
 		Keys.onEnterPressed: Keys.onReturnPressed
