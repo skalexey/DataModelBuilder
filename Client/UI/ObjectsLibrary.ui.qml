@@ -26,6 +26,9 @@ Item {
 		y: objectsLibraryTitle.y + objectsLibraryTitle.height
 		height: parent.height - objectsLibraryTitle.y - objectsLibraryTitle.height
 		anchors.horizontalCenter: parent.horizontalCenter
+		ScrollBar.vertical: ScrollBar {
+			active: true
+		}
 		delegate: ObjectInLibrary {
 			width: objectsLibraryContainer.width // To fix the error "TypeError: Cannot read property 'width' of null"
 			container: objectsLibraryContainer

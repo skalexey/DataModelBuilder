@@ -22,6 +22,9 @@ Item {
 		height: parent.height - contentBlockTitle.y - contentBlockTitle.height
 		anchors.horizontalCenter: parent.horizontalCenter
 		orientation: ListView.Vertical
+		ScrollBar.vertical: ScrollBar {
+			active: true
+		}
 		model: contentListModel
 		delegate: ItemInContent {
 			width: contentBlockContainer.width // To fix the error "TypeError: Cannot read property 'width' of null"

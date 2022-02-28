@@ -95,6 +95,9 @@ Item {
 				id: recentFilesList
 				width: parent.width
 				height: parent.height
+				ScrollBar.vertical: ScrollBar {
+					active: true
+				}
 				model: recentFilesModel
 				delegate: InteractiveListElement {
 					id: o

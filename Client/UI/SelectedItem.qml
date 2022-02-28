@@ -24,45 +24,44 @@ Column {
         verticalAlignment: Text.AlignVCenter
     }
 
-	PropListBlock {
-		id: propListBlock
-		visible: false
-		protoPropListModel: selectedItemProtoParamListModel
-		ownPropListModel: selectedItemOwnParamListModel
-		arrayListModel: selectedItemArrayListModel
-		width: parent.width * 0.6
-		anchors.horizontalCenter: parent.horizontalCenter
-	}
-
-	ParamInItem {
-		id: itemValue
-		visible: false
-		getName: function() { return selectedItemName; }
-		setName: function(val) { selectedItemChangeName(val); }
-		getValue: function() { return selectedItemValue(); }
-		setValue: function(val) { selectedItemChangeValue(val); }
-		getValueStr: function() { return selectedItemSimpleValue(); }
-		getType: function() { return getSelectedItemType(); }
-		setType: function(val) { setSelectedItemType(val); }
-		getTypeStr: function() { return getSelectedItemTypeStr(); }
-		getParentModel: function() { return getSelectedItemParentModel(); }
+	ScrollView {
+		id: scrollView
 		width: parent.width
-	}
+		height: parent.height
+		clip: true
 
-	// TODO: support scrollbar
-	ScrollBar {
-			id: vbar
-			hoverEnabled: true
-			active: hovered || pressed
-			orientation: Qt.Vertical
-			size: item1.height / propListBlock.height
-//			anchors.top: parent.top
-//			anchors.right: parent.right
-//			anchors.bottom: parent.bottom
+		PropListBlock {
+			id: propListBlock
+			visible: false
+			protoPropListModel: selectedItemProtoParamListModel
+			ownPropListModel: selectedItemOwnParamListModel
+			arrayListModel: selectedItemArrayListModel
+			width: parent.width * 0.6
+			anchors.horizontalCenter: parent.horizontalCenter
 		}
+
+		ParamInItem {
+			id: itemValue
+			visible: false
+			getName: function() { return selectedItemName; }
+			setName: function(val) { selectedItemChangeName(val); }
+			getValue: function() { return selectedItemValue(); }
+			setValue: function(val) { selectedItemChangeValue(val); }
+			getValueStr: function() { return selectedItemSimpleValue(); }
+			getType: function() { return getSelectedItemType(); }
+			setType: function(val) { setSelectedItemType(val); }
+			getTypeStr: function() { return getSelectedItemTypeStr(); }
+			getParentModel: function() { return getSelectedItemParentModel(); }
+			width: parent.width
+		}
+	}
 	states: [
 		State {
 			name: "simpleType"
+			PropertyChanges {
+				target: scrollView
+				contentHeight: itemValue.height
+			}
 			PropertyChanges {
 				target: itemValue
 				visible: true
@@ -71,12 +70,20 @@ Column {
 		State {
 			name: "object"
 			PropertyChanges {
+				target: scrollView
+				contentHeight: propListBlock.height
+			}
+			PropertyChanges {
 				target: propListBlock
 				visible: true
 			}
 		},
 		State {
 			name: "list"
+			PropertyChanges {
+				target: scrollView
+				contentHeight: propListBlock.height
+			}
 			PropertyChanges {
 				target: propListBlock
 				visible: true
