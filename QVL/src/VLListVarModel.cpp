@@ -169,11 +169,6 @@ namespace dmb
 		return mListModel.dataSize();
 	}
 
-	const VLListModel *VLListVarModel::getListModel() const
-	{
-		return &mListModel;
-	}
-
 	VLListModel *VLListVarModel::listModel()
 	{
 		if (!mListModel.elementsLoaded())

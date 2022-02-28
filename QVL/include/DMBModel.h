@@ -51,7 +51,9 @@ namespace dmb
 		Q_INVOKABLE dmb::VLListVarModel* createList();
 		Q_PROPERTY (QString currentFile READ currentFile NOTIFY currentFileChanged)
 		Q_PROPERTY (QString loadFrom WRITE setLoadFrom)
-		
+		Q_INVOKABLE void clear();
+		Q_INVOKABLE bool hasChanges() const;
+
 	protected:
 		const VLVarModelPtr &storeStandaloneModel(const VLVarModelPtr& ptr);
 		void setCurrentFile(const std::string& newFilePath);

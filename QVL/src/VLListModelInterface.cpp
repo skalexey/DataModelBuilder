@@ -65,6 +65,8 @@ namespace dmb
 
 	const VLVarModelPtr& VLListModelInterface::loadElementModel(int index, int indexBefore)
 	{
+		if (index >= dataSize())
+			return emptyVarModelPtr;
 		bool complete = false;
 		if (auto parent = getParentModel())
 		{
@@ -169,6 +171,16 @@ namespace dmb
 		mStorage.clear();
 	}
 
+	void VLListModelInterface::clearAndNotify()
+	{
+		auto sz = size();
+		if (sz == 0)
+			return;
+		beginRemoveRows(QModelIndex(), 0, sz - 1);
+		clear();
+		endRemoveRows();
+	}
+
 	QVariant VLListModelInterface::role(const VLVarModel* m, int index, int role) const
 	{
 		switch (role) {
@@ -254,16 +266,28 @@ namespace dmb
 		return mStorage.getIndex(elementPtr);
 	}
 
-	bool VLListModelInterface::foreachElement(const std::function<bool (int, const VLVarModelPtr &)> &pred) const
+	bool VLListModelInterface::foreachElement(const std::function<bool (int, const VLVarModelPtr &)> &pred, bool recursive) const
 	{
 		auto sz = size();
 		for (int i = 0; i < sz; i++)
-			if (!pred(i, getAtSp(i)))
-				return false;
+			if (auto m = getAtSp(i))
+			{
+				if (!pred(i, getAtSp(i)))
+					return false;
+				if (recursive)
+				{
+					if (auto o = m->asObject())
+						if (!o->getPropListModel().foreachElement(pred, recursive))
+							return false;
+					else if (auto l = m->asList())
+						if (!l->getListModel().foreachElement(pred, recursive))
+						return false;
+				}
+			}
 		return true;
 	}
 
-	bool VLListModelInterface::foreachElement(const std::function<bool (int, const VLVarModelPtr &)> &pred)
+	bool VLListModelInterface::foreachElement(const std::function<bool (int, const VLVarModelPtr &)> &pred, bool recursive)
 	{
 		// TODO: optimize performance
 		auto pred2 = [&](int i, const VLVarModelPtr& v) {
@@ -271,7 +295,7 @@ namespace dmb
 				return false;
 			return true;
 		};
-		return const_cast<const VLListModelInterface*>(this)->foreachElement(pred2);
+		return const_cast<const VLListModelInterface*>(this)->foreachElement(pred2, recursive);
 	}
 
 	bool VLListModelInterface::removeAt(int index)

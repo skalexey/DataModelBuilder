@@ -45,6 +45,7 @@ namespace dmb
 		// Other
 		virtual int size() const;
 		virtual void clear(); // Clear the list
+		void clearAndNotify();
 		bool elementsLoaded() const;
 		bool loadElementModels();
 		void connectSignals(VLVarModel* model) const;
@@ -92,8 +93,8 @@ namespace dmb
 		const dmb::VLVarModel* getAt(int index) const;
 		const VLVarModelPtr getParentModel() const;
 		int getElementIndex(const VLVarModel* elementPtr) const;
-		bool foreachElement(const std::function<bool(int, const VLVarModelPtr&)>& pred) const;
-		bool foreachElement(const std::function<bool(int, const VLVarModelPtr&)>& pred);
+		bool foreachElement(const std::function<bool(int, const VLVarModelPtr&)>& pred, bool recursive = false) const;
+		bool foreachElement(const std::function<bool(int, const VLVarModelPtr&)>& pred, bool recursive = false);
 
 	protected:
 		// Protected Qt model interface

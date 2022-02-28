@@ -102,6 +102,11 @@ namespace dmb
 		auto fPath = getAbsolutePath(filePath);
 		if (!filePath.isEmpty())
 			setCurrentFile(fPath);
+		if (mFilePath.empty())
+		{
+			emit modelStoreError(QString(""), QString("Empty file path"));
+			return false;
+		}
 		if (getDataModel().Store(mFilePath, { pretty }))
 		{
 			emit modelStored(QString(mFilePath.c_str()));
@@ -176,6 +181,29 @@ namespace dmb
 	VLListVarModel *DMBModel::createList()
 	{
 		return createListSp().get();
+	}
+
+	void DMBModel::clear()
+	{
+		mRoot->asObject()->getPropListModel().foreachElement([&](int i, const VLVarModelPtr& m) {
+			VLVarModel* mp = m.get();
+			if (auto l = mp->asList())
+				l->getListModel().clearAndNotify();
+			else if (auto o = m->asObject())
+				o->getPropListModel().clearAndNotify();
+			return true;
+		}, true);
+		mDataModel.Clear();
+		setCurrentFile("");
+	}
+
+	bool DMBModel::hasChanges() const
+	{
+		if (mFilePath.empty())
+			return false;
+		dmb::Model m;
+		m.Load(mFilePath);
+		return m.DataStr(false) != mDataModel.DataStr(false);
 	}
 
 	VLVarModelPtr DMBModel::createPtrFromData(const QVariant &data)

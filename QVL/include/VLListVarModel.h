@@ -54,7 +54,12 @@ namespace dmb
 	public:
 		// Public Qt model interface
 		const VLVarModel* getAt(int index) const;
-		const VLListModel *getListModel() const;
+		inline const VLListModel &getListModel() const {
+			return mListModel;
+		}
+		inline VLListModel &getListModel() {
+			return mListModel;
+		}
 		const VLVarModelPtr& getAtSp(int index) const;
 		const VLVarModelPtr& atSp(int index);
 		VLListModel *listModel();
