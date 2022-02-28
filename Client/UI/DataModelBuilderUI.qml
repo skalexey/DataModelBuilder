@@ -245,6 +245,7 @@ Item {
 	property var saveClicked: function() { log("saveClicked default handler"); }
 	property var onOpenFile: function(fPath) { log("onOpenFile default handler"); }
 	property var newClicked: function() { log("newClicked default handler"); }
+	property var closeFileClicked: function() { log("closeFileClicked default handler"); }
 
 	// ======= Screen definition =======
 	Screen01 {
@@ -268,7 +269,7 @@ Item {
 				x: 14
 				text: qsTr("File")
 				anchors.verticalCenter: parent.verticalCenter
-				onClicked: fileMenu.popup()
+				onClicked: bodyBlock.isChooseFileState() ? fileMenu.popup() : currentFileMenu.popup()
 			}
 			Text {
 				x: btnFile.x + btnFile.width + 12
@@ -276,28 +277,12 @@ Item {
 				text: textCurrentFile
 			}
 
-			Menu {
+			FileMenu {
 				id: fileMenu
-				MenuItem {
-					text: qsTr("New")
-					onClicked: newClicked()
-				}
+			}
 
-				MenuItem {
-					text: qsTr("Open")
-					onClicked: openFileClicked()
-				}
-				MenuItem {
-					text: qsTr("Save")
-					onClicked: saveClicked()
-				}
-				MenuItem {
-					text: qsTr("Save as")
-					onClicked: saveAsClicked()
-				}
-				RecentFilesMenu {
-					model: recentFilesModel
-				}
+			CurrentFileMenu {
+				id: currentFileMenu
 			}
 		}
 

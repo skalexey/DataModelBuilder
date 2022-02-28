@@ -38,5 +38,7 @@
 <file>./RecentFilesMenu.qml</file>
 <file>./DialogBottomRow.qml</file>
 <file>./DialogMessage.qml</file>
+<file>./CurrentFileMenu.qml</file>
+<file>./FileMenu.qml</file>
 </qresource>
 </RCC>

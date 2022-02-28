@@ -18,6 +18,14 @@ Item {
 		state = "chooseFile";
 	}
 
+	property var isFileOpenedState: function() {
+		return state === "fileOpened";
+	}
+
+	property var isChooseFileState: function() {
+		return state === "chooseFile";
+	}
+
 	Item {
 		id: fileControls
 		width: parent.width

@@ -73,17 +73,17 @@ Window {
 
 		function refreshUI() {
 			bodyBlock.stateOpened();
-			// ======= Properties for Content functional =======
+			textCurrentFile = Qt.binding(function() {
+				var relPath = app.relPath(dmbModel.currentFile);
+				return relPath;
+			});
 			contentListModel = dmbModel.contentModel.propListModel;
 			contentDeleteItemClicked = contentListModel.removeAt;
-			// ======= End of properties for Content functional =======
 			setSelectedObjectBindings();
-
 			setSelectedItemBindings();
 			contentListModel.dataChanged.connect(function(indexTopLeft, indexBottomRight, roles) {
 				setSelectedItemBindings();
 			});
-
 			connectInstantiation(dmbModel.contentModel);
 			connectInstantiation(dmbModel.typesModel);
 		}
@@ -112,7 +112,11 @@ Window {
 			}
 			else
 				newFile();
+		}
 
+		closeFileClicked: function() {
+			dmbModel.clear();
+			bodyBlock.stateChooseFile();
 		}
 
 
@@ -313,7 +317,6 @@ Window {
 		function storeRecentFile(fPath) {
 			console.log("Store recent file '" + fPath + "'");
 			var relPath = app.relPath(fPath);
-			textCurrentFile = relPath;
 			if (!dmbModelRecentFiles.contentModel.get("info").has(relPath))
 			{
 				var o = dmbModelRecentFiles.createObject();
@@ -384,7 +387,7 @@ Window {
 
 		Component.onCompleted: {
 			if (dmbModel.isLoaded)
-				bodyBlock.stateLoaded();
+				bodyBlock.stateChooseFile();
 			else
 			{
 				var fPath = "recent.json";
