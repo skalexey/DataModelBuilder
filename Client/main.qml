@@ -139,6 +139,19 @@ Window {
 				job();
 		}
 
+		exportContentClicked: function() {
+			uiRoot.saveAsDialog.title = "Export content"
+			uiRoot.saveAsDialog.show();
+			uiRoot.saveAsDialog.initialText = "";
+			uiRoot.saveAsDialog.onOk = function(enteredText) {
+				console.log("Export content to a file '" + enteredText + "'");
+				if (dmbModel.storeContent(enteredText))
+					console.log("Content stored successfully");
+				else
+					console.log("Error while storing the content");
+			}
+		}
+
 
 		// Reset default models
 		libraryTypeListModel: null

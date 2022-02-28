@@ -18,4 +18,9 @@ FileMenu {
 		text: qsTr("Save as")
 		onClicked: saveAsClicked()
 	}
+
+	MenuItem {
+		text: qsTr("Export content")
+		onClicked: exportContentClicked()
+	}
 }

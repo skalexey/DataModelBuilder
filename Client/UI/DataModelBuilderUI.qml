@@ -246,6 +246,7 @@ Item {
 	property var onOpenFile: function(fPath) { log("onOpenFile default handler"); }
 	property var newClicked: function() { log("newClicked default handler"); }
 	property var closeFileClicked: function() { log("closeFileClicked default handler"); }
+	property var exportContentClicked: function() { log("exportContentClicked default handler"); }
 
 	// ======= Screen definition =======
 	Screen01 {
