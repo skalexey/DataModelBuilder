@@ -90,7 +90,7 @@ Window {
 
 		newClicked: function() {
 			function newFile() {
-				dmbModel.cle();
+				dmbModel.clear();
 				refreshUI();
 			}
 
