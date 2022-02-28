@@ -8,6 +8,10 @@ Item {
 	width: Constants.width
 	height: Constants.height
 
+	function log(msg) {
+		console.log("DataModelBuilderUI: " + msg);
+	}
+
 	// ======= The code for Window =======
 	//    visible: true
 	// Uncomment if you deside to test dialogs in the Qt Designer
@@ -16,13 +20,14 @@ Item {
 	property alias preInstantiateDialog: preInstantiateDialog
 	property alias chooseFileDialog: chooseFileDialog
 	property alias saveAsDialog: saveAsDialog
+	property alias dialogMessage: dialogMessage
 	property alias bodyBlock: bodyBlock
 	// ======= Types list models
 	property var typesListsModel: ["No modifier", "Shift", "Control"]
 	property var typesListsModelDetailed: [{"No modifier": 0}, {"Shift": 1}, {"Control": 2}]
 
 	// ======= Files properties ========
-	property var textCurrentFile: "current file default"
+	property var textCurrentFile: "No file opened"
 	// ======= Recent files properties ========
 	property var recentFileRelPath: function(fPath) {
 		// Default handler. Will be overriden in main.qml
@@ -38,7 +43,7 @@ Item {
 
 	// ======= Selected item properties =======
 	property var varListFooterAddClicked: function(listModel) {
-		console.log("varListFooterAddClicked default handler");
+		log("varListFooterAddClicked default handler");
 	}
 
 	property var getSelectedItemState: function() {
@@ -53,22 +58,22 @@ Item {
 	property var selectedItemValue: function() { return "Test selectedItemValue" };
 
 	property var selectedItemChangeValue: function(val) {
-		console.log("selectedItemChangeValue(" + val + ") default handler");
+		log("selectedItemChangeValue(" + val + ") default handler");
 	}
 	property var selectedItemChangeName: function(val) {
-		console.log("selectedItemChangeName(" + val + ") default handler");
+		log("selectedItemChangeName(" + val + ") default handler");
 	}
 	property var setSelectedItemType: function(val) {
-		console.log("setSelectedItemType(" + val + ") default handler");
+		log("setSelectedItemType(" + val + ") default handler");
 	}
 	property var getSelectedItemType: function() {
-		console.log("getSelectedItemType() default handler");
+		log("getSelectedItemType() default handler");
 	}
 	property var getSelectedItemTypeStr: function() {
-		console.log("getSelectedItemTypeStr() default handler");
+		log("getSelectedItemTypeStr() default handler");
 	}
 	property var getSelectedItemParentModel: function() {
-		console.log("getSelectedItemParentModel() default handler");
+		log("getSelectedItemParentModel() default handler");
 	}
 
 	property string selectedItemName: "Selected item"
@@ -147,7 +152,7 @@ Item {
 	// ======= Content properties =======
 	property int contentCurrentItemIndex: content.contentContainer.currentIndex
 	property var contentDeleteItemClicked: function(i) {
-		console.log("DataModelBuilderUI: contentDeleteItemClicked(" + i + ") default handler")
+		log("DataModelBuilderUI: contentDeleteItemClicked(" + i + ") default handler")
 	}
 
 	property var itemClick: function() {
@@ -158,12 +163,12 @@ Item {
 			preInstantiateDialog.show();
 			preInstantiateDialog.initialText = instId
 			preInstantiateDialog.onConfirm = function(enteredText) {
-				console.log("Instantiate '" + enteredText + "' of type '" + protoId + "'");
+				log("Instantiate '" + enteredText + "' of type '" + protoId + "'");
 				model.instantiate(protoId, enteredText);
 			}
 		});
 		model.onInstantiateRefused.connect(function(error) {
-			console.log("Instantiate refused: " + error);
+			log("Instantiate refused: " + error);
 		});
 	}
 	property var contentListModel: ListModel {
@@ -196,8 +201,8 @@ Item {
 	property alias objectsLibrary: bodyBlock.objectsLibrary
 	property alias content: bodyBlock.content
 	property int libraryCurrentObjectIndex: objectsLibrary.libraryContainer.currentIndex
-	property var libraryAddNewObjectClicked: function() { console.log("Default click handler") }
-	property var libraryDeleteObjectClicked: function(i) { console.log("DataModelBuilderUI: onDeleteObjectClicked(" + i + ") default handler") }
+	property var libraryAddNewObjectClicked: function() { log("Default click handler") }
+	property var libraryDeleteObjectClicked: function(i) { log("DataModelBuilderUI: onDeleteObjectClicked(" + i + ") default handler") }
 	property var libraryTypeListModel: ListModel {
 		ListElement {
 			name: "Scheme element"
@@ -216,8 +221,8 @@ Item {
 		}
 	}
 	property string selectedObjectName: "Obj name"
-	property var selectedObjectNewParamClicked: function() { console.log("DataModelBuilderUI: onNewParamClicked default handler") }
-	property var selectedObjectDeleteParameterClicked: function(i) { console.log("DataModelBuilderUI: onDeleteParameterClicked(" + i + ") Delete param default handler") }
+	property var selectedObjectNewParamClicked: function() { log("DataModelBuilderUI: onNewParamClicked default handler") }
+	property var selectedObjectDeleteParameterClicked: function(i) { log("DataModelBuilderUI: onDeleteParameterClicked(" + i + ") Delete param default handler") }
 	property var selectedObjParamListModel: ListModel {
 		ListElement {
 			name: "Type 1"
@@ -231,14 +236,16 @@ Item {
 			name: "Type 3"
 		}
 	}
-	property var storeClicked: function() { console.log("DataModelBuilderUI: btnStore.onClicked default handler"); }
+	property var storeClicked: function() { log("DataModelBuilderUI: btnStore.onClicked default handler"); }
 	// ======= End of Types properties =======
 
 	// ======= Screen properties =======
-	property var openFileClicked: function() { console.log("openFileClicked default handler"); }
-	property var saveAsClicked: function() { console.log("saveAsClicked default handler"); }
-	property var saveClicked: function() { console.log("saveClicked default handler"); }
-	property var onOpenFile: function(fPath) { console.log("onOpenFile default handler"); }
+	property var openFileClicked: function() { log("openFileClicked default handler"); }
+	property var saveAsClicked: function() { log("saveAsClicked default handler"); }
+	property var saveClicked: function() { log("saveClicked default handler"); }
+	property var onOpenFile: function(fPath) { log("onOpenFile default handler"); }
+	property var newClicked: function() { log("newClicked default handler"); }
+
 	// ======= Screen definition =======
 	Screen01 {
 		id: screen
@@ -272,15 +279,20 @@ Item {
 			Menu {
 				id: fileMenu
 				MenuItem {
-					text: "Open"
+					text: qsTr("New")
+					onClicked: newClicked()
+				}
+
+				MenuItem {
+					text: qsTr("Open")
 					onClicked: openFileClicked()
 				}
 				MenuItem {
-					text: "Save"
+					text: qsTr("Save")
 					onClicked: saveClicked()
 				}
 				MenuItem {
-					text: "Save as"
+					text: qsTr("Save as")
 					onClicked: saveAsClicked()
 				}
 				RecentFilesMenu {
