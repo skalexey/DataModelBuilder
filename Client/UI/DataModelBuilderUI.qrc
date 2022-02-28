@@ -36,5 +36,7 @@
 <file>./VarInterface.qml</file>
 <file>./TypeInstanceMenu.qml</file>
 <file>./RecentFilesMenu.qml</file>
+<file>./DialogBottomRow.qml</file>
+<file>./DialogMessage.qml</file>
 </qresource>
 </RCC>

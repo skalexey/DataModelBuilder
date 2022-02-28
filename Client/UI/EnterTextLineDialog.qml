@@ -7,15 +7,23 @@ DialogTemplate {
 		textInput.forceActiveFocus();
 	}
 
+	function log(msg) {
+		console.log("EnterTextLineDialog: " + msg);
+	}
+
 	property alias initialText: textInput.text
 	property alias placeholderText: textInput.placeholderText
 	property var onConfirm: function(enteredText) {
-		console.log("EnterTextLineDialog: onConfirm('" + enteredText + "') default handler")
+		log("onConfirm('" + enteredText + "') default handler")
 	}
 
 	title: "Enter a text"
-	onAccepted: onConfirm(textInput.text);
-	onRejected: console.log("Cancel clicked")
+	onOk: function() {
+		onConfirm(textInput.text);
+	}
+	onCancel: function() {
+		log("Cancel clicked");
+	}
 	TextField {
 		id: textInput
 		placeholderText: "Enter text"
