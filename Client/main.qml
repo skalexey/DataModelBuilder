@@ -115,8 +115,28 @@ Window {
 		}
 
 		closeFileClicked: function() {
-			dmbModel.clear();
-			bodyBlock.stateChooseFile();
+			function job() {
+				dmbModel.clear();
+				bodyBlock.stateChooseFile();
+			}
+			if (dmbModel.hasChanges())
+			{
+				uiRoot.dialogMessage.buttonOkText = qsTr("Yes");
+				uiRoot.dialogMessage.show(
+					qsTr("Save your work")
+					, qsTr("You have unsaved changes. Do you want to save them before closing?")
+					, function() { // onOk
+						dmbModel.store();
+						job();
+					}
+					, function() {} // onCancel
+					, function() { // onNo
+						job();
+					}
+				);
+			}
+			else
+				job();
 		}
 
 
