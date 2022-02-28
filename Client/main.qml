@@ -350,6 +350,10 @@ Window {
 		function storeRecentFile(fPath) {
 			console.log("Store recent file '" + fPath + "'");
 			var relPath = app.relPath(fPath);
+			textCurrentFile = Qt.binding(function() {
+				var relPath = app.relPath(dmbModel.currentFile);
+				return relPath;
+			});
 			if (!dmbModelRecentFiles.contentModel.get("info").has(relPath))
 			{
 				var o = dmbModelRecentFiles.createObject();
