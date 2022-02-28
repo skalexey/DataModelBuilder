@@ -46,14 +46,15 @@ target_include_directories(qvl PUBLIC
 
 target_link_libraries(qvl PUBLIC
     Qt::Core
-    Qt::Gui
     Qt::Qml
     DMBCore
     JSONConverter
     VL
 )
 
-#target_compile_definitions(qvl PRIVATE QT_QML_DEBUG)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    target_compile_definitions(qvl PRIVATE QT_QML_DEBUG)
+endif()
 
 target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-cmake/$<CONFIG>)
 target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-cmake/dependencies/VL/JSONConverter/$<CONFIG>)

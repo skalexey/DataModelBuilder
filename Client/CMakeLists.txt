@@ -44,7 +44,10 @@ qt_add_executable(DataModelBuilder WIN32 MACOSX_BUNDLE
 	UI/DataModelBuilderUI.qrc
 )
 
-target_compile_definitions(DataModelBuilder PRIVATE QT_QML_DEBUG)
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    target_compile_definitions(DataModelBuilder PRIVATE QT_QML_DEBUG)
+endif()
 
 target_link_libraries(DataModelBuilder PUBLIC
     Qt::Core
