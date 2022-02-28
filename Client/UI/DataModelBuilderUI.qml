@@ -317,6 +317,10 @@ Item {
 			id: saveAsDialog
 		}
 
+		DialogMessage {
+			id: dialogMessage
+		}
+
 	}
 	// ======= End of Screen definition =======
 }

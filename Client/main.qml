@@ -71,6 +71,50 @@ Window {
 			dmbModel.load(fPath);
 		}
 
+		function refreshUI() {
+			bodyBlock.stateOpened();
+			// ======= Properties for Content functional =======
+			contentListModel = dmbModel.contentModel.propListModel;
+			contentDeleteItemClicked = contentListModel.removeAt;
+			// ======= End of properties for Content functional =======
+			setSelectedObjectBindings();
+
+			setSelectedItemBindings();
+			contentListModel.dataChanged.connect(function(indexTopLeft, indexBottomRight, roles) {
+				setSelectedItemBindings();
+			});
+
+			connectInstantiation(dmbModel.contentModel);
+			connectInstantiation(dmbModel.typesModel);
+		}
+
+		newClicked: function() {
+			function newFile() {
+				dmbModel.cle();
+				refreshUI();
+			}
+
+			if (dmbModel.hasChanges())
+			{
+				uiRoot.dialogMessage.buttonOkText = qsTr("Yes");
+				uiRoot.dialogMessage.show(
+					qsTr("Save your work")
+					, qsTr("You have unsaved changes. Do you want to save them before creating a new file?")
+					, function() {
+						dmbModel.store();
+						newFile();
+					}
+					, function() {
+						newFile();
+					}
+					, function() {}
+				);
+			}
+			else
+				newFile();
+
+		}
+
 
 		// Reset default models
 		libraryTypeListModel: null
@@ -294,20 +338,7 @@ Window {
 		property var onModelLoaded: function(fPath) {
 			console.log("DMBModel: File loaded '" + fPath + "'");
 			console.log("fname: " + app.nameFromUrl(fPath));
-			bodyBlock.stateOpened();
-			// ======= Properties for Content functional =======
-			contentListModel = dmbModel.contentModel.propListModel;
-			contentDeleteItemClicked = contentListModel.removeAt;
-			// ======= End of properties for Content functional =======
-			setSelectedObjectBindings();
-
-			setSelectedItemBindings();
-			contentListModel.dataChanged.connect(function(indexTopLeft, indexBottomRight, roles) {
-				setSelectedItemBindings();
-			});
-
-			connectInstantiation(dmbModel.contentModel);
-			connectInstantiation(dmbModel.typesModel);
+			refreshUI();
 			storeRecentFile(fPath);
 		}
 
