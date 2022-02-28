@@ -35,9 +35,9 @@ void ModelCreationTest()
 	branch.Set("leafCount", 10);
 	branch.Set("fruit", vl::Object());
 	branch.Set("branches", vl::List());
-	auto branch1 = branch.Copy();
+	vl::Object branch1 = branch.Copy()->AsObject();
 	branch1.Set("leafCount", 9);
-	auto branch2 = branch.Copy();
+	vl::Object branch2 = branch.Copy()->AsObject();
 	branch2.Set("leafCount", 3);
 	branch2.Set("fruit", pear);
 	branch1.Get("branches").AsList().Add(branch2);
@@ -73,9 +73,9 @@ void CrashTest()
 	branch.Set("leafCount", 10);
 	branch.Set("fruit", vl::Object());
 	branch.Set("branches", vl::List());
-	auto branch1 = branch.Copy();
+	auto branch1 = branch.Copy()->AsObject();
 	branch1.Set("leafCount", 9);
-	auto branch2 = branch.Copy();
+	auto branch2 = branch.Copy()->AsObject();
 	branch2.Set("leafCount", 3);
 	branch2.Set("fruit", pear);
 	branch1.Get("branches").AsList().Add(branch2);
@@ -204,9 +204,9 @@ void CustomProtoTestStore()
 	branch.Set("leafCount", 10);
 	branch.Set("fruit", vl::Object());
 	branch.Set("branches", vl::List());
-	auto branch1 = branch.Copy();
+	auto branch1 = branch.Copy()->AsObject();
 	branch1.Set("leafCount", 9);
-	auto branch2 = branch.Copy();
+	auto branch2 = branch.Copy()->AsObject();
 	branch2.Set("leafCount", 3);
 	auto fruit = vl::Object();
 	fruit.SetPrototype(orange);
