@@ -21,14 +21,7 @@ VarInterface {
 		}
 	}
 
-	property var menuModel: ListModel {
-		ListElement {
-			title: "Test menu element 1"
-		}
-		ListElement {
-			title: "Test menu element 2"
-		}
-	}
+	property var menuModel: null
 
 	property var onPress: function () {
 		//console.log("InteraciveListElement.onPress default handler");
@@ -48,7 +41,10 @@ VarInterface {
 			if (container)
 				container.currentIndex = index
 			if (mouse.button === Qt.RightButton)
-				contextMenu.popup();
+			{
+				if (menuModel)
+					contextMenu.popup();
+			}
 			else if (mouse.button === Qt.LeftButton)
 				onPress();
 		}
@@ -59,7 +55,8 @@ VarInterface {
 
 		onPressAndHold: function(mouse){
 			if (mouse.source === Qt.MouseEventNotSynthesized)
-				contextMenu.popup()
+				if (menuModel)
+					contextMenu.popup();
 		}
 
 		Menu {
