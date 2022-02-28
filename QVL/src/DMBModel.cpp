@@ -119,6 +119,26 @@ namespace dmb
 		}
 	}
 
+	bool DMBModel::storeContent(const QString &filePath, bool pretty)
+	{
+		auto fPath = getAbsolutePath(filePath);
+		if (fPath.empty())
+		{
+			emit modelStoreError(QString(""), QString("Empty file path"));
+			return false;
+		}
+		if (getDataModel().GetContent().Store(fPath, { pretty }))
+		{
+			emit modelStored(QString(fPath.c_str()));
+			return true;
+		}
+		else
+		{
+			emit modelStoreError(QString(fPath.c_str()), Utils::FormatStr("Can't store the content to the file '%s'", fPath.c_str()).c_str());
+			return false;
+		}
+	}
+
 	bool DMBModel::load(const QString &url)
 	{
 		auto& m = mRoot->getPropListModel();

@@ -44,6 +44,7 @@ namespace dmb
 		Q_PROPERTY (VLObjectVarModel* contentModel READ contentModel NOTIFY contentModelChanged)
 		Q_PROPERTY (VLObjectVarModel* typesModel READ typesModel NOTIFY typesModelChanged)
 		Q_INVOKABLE bool store(const QString& filePath = "", bool pretty = true);
+		Q_INVOKABLE bool storeContent(const QString& filePath = "", bool pretty = true);
 		Q_INVOKABLE bool load(const QString& filePath);
 		Q_PROPERTY (bool isLoaded READ isLoaded NOTIFY modelLoaded);
 		Q_INVOKABLE dmb::VLVarModel* createFromData(const QVariant& data);
