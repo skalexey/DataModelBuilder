@@ -91,7 +91,7 @@ Item {
 				delegate: InteractiveListElement {
 					id: o
 					height: 50
-					width: parent.width
+					width: recentFilesList.width
 					container: recentFilesList
 					onClick: function() {
 						console.log("recentFileClicked");
