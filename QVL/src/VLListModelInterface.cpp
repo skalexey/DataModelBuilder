@@ -272,17 +272,16 @@ namespace dmb
 		for (int i = 0; i < sz; i++)
 			if (auto m = getAtSp(i))
 			{
-				if (!pred(i, getAtSp(i)))
-					return false;
 				if (recursive)
 				{
 					if (auto o = m->asObject())
-						if (!o->getPropListModel().foreachElement(pred, recursive))
-							return false;
-					else if (auto l = m->asList())
-						if (!l->getListModel().foreachElement(pred, recursive))
-						return false;
+						o->getPropListModel().foreachElement(pred, recursive);
+					if (auto l = m->asList())
+						l->getListModel().foreachElement(pred, recursive);
 				}
+				if (!pred(i, getAtSp(i)))
+					return false;
+
 			}
 		return true;
 	}
