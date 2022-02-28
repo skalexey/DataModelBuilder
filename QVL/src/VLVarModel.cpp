@@ -3,6 +3,7 @@
 #include "vl.h"
 #include "VLObjectVarModel.h"
 #include "VLListVarModel.h"
+#include "VarModelFactory.h"
 #include "DMBModel.h"
 
 namespace dmb
@@ -154,6 +155,17 @@ namespace dmb
 				return true;
 			}
 		return false;
+	}
+
+	QVariant VLVarModel::copy()
+	{
+		if (auto owner = getDataModel())
+			return QVariant::fromValue(
+						owner->storeStandaloneModel(
+							VarModelFactory::Instance().Create(*getData().Copy())
+							).get()
+						);
+		return QVariant();
 	}
 
 	bool VLVarModel::setParentModel(const QVariant& data)

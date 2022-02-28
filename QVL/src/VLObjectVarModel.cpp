@@ -256,6 +256,11 @@ namespace dmb
 		return "";
 	}
 
+	QString VLObjectVarModel::freeId(const QString& desiredId) const
+	{
+		return QString(getFreeId(desiredId.toStdString()).c_str());
+	}
+
 	void VLObjectVarModel::instantiate(const QString& typeId, const QString& instanceName)
 	{
 		if (auto owner = getDataModel())

@@ -95,7 +95,7 @@ namespace dmb
 		Q_INVOKABLE bool setPrototype(const QString& protoId);
 		Q_INVOKABLE bool setPrototype(VLObjectVarModel* model);
 		Q_INVOKABLE int size() const;
-
+		Q_INVOKABLE QString freeId(const QString& desiredId) const;
 		QVariant protoId() const;
 		QVariant typeId() const;
 

@@ -76,6 +76,7 @@ namespace dmb
 		Q_PROPERTY (QVariant parent READ parentModelProp WRITE setParentModel NOTIFY parentChanged)
 		Q_INVOKABLE bool remove();
 		Q_INVOKABLE bool removeFromParent();
+		Q_INVOKABLE QVariant copy();
 
 		QString id() const;
 		bool setId(const QString &newId);
