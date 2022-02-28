@@ -378,6 +378,8 @@ Window {
 
 		property var modelStoreError: function(f, e) {
 			console.log("Store model error: " + e);
+			if (e === "Empty file path")
+				saveAsClicked();
 		}
 
 		Component.onCompleted: {
