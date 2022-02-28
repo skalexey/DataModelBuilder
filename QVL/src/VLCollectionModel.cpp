@@ -171,7 +171,8 @@ namespace dmb
 		if (it == mPropIndex.end())
 			return false;
 		auto index = it->second;
-		getData().RenameProperty(propId, newId);
+		if (!getData().RenameProperty(propId, newId))
+			return false;
 		mPropIndex.erase(it);
 		mPropIndex[newId] = index;
 		mIdList[index] = newId;
