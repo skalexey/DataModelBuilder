@@ -191,7 +191,7 @@ Window {
 					return model;
 				}
 				else
-					return new null;
+					return null;
 			});
 		}
 		// ======= End of properties for Type library functional =======
