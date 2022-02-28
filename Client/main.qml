@@ -100,14 +100,14 @@ Window {
 				uiRoot.dialogMessage.show(
 					qsTr("Save your work")
 					, qsTr("You have unsaved changes. Do you want to save them before creating a new file?")
-					, function() {
+					, function() { // onOk
 						dmbModel.store();
 						newFile();
 					}
-					, function() {
+					, function() {} // onCancel
+					, function() { // onNo
 						newFile();
 					}
-					, function() {}
 				);
 			}
 			else

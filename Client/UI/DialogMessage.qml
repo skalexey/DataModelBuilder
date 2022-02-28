@@ -12,7 +12,7 @@ DialogTemplate {
 			this.onOk = onOk;
 		if (onNo)
 		{
-			this.onNo = onNo
+			this.onNo = onNo;
 			threeBtn = true;
 		}
 		if (onCancel)

@@ -42,7 +42,7 @@ Item {
 		anchors.horizontalCenter: parent.horizontalCenter
 		width: parent.width / 3 - 10
 		onClicked: function(mouse) {
-			dialog.onCancel();
+			dialog.onNo();
 			dialog.close();
 		}
 	}
