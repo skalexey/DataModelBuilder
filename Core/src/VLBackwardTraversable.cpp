@@ -359,6 +359,11 @@ namespace vl
 					}
 			}
 		}
+		else if (info->IsObject())
+		{
+			if (info->AsObject().Has("clear"))
+				mChildren.clear();
+		}
 	}
 
 	vl::ListTreeNode::ListTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent)
@@ -382,45 +387,50 @@ namespace vl
 		}
 		if (info->IsObject())
 		{
-			if (!mData)
-			{
-				LOG_WARNING("Update an unitialized ListTreeNode");
-				return;
-			}
-			auto& list = mData->AsList();
-			auto listSize = list.Size();
 			auto& infoObj = info->AsObject();
-			auto index = infoObj.Get("index").AsNumber().Val();
-			auto indexBefore = infoObj.Has("indexBefore") ? infoObj.Get("indexBefore").AsNumber().Val() : -1;
-			auto count = ChildCount();
-			if (indexBefore >= 0)
-				mChildren.resize(count = indexBefore);
-			if (index >= count) // No child
+			if (infoObj.Has("clear"))
+				mChildren.clear();
+			else
 			{
-				if (index < listSize)
+				if (!mData)
 				{
-					mChildren.resize(listSize);
-					for (int i = count; i < listSize; i++)
-						Set(i, mRegistry.CreateIndexedNode(i, mData->AsList().At(i), this));
+					LOG_WARNING("Update an unitialized ListTreeNode");
+					return;
 				}
-				else
-					LOG_WARNING("Unsupported update received by ListTreeNode [2]");
-			}
-			else // index < count // Child exists
-			{
-				if (index >= listSize) // No data
-					for (int i = listSize; i < count; i++)
-						Remove(count - 1 - i);
-				else // index < listSize // Data exists
+				auto& list = mData->AsList();
+				auto listSize = list.Size();
+				auto index = infoObj.Get("index").AsNumber().Val();
+				auto indexBefore = infoObj.Has("indexBefore") ? infoObj.Get("indexBefore").AsNumber().Val() : -1;
+				auto count = ChildCount();
+				if (indexBefore >= 0)
+					mChildren.resize(count = indexBefore);
+				if (index >= count) // No child
 				{
-					if (count > listSize)
+					if (index < listSize)
 					{
-						Remove(index);
+						mChildren.resize(listSize);
+						for (int i = count; i < listSize; i++)
+							Set(i, mRegistry.CreateIndexedNode(i, mData->AsList().At(i), this));
 					}
 					else
+						LOG_WARNING("Unsupported update received by ListTreeNode [2]");
+				}
+				else // index < count // Child exists
+				{
+					if (index >= listSize) // No data
+						for (int i = listSize; i < count; i++)
+							Remove(count - 1 - i);
+					else // index < listSize // Data exists
 					{
-						Clear(index);
-						Set(index, mRegistry.CreateIndexedNode(index, mData->AsList().At(index), this));
+						if (count > listSize)
+						{
+							Remove(index);
+						}
+						else
+						{
+							Clear(index);
+							Set(index, mRegistry.CreateIndexedNode(index, mData->AsList().At(index), this));
+						}
 					}
 				}
 			}

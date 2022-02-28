@@ -70,6 +70,11 @@ const vl::Object& dmb::Registry::GetData() const
 	return mData;
 }
 
+void dmb::Registry::Clear()
+{
+	mData.Clear();
+}
+
 void dmb::Registry::Init(const vl::Object& data)
 {
 	mData = data;
@@ -164,6 +169,11 @@ const vl::Object& dmb::Content::GetData() const
 	return mData;
 }
 
+void dmb::Content::Clear()
+{
+	mData.Clear();
+}
+
 void dmb::Content::Init(const vl::Object& data, const TypeResolver& typeResolver)
 {
 	mData = data;
@@ -255,6 +265,20 @@ std::string dmb::Model::GetTypeId(const vl::Object& obj) const
 const vl::Object& dmb::Model::GetData()
 {
 	return mData;
+}
+
+void dmb::Model::Clear()
+{
+	mRegistry.Clear();
+	mContent.Clear();
+	mPrivate.Clear();
+}
+
+std::string dmb::Model::DataStr(bool pretty) const
+{
+	vl::JSONConverter converter;
+	return converter.JSONStr(
+		mData, mTypeResolver,{ pretty, false });
 }
 
 void dmb::Model::Init()

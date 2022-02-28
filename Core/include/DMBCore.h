@@ -27,6 +27,7 @@ namespace dmb
 		// TODO: think how to keep int under the hood
 		vl::Object& GetData();
 		const vl::Object& GetData() const;
+		void Clear();
 
 	protected:
 		void Init(const vl::Object& data);
@@ -59,6 +60,7 @@ namespace dmb
 		// TODO: TODO: think how to keep int under the hood
 		vl::Object& GetData();
 		const vl::Object& GetData() const;
+		void Clear();
 
 	protected:
 		void Init(const vl::Object& data, const TypeResolver& typeResolver);
@@ -83,6 +85,8 @@ namespace dmb
 		std::string JSONStr(const vl::CnvParams& params = vl::CnvParams());
 		std::string GetTypeId(const vl::Object& obj) const;
 		const vl::Object& GetData();
+		void Clear();
+		std::string DataStr(bool pretty = true) const;
 
 	protected:
 		void Init();
