@@ -19,6 +19,14 @@ InteractiveListElement {
 			}
 		}
 		ListElement {
+			title: "Copy"
+			cmd: function(i) {
+				var c = value.copy();
+				var parentModel = libraryTypeListModel.parent;
+				parentModel.set(parentModel.freeId(name), c);
+			}
+		}
+		ListElement {
 			title: "Rename"
 			cmd: function(i) {
 				obj.state = "edit";
