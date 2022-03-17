@@ -76,6 +76,12 @@ qt6_add_resources(DataModelBuilder "qmake_immediate"
 )
 
 add_custom_command(
+    TARGET DataModelBuilder PRE_BUILD
+    COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/build_qvl.sh ${CMAKE_CFG_INTDIR} "${CMAKE_CURRENT_SOURCE_DIR}"
+    VERBATIM
+)
+
+add_custom_command(
     TARGET DataModelBuilder POST_BUILD
     COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/deliver_qvl.sh ${CMAKE_CFG_INTDIR} "${CMAKE_CURRENT_SOURCE_DIR}"
     VERBATIM

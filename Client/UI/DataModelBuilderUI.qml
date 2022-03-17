@@ -236,6 +236,19 @@ Item {
 			name: "Type 3"
 		}
 	}
+	property var selectedObjProtoPropListModel: ListModel {
+		ListElement {
+			name: "Type 1"
+		}
+
+		ListElement {
+			name: "Type 2"
+		}
+
+		ListElement {
+			name: "Type 3"
+		}
+	}
 	property var storeClicked: function() { log("DataModelBuilderUI: btnStore.onClicked default handler"); }
 	// ======= End of Types properties =======
 

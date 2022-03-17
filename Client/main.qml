@@ -10,6 +10,10 @@ Window {
     // To be used in libraryTypeListModel.onRowsRemoved
     property var rowsRemovedF: uiRoot.onObjectRemoved
 
+	function log(msg) {
+		console.log("main.qml: " + msg);
+	}
+
 	DMBModel {
 		id: dmbModel
 
@@ -54,12 +58,12 @@ Window {
 		saveAsClicked: function() {
 			uiRoot.saveAsDialog.show();
 			uiRoot.saveAsDialog.initialText = "";
-			uiRoot.saveAsDialog.onOk = function(enteredText) {
-				console.log("Save current model to a file '" + enteredText + "'");
+			uiRoot.saveAsDialog.onConfirm = function(enteredText) {
+				log("Save current model to a file '" + enteredText + "'");
 				if (dmbModel.store(enteredText))
-					console.log("Stored successfully");
+					log("Stored successfully");
 				else
-					console.log("Error while storing");
+					log("Error while storing");
 			}
 		}
 
@@ -143,12 +147,12 @@ Window {
 			uiRoot.saveAsDialog.title = "Export content"
 			uiRoot.saveAsDialog.show();
 			uiRoot.saveAsDialog.initialText = "";
-			uiRoot.saveAsDialog.onOk = function(enteredText) {
-				console.log("Export content to a file '" + enteredText + "'");
+			uiRoot.saveAsDialog.onConfirm = function(enteredText) {
+				log("Export content to a file '" + enteredText + "'");
 				if (dmbModel.storeContent(enteredText))
-					console.log("Content stored successfully");
+					log("Content stored successfully");
 				else
-					console.log("Error while storing the content");
+					log("Error while storing the content");
 			}
 		}
 
@@ -174,17 +178,17 @@ Window {
 				return info.get("relPath").value;
 			else
 			{
-				console.log("Can't find recent file info for '" + fPath + "'");
+				log("Can't find recent file info for '" + fPath + "'");
 				return fPath ? fPath : typeof fPath;
 			}
 		}
 
 		// ======= Properties for Type library functional =======
 		function getCurrentObj() {
-			//console.log("libraryTypeListModel.object(" + libraryCurrentObjectIndex + ")");
+			log("libraryTypeListModel.object(" + libraryCurrentObjectIndex + ")");
 			var obj = dmbModel.typesModel.at(libraryCurrentObjectIndex);
 			if (!obj)
-				console.log("NULL in getCurrentObj()!");
+				log("NULL in getCurrentObj()!");
 			return obj;
 		}
 
@@ -230,14 +234,27 @@ Window {
 				else
 					return null;
 			});
+
+			selectedObjProtoPropListModel = Qt.binding(function() {
+				var obj = getCurrentObj();
+				if (obj)
+				{
+					var model = obj.value.protoPropListModel;
+					if (model)
+						connectInstantiation(model.parent);
+					return model;
+				}
+				else
+					return null;
+			});
 		}
 		// ======= End of properties for Type library functional =======
 		// ======= Properties for Selected content item =======
 		function getCurrentItem() {
-			//console.log("contentListModel.object(" + contentCurrentItemIndex + ")");
+			log("contentListModel.object(" + contentCurrentItemIndex + ")");
 			var item = dmbModel.contentModel.at(contentCurrentItemIndex);
 			if (!item)
-				console.log("NULL in getCurrentObj()!");
+				log("NULL in getCurrentObj()!");
 			return item;
 		}
 		// When an object is removed, selectedObject should get the new data
@@ -261,7 +278,7 @@ Window {
 				if (item && item.type === ObjectProperty.Object)
 				{
 					connectInstantiation(item.value);
-					return item.value.protoPropListModel;
+					return item.value.protoPropListModel
 				}
 				else
 					return null;
@@ -343,12 +360,17 @@ Window {
 			};
 
 			varListFooterAddClicked = function(listModel, type) {
-				listModel.add(type);
+				preInstantiateDialog.show();
+				preInstantiateDialog.initialText = listModel.parent.freeId("New prop");
+				preInstantiateDialog.onConfirm = function(enteredText) {
+					log("Add new prop '" + enteredText + "' of type '" + type + "'");
+					listModel.add(enteredText, type);
+				}
 			}
 		}
 
 		function storeRecentFile(fPath) {
-			console.log("Store recent file '" + fPath + "'");
+			log("Store recent file '" + fPath + "'");
 			var relPath = app.relPath(fPath);
 			textCurrentFile = Qt.binding(function() {
 				var relPath = app.relPath(dmbModel.currentFile);
@@ -365,7 +387,7 @@ Window {
 			}
 			else
 			{
-				console.log("Already exists. Put on top");
+				log("Already exists. Put on top");
 				var list = dmbModelRecentFiles.contentModel.get("list");
 				var entry = list.find(relPath);
 				if (entry)
@@ -376,18 +398,18 @@ Window {
 		}
 
 		property var onModelLoaded: function(fPath) {
-			console.log("DMBModel: File loaded '" + fPath + "'");
-			console.log("fname: " + app.nameFromUrl(fPath));
+			log("DMBModel: File loaded '" + fPath + "'");
+			log("fname: " + app.nameFromUrl(fPath));
 			refreshUI();
 			storeRecentFile(fPath);
 		}
 
 		property var onModelLoadError: function(f, error) {
-			console.log("Load file error: " + error);
+			log("Load file error: " + error);
         }
 
 		property var onRecentFilesModelLoaded: function(fPath) {
-			console.log("onRecentFilesModelLoaded('" + fPath + "')");
+			log("onRecentFilesModelLoaded('" + fPath + "')");
 			recentFilesModel = dmbModelRecentFiles.contentModel.get("list").listModel
 		}
 
@@ -400,7 +422,7 @@ Window {
 			if (!local.recentFilesLoadError)
 			{
 				local.recentFilesLoadError = true;
-				console.log("Create recent files storage recent.json");
+				log("Create recent files storage recent.json");
 				dmbModelRecentFiles.contentModel.add("list", ObjectProperty.List);
 				dmbModelRecentFiles.contentModel.add("info", ObjectProperty.Object);
 				if (!dmbModelRecentFiles.store(f))
@@ -409,7 +431,7 @@ Window {
 					onRecentFilesModelLoaded(f);
 			}
 			else
-				console.log("Load recent files storage error: " + error);
+				log("Load recent files storage error: " + error);
 		}
 
 		property var modelStored: function(f) {
@@ -417,7 +439,7 @@ Window {
 		}
 
 		property var modelStoreError: function(f, e) {
-			console.log("Store model error: " + e);
+			log("Store model error: " + e);
 			if (e === "Empty file path")
 				saveAsClicked();
 		}

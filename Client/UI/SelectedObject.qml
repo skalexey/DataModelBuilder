@@ -18,7 +18,7 @@ Column {
 
 	PropListBlock {
 		id: propListBlock
-		protoPropListModel: null
+		protoPropListModel: selectedObjProtoPropListModel
 		ownPropListModel: selectedObjParamListModel
 		width: parent.width * 0.6
 		anchors.horizontalCenter: parent.horizontalCenter

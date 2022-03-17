@@ -14,6 +14,10 @@ Column {
 		state = s;
 	}
 
+	function log(msg) {
+		console.log("PropListBlock: " + msg);
+	}
+
 	Text {
 		id: emptyLabel
 		visible: false
