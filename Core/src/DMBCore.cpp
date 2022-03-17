@@ -70,9 +70,9 @@ const vl::Object& dmb::Registry::GetData() const
 	return mData;
 }
 
-void dmb::Registry::Clear()
+void dmb::Registry::Clear(bool recursive)
 {
-	mData.Clear();
+	mData.Clear(recursive);
 }
 
 void dmb::Registry::Init(const vl::Object& data)
@@ -169,15 +169,20 @@ const vl::Object& dmb::Content::GetData() const
 	return mData;
 }
 
-void dmb::Content::Clear()
+void dmb::Content::Clear(bool recursive)
 {
-	mData.Clear();
+	mData.Clear(recursive);
 }
 
 void dmb::Content::Init(const vl::Object& data, const TypeResolver& typeResolver)
 {
 	mData = data;
 	mTypeResolver = typeResolver;
+}
+
+dmb::Model::~Model()
+{
+	mTypeResolver = TypeResolver();
 }
 
 dmb::Model::Model()
@@ -267,11 +272,9 @@ const vl::Object& dmb::Model::GetData()
 	return mData;
 }
 
-void dmb::Model::Clear()
+void dmb::Model::Clear(bool recursive)
 {
-	mRegistry.Clear();
-	mContent.Clear();
-	mPrivate.Clear();
+	mData.Clear(recursive);
 }
 
 std::string dmb::Model::DataStr(bool pretty) const

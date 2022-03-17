@@ -17,9 +17,11 @@ namespace vl
 	class ListTreeNode;
 	typedef std::shared_ptr<ListTreeNode> ListTreeNodePtr;
 	class VarNodeRegistry;
-
+	
 	class VarTreeNode : public Observer {
 		friend class VarNodeRegistry;
+		friend class ListTreeNode;
+		friend class ObjectTreeNode;
 
 	public:
 		VarTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent);
@@ -34,7 +36,7 @@ namespace vl
 		virtual const ObjectTreeNode* AsObject() const;
 		virtual ListTreeNode* AsList();
 		virtual const ListTreeNode* AsList() const;
-		void Update(vl::VarPtr info) override;
+		void Update(Observable* sender, vl::VarPtr info) override;
 		virtual int ChildCount() const;
 		inline const vl::Var* GetData() const {
 			return mData;
@@ -61,6 +63,7 @@ namespace vl
 		const void* mDataPtr = nullptr;
 		VarTreeNode* mParent = nullptr;
 		VarNodeRegistry& mRegistry;
+		bool mToBeReplaced = false;
 	};
 	
 
@@ -70,7 +73,7 @@ namespace vl
 	public:
 		ObjectTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent);
 		~ObjectTreeNode();
-		void Update(vl::VarPtr info) override;
+		void Update(Observable* sender, vl::VarPtr info) override;
 		bool Has(const std::string& childId) const;
 		void Set(const std::string& childId, const VarTreeNodePtr& node);
 		const VarTreeNodePtr& Get(const std::string& childId) const;
@@ -96,9 +99,12 @@ namespace vl
 	public:
 		ListTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent);
 		~ListTreeNode();
-		void Update(vl::VarPtr info) override;
-		int ChildCount() const override;
+		void Update(Observable* sender, vl::VarPtr info) override;
+		inline int ChildCount() const override {
+			return mChildren.size();
+		}
 		void Set(int index, const VarTreeNodePtr& node);
+		void Add(const VarTreeNodePtr& node);
 		inline void Resize(int newSize) {
 			mChildren.resize(newSize);
 		}
@@ -120,13 +126,19 @@ namespace vl
 
 	// VarNodeRegistry
 	class VarNodeRegistry {
+		// The tree in the registry consists of these classes:
+		friend class VarTreeNode;
+		friend class ObjectTreeNode;
+		friend class ListTreeNode;
+
 	public:
+		// Initialize interface
 		VarNodeRegistry(vl::AbstractVar* rootData);
+
+	public:
+		// Public interface
 		const std::string& GetId(const VarTreeNode* node) const;
 		int GetIndex(const VarTreeNode* node) const;
-		VarTreeNodePtr CreateNamedNode(const std::string& nodeId, vl::Var& data, VarTreeNode* parent);
-		bool RemoveNode(const VarTreeNode* node);
-		VarTreeNodePtr CreateIndexedNode(int index, vl::Var& data, VarTreeNode* parent);
 		const VarTreeNode* GetNode(const vl::Var& varPtr) const;
 		const VarTreeNode* GetNode(const std::string& path) const;
 		inline VarTreeNode& GetTree() {
@@ -134,9 +146,14 @@ namespace vl
 		}
 
 	protected:
+		// Protected interface
 		VarTreeNodePtr CreateNode(vl::Var& data, VarTreeNode* parent);
+		VarTreeNodePtr CreateNamedNode(const std::string& nodeId, vl::Var& data, VarTreeNode* parent);
+		VarTreeNodePtr CreateIndexedNode(int index, vl::Var& data, VarTreeNode* parent);
+		bool RemoveNode(const VarTreeNode* node);
 
 	private:
+		// Data
 		std::unordered_multimap<const void*, VarTreeNode*> mVarToNode;
 		std::unordered_map<const VarTreeNode*, std::string> mNamedNodes;
 		std::unordered_map<const VarTreeNode*, int> mIndexedNodes;
