@@ -1,0 +1,59 @@
+{
+    "content": {
+        "fruitTree": {
+            "proto": "bush",
+            "leafColor": "Gold"
+        },
+        "fieldSize": 4.0,
+        "animalsAround": [
+            {
+                "proto": "animal",
+                "type": "bear",
+                "isMammal": true
+            },
+            {
+                "proto": "animal",
+                "type": "bird"
+            },
+            {}
+        ]
+    },
+    "types": {
+        "animal": {
+            "type": ""
+        },
+        "pear": {
+            "isFruit": true,
+            "color": "Yellow",
+            "radius": 0.30000001192092896,
+            "branchCount": 1.0
+        },
+        "bush": {
+            "leafColor": "Green",
+            "isTree": true,
+            "leafPerBranch": 6.0,
+            "y": 0.0,
+            "branches": [
+                {
+                    "leafCount": 10.0,
+                    "branches": [
+                        {
+                            "leafCount": 10.0,
+                            "branches": [],
+                            "fruit": {}
+                        }
+                    ],
+                    "fruit": {}
+                }
+            ],
+            "x": 0.0
+        }
+    },
+    "private": {
+        "branch": {
+            "leafCount": 10.0,
+            "fruit": {},
+            "branches": []
+        }
+    }
+}

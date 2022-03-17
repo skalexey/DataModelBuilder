@@ -11,6 +11,26 @@ void Load(const std::string& fName)
 	std::cout << model.JSONStr({ true }) << "\n";
 }
 
+void Check(const std::string& whatfName, const std::string& correctfName)
+{
+	std::cout << "Check test result '" << whatfName << "'\n";
+	dmb::Model model1;
+	model1.Load(whatfName);
+	dmb::Model model2;
+	model2.Load(correctfName);
+	auto model1Out = model1.JSONStr({ true });
+	auto model2Out = model2.JSONStr({ true });
+	if (model1Out == model2Out)
+		std::cout << "Good\n";
+	else
+	{
+		std::cout << "Error! Test result differs from the sample '" << correctfName << "'\n";
+		std::cout << whatfName << " content:\n" << model1Out << "\n";
+		std::cout << correctfName << " content:\n" << model2Out << "\n";
+		assert(false);
+	}
+}
+
 void ModelCreationTest()
 {
 	std::cout << "Model creation test\n";
@@ -47,6 +67,7 @@ void ModelCreationTest()
 	model.Store(fName, { true, true });
 	std::cout << "Model written to the json file'" << fName << "':\n";
 	std::cout << model.JSONStr({ true }) << "\n";
+	Check(fName, "new_model_check.json");
 }
 
 void CrashTest()
@@ -81,10 +102,11 @@ void CrashTest()
 	branch1.Get("branches").AsList().Add(branch2);
 	bush.Get("branches").AsList().Add(branch1);
 	std::cout << "Model created\n";
-	const char* fName = "new_model.json";
+	const char* fName = "crash_test_out.json";
 	model.Store(fName, { true, true });
 	std::cout << "Model written to the json file'" << fName << "':\n";
 	std::cout << model.JSONStr({ true }) << "\n";
+	Check(fName, "crash_test_out_check.json");
 }
 
 void ModelEditTest()
@@ -122,6 +144,7 @@ void ContentFillingTest()
 	const char* fName = "content_filling_test_out.json";
 	model.Store(fName, { true });
 	std::cout << "Written to '" << fName << "': \n" << model.JSONStr({ true }) << "\n";
+	Check(fName, "content_filling_test_out_check.json");
 }
 
 void SeparateContentStoreTest()
@@ -218,6 +241,7 @@ void CustomProtoTestStore()
 	model.Store(fName, { true, true });
 	std::cout << "Model written to the json file'" << fName << "':\n";
 	std::cout << model.JSONStr({ true }) << "\n";
+	Check(fName, "custom_proto_test_out_check.json");
 }
 
 void CustomProtoTestLoad()
@@ -243,6 +267,7 @@ void SimpleTest()
 	const char* fName = "simple_test_out.json";
 	m.Store(fName, { true, true });
 	std::cout << m.JSONStr({ true }) << "\n";
+	Check(fName, "simple_test_out_check.json");
 }
 
 void SimpleRemoveTest()
@@ -261,10 +286,11 @@ void SimpleRemoveTest()
 	auto& content = m.GetContent();
 	content.GetData().Set("fruit", fruit);
 	content.GetData().Set("orange", orange);
-	const char* fName = "simple_remove_test.json";
+	const char* fName = "simple_remove_test_out.json";
 	m.Store(fName, { true, true });
 	std::cout << m.JSONStr({ true }) << "\n";
 	Load(fName);
+	Check(fName, "simple_remove_test_out_check.json");
 }
 
 void SimpleRemoveArrayTest()
@@ -293,6 +319,7 @@ void SimpleRemoveArrayTest()
 	m.Store(fName, { true, true });
 	std::cout << m.JSONStr({ true }) << "\n";
 	Load(fName);
+	Check(fName, "simple_test_remove_array_out_check.json");
 }
 
 void RemoveTestProtoShift()
@@ -326,6 +353,7 @@ void RemoveTestProtoShift()
 	m.Store(fName, { true, true });
 	std::cout << m.JSONStr({ true }) << "\n";
 	Load(fName);
+	Check(fName, "remove_test_proto_shift_out_check.json");
 }
 
 void RemoveTest()
@@ -357,6 +385,7 @@ void RemoveTest()
 	m.Store(fName, { true, true });
 	std::cout << m.JSONStr({ true }) << "\n";
 	Load(fName);
+	Check(fName, "remove_test_out_check.json");
 }
 
 void SimpleInTest()
@@ -388,6 +417,7 @@ void SimpleProtoWriteTest()
 	const char* fName = "simple_proto_test_out.json";
 	model.Store(fName, { true });
 	std::cout << "Written to '" << fName << "': \n" << model.JSONStr({ true }) << "\n";
+	Check(fName, "simple_proto_test_out_check.json");
 }
 
 void SimpleProtoLoadTest()
@@ -410,9 +440,8 @@ void DatabaseTest2()
 int main(int argc, const char* argv[])
 {
 	std::cout << "DataModelBuilderCore Test Project\n";
-	//RemoveTest();
+	RemoveTest();
 	DatabaseTest2();
-	return 0;
 	RemoveTestProtoShift();
 	SimpleRemoveTest();
 	SimpleRemoveArrayTest();

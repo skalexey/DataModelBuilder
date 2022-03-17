@@ -1,0 +1,19 @@
+{
+    "content": {
+        "fruitList": [
+            {
+                "proto": "content.fruitList.[2]",
+                "title": "Pear"
+            },
+            {
+                "proto": "content.fruitList.[2]",
+                "title": "Orange"
+            },
+            {
+                "title": "Fruit"
+            }
+        ]
+    },
+    "types": {},
+    "private": {}
+}

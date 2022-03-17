@@ -1,0 +1,16 @@
+{
+    "content": {
+        "animalsAround": [
+            {
+                "proto": "animal",
+                "type": "bear"
+            }
+        ]
+    },
+    "types": {
+        "animal": {
+            "type": ""
+        }
+    },
+    "private": {}
+}

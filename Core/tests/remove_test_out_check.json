@@ -1,0 +1,27 @@
+{
+    "content": {
+        "orange": {
+            "proto": "content.fruitList.[0]",
+            "title": "Orange"
+        },
+        "apple": {
+            "proto": "content.fruitList.[0]",
+            "title": "Apple"
+        },
+        "fruitList": [
+            {
+                "title": "Fruit"
+            },
+            {
+                "proto": "content.fruitList.[0]",
+                "title": "Orange"
+            },
+            {
+                "proto": "content.fruitList.[0]",
+                "title": "Apple"
+            }
+        ]
+    },
+    "types": {},
+    "private": {}
+}
