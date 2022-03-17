@@ -56,6 +56,12 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     target_compile_definitions(qvl PRIVATE QT_QML_DEBUG)
 endif()
 
+add_custom_command(
+    TARGET qvl PRE_BUILD
+    COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/build_dmbcore.sh ${CMAKE_BUILD_TYPE} "${CMAKE_CURRENT_SOURCE_DIR}"
+    VERBATIM
+)
+
 target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-cmake/$<CONFIG>)
 target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/Build-cmake/dependencies/VL/JSONConverter/$<CONFIG>)
 target_link_directories(qvl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Core/dependencies/VL/Build-cmake/$<CONFIG>)

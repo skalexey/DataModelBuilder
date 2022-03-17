@@ -25,19 +25,20 @@ for %%x in (%*) do (
 	)
 )
 
-echo --- Build DMBCore
+rem Now is run by CMake
+rem echo --- Build DMBCore
 
-set curDir=%CD%
-cd ../Core
-setLocal
-call build.bat %*
-endLocal
-if not errorlevel 0 (
-	echo --- Core build failed. Error code: %errorlevel%
-	goto end
-)
+rem set curDir=%CD%
+rem cd ../Core
+rem setLocal
+rem call build.bat %*
+rem endLocal
+rem if not errorlevel 0 (
+rem 	echo --- Core build failed. Error code: %errorlevel%
+rem 	goto end
+rem )
 
-echo --- Core build done
+rem echo --- Core build done
 
 cd %curDir%
 
