@@ -8,15 +8,16 @@
 #include "ObjectProperty.h"
 #include "ModelsFwd.h"
 
-QT_BEGIN_NAMESPACE
-		class QModelIndex;
-QT_END_NAMESPACE
-
 namespace dmb
 {
-	class VLVarModel : public QObject
+	class VLVarModel : public QObject, public std::enable_shared_from_this<VLVarModel>
 	{
 		friend class VLListModelInterface;
+		friend class VLCollectionModel;
+		friend class VLListModel;
+		friend class ModelStorage;
+		friend class ObjectModelStorage;
+		friend class ListModelStorage;
 
 		Q_OBJECT
 
@@ -24,8 +25,9 @@ namespace dmb
 		// Constructors and initializers
 		explicit VLVarModel(QObject *parent = nullptr);
 		VLVarModel(const vl::Var& v, QObject *parent = nullptr);
-		~VLVarModel();
+		virtual ~VLVarModel();
 		virtual void Init(QObject* parent = nullptr);
+		virtual void Init(QObject *parent, DMBModel* owner);
 		virtual void Init(QObject *parent, const vl::Var& data, DMBModel* owner);
 		virtual void Init(const VLVarModelPtr& parent = nullptr);
 		// Type casts
@@ -38,34 +40,7 @@ namespace dmb
 		virtual bool isList() const;
 
 	public:
-		// Public data interface
-		const std::string& getId() const;
-		const vl::Var& getData() const;
-		virtual const vl::Var& getChildData(const VLVarModel* childPtr) const;
-		std::string getTypeId() const;
-		DMBModel* getDataModel();
-		const DMBModel* getDataModel() const;
-
-	protected:
-		// Protected data interface
-		vl::Var& getData();
-		virtual vl::Var& getChildData(const VLVarModel* childPtr);
-		void setDataModel(DMBModel* m);
-
-	public:
-		// Public Qt model interface
-		QVariant parentModelProp();
-		VLVarModelPtr getParentModel() const;
-		VLVarModelPtr parentModel();
-		bool setParentModel(const QVariant& data);
-		int getIndex() const;
-		virtual int getChildIndex(const VLVarModel* childPtr) const;
-		virtual bool removeChild(const VLVarModel* childPtr);
-		virtual const VLVarModelPtr& getChildPtr(const VLVarModel* p) const;
-		virtual VLVarModelPtr getPtr();
-
-	public:
-		// Properties
+		// Qt Interface
 		Q_PROPERTY (QString id READ id WRITE setId NOTIFY idChanged)
 		Q_PROPERTY (QString name READ id WRITE setId NOTIFY idChanged) // Alias for id property
 		Q_PROPERTY (ObjectProperty::Type type READ type WRITE setType NOTIFY typeChanged)
@@ -75,29 +50,59 @@ namespace dmb
 		Q_PROPERTY (QObject* owner READ getDataModel NOTIFY ownerChanged)
 		Q_PROPERTY (QVariant parent READ parentModelProp WRITE setParentModel NOTIFY parentChanged)
 		Q_INVOKABLE bool remove();
-		Q_INVOKABLE bool removeFromParent();
+		Q_INVOKABLE bool detachFromParent();
 		Q_INVOKABLE QVariant copy();
 
+	public:
+		VLVarModelPtr getParentModel() const;
+		DMBModel* getDataModel();
+		const DMBModel* getDataModel() const;
+		const vl::Var& getData() const;
+		std::string getStringId() const;
+
+	public:
+	signals:
+		void idChanged() const;
+		void typeChanged() const;
+		void valueChanged() const;
+		void ownerChanged(dmb::DMBModel* newOwner) const;
+		void beforeRemove() const;
+		void removed() const;
+		void parentChanged() const;
+
+	protected:
+		// For Qt Interface
+		QVariant parentModelProp();
+		VLVarModelPtr parentModel();
+		bool setParentModel(const QVariant& data);
+		virtual bool removeChild(const VLVarModel* childPtr);
+		virtual const VLVarModelPtr& getChild(const VLVarModel* p) const;
+		virtual const VLVarModelPtr& getPtr();
 		QString id() const;
 		bool setId(const QString &newId);
-		bool setId(const std::string &newId);
 		ObjectProperty::Type type() const;
 		QString typeStr() const;
-		void setType(const ObjectProperty::Type &newType);
+		bool setType(const ObjectProperty::Type &newType);
+		// Destroys the child model and replace it by a new with newType
+		virtual inline bool setChildType(const VLVarModel* child, const ObjectProperty::Type &newType) {
+			// Default logic
+			return false;
+		}
+		virtual const vl::Var& setChildValue(const VLVarModel* child, const vl::VarPtr& value);
 		QVariant value() const;
 		bool setValue(const QVariant &newValue);
 		QVariant valueStr() const;
 
-	private:
-		bool setValueInternal(const QVariant &newValue, bool emitValueChanged);
-
-	signals:
-		void idChanged(int index) const;
-		void typeChanged(int index) const;
-		void valueChanged(int index) const;
-		void ownerChanged(dmb::DMBModel* newOwner) const;
-		void beforeRemove() const;
-		void parentChanged() const;
+	protected:
+		// Protected data interface
+		vl::Var& data();
+		virtual vl::Var& getChildData(const VLVarModel* childPtr);
+		void setDataModel(DMBModel* m);
+		const std::string& getId() const;
+		int getIndex() const;
+		virtual const vl::Var& getChildData(const VLVarModel* childPtr) const;
+		std::string getTypeId() const;
+		bool setId(const std::string &newId);
 
 	private:
 		// Data

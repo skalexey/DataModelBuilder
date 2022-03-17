@@ -7,7 +7,14 @@
 #include "VLObjectVarModel.h"
 #include "VLListVarModel.h"
 #include "VarModelFactory.h"
+
 #include "Log.h"
+#ifdef LOG_ON
+	#include <QDebug>
+#endif
+LOG_TITLE("DMBModel")
+SET_LOG_DEBUG(true)
+LOG_STREAM([]{return qDebug();})
 
 namespace
 {
@@ -48,8 +55,7 @@ namespace dmb
 	DMBModel::DMBModel(QObject *parent)
 		: QObject(parent)
 	{
-		mRoot = std::make_shared<VLObjectVarModel>();
-		mRoot->Init(nullptr, getDataModel().GetData(), this);
+		InitRoot();
 	}
 
 	DMBModel::~DMBModel()
@@ -66,7 +72,9 @@ namespace dmb
 	VLObjectVarModel *DMBModel::contentModel()
 	{
 		// Invoke non-const version of getModel
-		if (auto model = mRoot->model("content"))
+		if (!mRoot)
+			return nullptr;
+		if (auto& model = mRoot->getModel("content"))
 			return model->asObject();
 		return nullptr;
 	}
@@ -74,7 +82,9 @@ namespace dmb
 	const VLObjectVarModel *DMBModel::getTypesModel() const
 	{
 		// Invoke const version of getModel
-		if (auto model = mRoot->model("types"))
+		if (!mRoot)
+			return nullptr;
+		if (auto& model = mRoot->getModel("types"))
 			return model->asObject();
 		return nullptr;
 	}
@@ -82,7 +92,9 @@ namespace dmb
 	VLObjectVarModel *DMBModel::typesModel()
 	{
 		// Invoke non-const version of getModel
-		if (auto model = mRoot->model("types"))
+		if (!mRoot)
+			return nullptr;
+		if (auto& model = mRoot->getModel("types"))
 			return model->asObject();
 		return nullptr;
 	}
@@ -139,23 +151,23 @@ namespace dmb
 		}
 	}
 
+	void DMBModel::InitRoot()
+	{
+		mRoot = std::make_shared<VLObjectVarModel>();
+		mRoot->Init(nullptr, getDataModel().GetData(), this);
+	}
+
 	bool DMBModel::load(const QString &url)
 	{
-		auto& m = mRoot->getPropListModel();
-		bool firstLoad = true;
-		if (m.elementsLoaded())
-		{
-			m.clear();
-			firstLoad = false;
-		}
 		auto fPath = getAbsolutePath(url);
+		clear();
+
+		mRoot.reset();
+
 		if (getDataModel().Load(fPath))
 		{
-			if (!firstLoad)
-				// The list of ids created in Init method
-				// on the object creation or loaded here
-				mRoot->getPropListModel().UpdateIdList();
-			// Create new Qt models for types and content
+			InitRoot();
+			LOCAL_DEBUG("Put 'ROOT " << (long)this << "' " << mRoot.get());
 			mRoot->loadPropList();
 			setCurrentFile(fPath.c_str());
 			emit modelLoaded(QString(fPath.c_str()));
@@ -175,8 +187,9 @@ namespace dmb
 
 	const VLVarModelPtr &DMBModel::storeStandaloneModel(const VLVarModelPtr &ptr)
 	{
+		LOCAL_DEBUG("storeStandaloneModel " << ptr.get());
 		auto it = mStandaloneModels.emplace(ptr.get(), ptr);
-		ptr->Init(this, const_cast<const VLVarModel&>(*ptr).getData(), this);
+		ptr->Init(this, this);
 		return it.first->second;
 	}
 
@@ -186,11 +199,18 @@ namespace dmb
 		emit currentFileChanged();
 	}
 
+	// Qt model interface
+	// Redirect to createFromDataPtr
 	VLVarModel *DMBModel::createFromData(const QVariant& data)
 	{
-		if (auto ptr = createPtrFromData(data))
-			return storeStandaloneModel(ptr).get();
-		return nullptr;
+		return createFromDataPtr(data).get();
+	}
+
+	const VLVarModelPtr& DMBModel::createFromDataPtr(const QVariant& data)
+	{
+		if (auto ptr = VarModelFactory::Instance().createFromData(data))
+			return storeStandaloneModel(ptr);
+		return nullVarModelPtr;
 	}
 
 	VLObjectVarModel *DMBModel::createObject()
@@ -205,15 +225,15 @@ namespace dmb
 
 	void DMBModel::clear()
 	{
-		mRoot->asObject()->getPropListModel().foreachElement([&](int i, const VLVarModelPtr& m) {
-			VLVarModel* mp = m.get();
-			if (auto l = mp->asList())
-				l->getListModel().clearAndNotify();
-			else if (auto o = m->asObject())
-				o->getPropListModel().clearAndNotify();
-			return true;
-		}, true);
-		mDataModel.Clear();
+//		mRoot->asObject()->getAllPropsListModel().foreachElement([&](int i, const VLVarModelPtr& m) {
+//			VLVarModel* mp = m.get();
+//			if (auto l = mp->asList())
+//				l->getListModel().clearAndNotify();
+//			else if (auto o = m->asObject())
+//				o->getAllPropsListModel().clearAndNotify();
+//			return true;
+//		}, true);
+		mDataModel.Clear(true);
 		setCurrentFile("");
 	}
 
@@ -223,19 +243,14 @@ namespace dmb
 			return false;
 		dmb::Model m;
 		m.Load(mFilePath);
+		LOCAL_DEBUG("1 model: " << m.DataStr(false).c_str());
+		LOCAL_DEBUG("2 model: " << mDataModel.DataStr(false).c_str());
 		return m.DataStr(false) != mDataModel.DataStr(false);
-	}
-
-	VLVarModelPtr DMBModel::createPtrFromData(const QVariant &data)
-	{
-		vl::VarPtr v = ObjectProperty::makeVarFromData(data);
-		return VarModelFactory::Instance().Create(*v);
 	}
 
 	VLObjectVarModelPtr DMBModel::createObjectSp()
 	{
-		auto ptr = VarModelFactory::Instance().CreateObject();
-		if (ptr)
+		if (auto ptr = VarModelFactory::Instance().CreateObject())
 			if (storeStandaloneModel(ptr))
 				return ptr;
 		return nullptr;
@@ -262,6 +277,8 @@ namespace dmb
 		return emptyVarModelPtr;
 	}
 
+
+
 	bool DMBModel::removeStandaloneModel(const VLVarModel *p)
 	{
 		return mStandaloneModels.erase(p) > 0;
@@ -284,10 +301,13 @@ namespace dmb
 
 	const VLVarModelPtr &DMBModel::modelByTypeId(const std::string &path)
 	{
+		// TODO: remove this hack
+		if (path.empty())
+			return nullVarModelPtr;
 		// Find in types if this is not a path but just a token
 		if (path.find_first_of('.') == std::string::npos)
 			if (auto types = typesModel())
-				if (auto& m = types->modelSp(path))
+				if (auto& m = types->model(path))
 					return m;
 
 		// Parse the path
@@ -307,27 +327,27 @@ namespace dmb
 				path.substr(cursor) : path.substr(cursor, dotPos - cursor);
 			auto n = ((node && *node) ? node : &root)->get();
 			if (auto o = n->asObject())
-				node = &o->modelSp(id);
+				node = &o->model(id);
 			else if (auto l = n->asList())
 			{
 				auto index = parseIndex(id);
-				if (index >= 0 && index < l->getData().Size())
-					node = &l->atSp(index);
+				if (auto& m = l->modelAt(index))
+					node = &m;
 				else
 				{
-					qDebug() << Utils::FormatStr("QVL: Wrong index %d in the path '%s' used for node '%s'", index, path.c_str(), lastId.c_str()).c_str();
+					LOCAL_LOG(Utils::FormatStr("QVL: Wrong index %d in the path '%s' used for node '%s'", index, path.c_str(), lastId.c_str()).c_str());
 					return nullVarModelPtr;
 				}
 			}
 			else
 			{
-				qDebug() << Utils::FormatStr("QVL: Wrong container type during parsing the node path '%s'", path.c_str()).c_str();
+				LOCAL_LOG(Utils::FormatStr("QVL: Wrong container type during parsing the node path '%s'", path.c_str()).c_str());
 				return nullVarModelPtr;
 			}
 			cursor = dotPos + 1;
 			lastId = id;
 
 		} while (dotPos != std::string::npos && node != nullptr);
-		return *node;
+		return node ? *node : nullVarModelPtr;
 	}
 }

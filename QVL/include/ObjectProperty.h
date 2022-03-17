@@ -43,7 +43,7 @@ namespace dmb
 		static const char* GetTypeStr(const vl::Var& var);
 		static vl::VarPtr MakeVarPtr(Type type);
 		static Type typeFromQVariant(const QVariant &data);
-		static vl::VarPtr makeVarFromData(const QVariant &data);
+		static vl::VarPtr makeVarFromData(const QVariant &data, vl::Type type = vl::Type::Count);
 
 	signals:
 		void vlTypeModelChanged();

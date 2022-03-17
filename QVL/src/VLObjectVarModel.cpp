@@ -1,3 +1,4 @@
+#include <unordered_set>
 #include <QObject>
 #include "VLObjectVarModel.h"
 #include "VLCollectionModel.h"
@@ -7,57 +8,90 @@
 #include "DMBModel.h"
 #include "Utils.h"
 
+#include "Log.h"
+#ifdef LOG_ON
+	#include <QDebug>
+#endif
+LOG_TITLE("VLCollectionModel")
+LOG_STREAM([]{return qDebug();})
+SET_LOG_VERBOSE(false)
+SET_LOG_DEBUG(true)
+
+namespace
+{
+	dmb::VLVarModelPtr nullVarModelPtr = nullptr;
+}
+
 namespace dmb
 {
 	const std::string emptyString;
 
 	VLObjectVarModel::VLObjectVarModel(QObject *parent)
 		: Base(parent)
+		, mAllPropsListModel(std::make_unique<AllPropsCollectionModel>(this, std::make_shared<ObjectModelStorage>()))
+		, mOwnPropsListModel(std::make_unique<OwnPropsCollectionModel>(this, *mAllPropsListModel)) // Share the same storage
 	{
-//		if (parent)
-//			qDebug() << "Object(QObject* parent) Object with a parent created";
-//		else
-//			qDebug() << "Object(QObject* parent == nullptr) Empty object cretaed";
+		if (parent) {
+			LOCAL_VERBOSE("Object(QObject* parent) Object with a parent created");
+		} else {
+			LOCAL_VERBOSE("Object(QObject* parent == nullptr) Empty object cretaed");
+		}
 	}
 
 	VLObjectVarModel::VLObjectVarModel(const vl::Var& v, QObject* parent)
 		: Base(v, parent)
+		, mAllPropsListModel(std::make_unique<AllPropsCollectionModel>(this, std::make_shared<ObjectModelStorage>()))
+		, mOwnPropsListModel(std::make_unique<OwnPropsCollectionModel>(this, *mAllPropsListModel)) // Share the same storage
 	{}
 
 	VLObjectVarModel::~VLObjectVarModel() {
-		//qDebug() << "~Object() with id '" << Base::getId().c_str() << "'";
+		LOCAL_DEBUG("~Object() (" << this << ")");
+		emit beforeRemove();
+		mOwnPropsListModel.reset();
+		mAllPropsListModel.reset();
 	}
 
 	bool VLObjectVarModel::loadPropList()
 	{
-//		qDebug() << "Load element models of object '" << Base::getId().c_str() << "' ";
-		bool result = mPropListModel.loadElementModels();
-//		if (result)
-//			qDebug() << " loaded\n";
-//		else
-//			qDebug() << " not loaded\n";
-		return result;
+		return getOwnPropsListModel().loadElementModels();
 	}
 
 	void VLObjectVarModel::Init(QObject *parent)
 	{
 		Base::Init(parent);
-		mPropListModel.setParent(this);
+		getOwnPropsListModel().setParent(this);
+		LOCAL_DEBUG(&getOwnPropsListModel() << "->(collection)setParent(" << this << ")");
+		getAllPropsListModel().setParent(this);
+		LOCAL_DEBUG(&getAllPropsListModel() << "->(collection)setParent(" << this << ")");
 	}
 
-	void VLObjectVarModel::Init(QObject *parent, const vl::Var& data, DMBModel* owner)
+	void VLObjectVarModel::Init(QObject *parent, DMBModel* owner)
 	{
-		Base::Init(parent, data, owner);
-		mPropListModel.Init(shared_from_this());
+		Base::Init(parent, owner);
+		auto ptr = shared_from_this();
+		getAllPropsListModel().Init(ptr);
+		getOwnPropsListModel().Init(ptr);
+		// We have the data object to update the id list
+		getAllPropsListModel().UpdateIdList();
 		// Uncomment if there are problems with not existent nested models
 		// Only in the first call of the nested model
 		//loadPropList();
 	}
 
+	void VLObjectVarModel::Init(QObject *parent, const vl::Var &data, DMBModel *owner)
+	{
+		Base::Init(parent, data, owner);
+	}
+
 	void VLObjectVarModel::Init(const VLVarModelPtr& parent)
 	{
 		Base::Init(parent);
-		mPropListModel.Init(shared_from_this());
+		auto ptr = shared_from_this();
+		getOwnPropsListModel().Init(ptr);
+		getAllPropsListModel().Init(ptr);
+		// The object is supposed to be registered
+		// in the parent's storage
+		getAllPropsListModel().UpdateIdList();
 	}
 
 	// Type casts
@@ -77,14 +111,42 @@ namespace dmb
 		return true;
 	}
 
+	// Begin of INVOKABLE helpful list-like interface
+	QVariant VLObjectVarModel::at(int index)
+	{
+		return getOwnPropsListModel().at(index);
+	}
+
+	bool VLObjectVarModel::removeAt(int index)
+	{
+		return getOwnPropsListModel().removeAt(index);
+	}
+	// End of helpful INVOKABLE list-like interface
+
+	// Redirects to has(const std::string)
+	// Check the data recursively through the proto chain
 	bool VLObjectVarModel::has(const QString &propId) const
 	{
 		return has(propId.toStdString());
 	}
 
+	// Redirects to hasOwn(const std::string)
+	// Checks the data just in its object
+	bool VLObjectVarModel::hasOwn(const QString &propId) const
+	{
+		return hasOwn(propId.toStdString());
+	}
+
+	// Checks the data recursively through the proto chain
 	bool VLObjectVarModel::has(const std::string &propId) const
 	{
 		return getData().Has(propId);
+	}
+
+	// Checks the data just in its object
+	bool VLObjectVarModel::hasOwn(const std::string &propId) const
+	{
+		return getData().HasOwn(propId);
 	}
 
 	const vl::ObjectVar &VLObjectVarModel::getData() const
@@ -92,168 +154,133 @@ namespace dmb
 		return Base::getData().AsObject();
 	}
 
-	vl::ObjectVar &VLObjectVarModel::getData()
+	vl::ObjectVar &VLObjectVarModel::data()
 	{
 		return const_cast<vl::ObjectVar&>(const_cast<const VLObjectVarModel*>(this)->getData());
 	}
 
-	const std::string &VLObjectVarModel::getPropId(int index) const
+	const VLVarModelPtr &VLObjectVarModel::getChild(const VLVarModel *p) const
 	{
-		return mPropListModel.getId(index);
+		if (auto id = getChildId(p))
+			return getModel(*id);
+		return nullVarModelPtr;
 	}
 
-	const VLVarModel *VLObjectVarModel::getAt(int index) const
-	{
-		return mPropListModel.getAt(index);
-	}
-
-	VLVarModel *VLObjectVarModel::getAt(int index)
-	{
-		return const_cast<VLVarModel*>(const_cast<const VLObjectVarModel*>(this)->getAt(index));
-	}
-
-	int VLObjectVarModel::getChildIndex(const VLVarModel *childPtr) const
-	{
-		return mPropListModel.getElementIndex(childPtr);
-	}
-
-	const std::string &VLObjectVarModel::getChildId(const VLVarModel *childPtr) const
-	{
-		auto index = getChildIndex(childPtr);
-		if (index >= 0)
-			return getId(index);
-		return emptyString;
-	}
-
-	const VLVarModelPtr &VLObjectVarModel::getChildPtr(const VLVarModel *p) const
-	{
-		return getModelSp(getChildId(p));
-	}
-
+	// Redirects to the propListModel
+	// Removes data and model from the parent
 	bool VLObjectVarModel::removeChild(const VLVarModel *childPtr)
 	{
-		return mPropListModel.remove(getChildId(childPtr));
-	}
-
-	const std::string &VLObjectVarModel::getId(int index) const
-	{
-		return mPropListModel.getId(index);
-	}
-
-	int VLObjectVarModel::getIndex(const std::string &propId) const
-	{
-		return mPropListModel.getIndex(propId);
+		return getOwnPropsListModel().removeElement(childPtr);
 	}
 
 	bool VLObjectVarModel::renameProperty(const std::string &propId, const std::string &newId)
 	{
-		return mPropListModel.renameElement(propId, newId);
+		return getOwnPropsListModel().renameElement(propId, newId);
 	}
 
 	const vl::Var &VLObjectVarModel::getChildData(const VLVarModel *childPtr) const
 	{
-		return mPropListModel.getDataAt(getChildIndex(childPtr));
+		if (auto id = getChildId(childPtr))
+			return getData().Get(*id);
+		return vl::emptyVar;
 	}
 
-	const VLVarModelPtr& VLObjectVarModel::getModelSp(const std::string &propId) const
+	// Begin of Model retrieving by id interface
+	// Redirects to propListModel
+	// Return null if the model doesn't exist
+	const VLVarModelPtr& VLObjectVarModel::getModel(const std::string &propId) const
 	{
-		return mPropListModel.getModelSp(propId);
+		return getAllPropsListModel().getModel(propId);
 	}
 
-	const VLVarModelPtr& VLObjectVarModel::modelSp(const std::string &propId)
+	// Redirects to propListModel
+	// Creates a model if doesn't exist
+	const VLVarModelPtr& VLObjectVarModel::model(const std::string &propId)
 	{
-		return mPropListModel.modelSp(propId);
+		return getAllPropsListModel().model(propId);
 	}
 
+	// Redirects to propListModel
 	const VLVarModelPtr &VLObjectVarModel::setModel(const std::string &propId, const VLVarModelPtr &modelPtr)
 	{
-		return mPropListModel.setModel(propId, modelPtr);
+		// Should call it on AllPropsCollectionModel to be able
+		// to check the existent shared model and restrict adding a new model if it exists
+		return getAllPropsListModel().setModel(propId, modelPtr);
 	}
 
-	const VLVarModel *VLObjectVarModel::getModel(const std::string &propId) const
+	const std::string *VLObjectVarModel::getChildId(const VLVarModel *childPtr) const
 	{
-		return mPropListModel.getModel(propId);
+		return getOwnPropsListModel().getElementId(childPtr);
 	}
 
-	VLVarModel *VLObjectVarModel::model(const std::string &propId)
+	// Redirects to allPropListModel
+	// Creates a model if doesn't exist
+	// Return its own prop even if it is of a proto own
+	QVariant VLObjectVarModel::get(const QString &propId)
 	{
-		return mPropListModel.model(propId);
+		return getAllPropsListModel().get(propId);
 	}
+
+	QVariant VLObjectVarModel::getOwn(const QString &propId)
+	{
+		return getOwnPropsListModel().get(propId);
+	}
+	// End of Model retrieving by id interface
 
 	VLCollectionModel* VLObjectVarModel::propListModel()
 	{
-		if (!mPropListModel.elementsLoaded())
+		if (!getOwnPropsListModel().elementsLoaded())
 			loadPropList();
-		return &mPropListModel;
+		return &getOwnPropsListModel();
 	}
 
-	VLCollectionModel *VLObjectVarModel::protoPropListModel()
+	QVariant VLObjectVarModel::protoPropListModel()
 	{
-		if (auto protoModel = model("proto"))
+		if (auto& protoModel = model("proto"))
 			if (auto objectModel = protoModel->asObject())
-				return objectModel->propListModel();
-		return nullptr;
+				return QVariant::fromValue(objectModel->propListModel());
+		return QVariant();
 	}
 
-	VLCollectionModel& VLObjectVarModel::getPropListModel()
+	QVariant VLObjectVarModel::allPropListModel()
 	{
-		return mPropListModel;
+		if (!getAllPropsListModel().elementsLoaded())
+		{
+			getAllPropsListModel().UpdateIdList();
+			getAllPropsListModel().loadElementModels();
+		}
+		return QVariant::fromValue(&getAllPropsListModel());
 	}
 
 	void VLObjectVarModel::add(const QString& propId, ObjectProperty::Type type)
 	{
-		mPropListModel.add(propId, type);
+		getOwnPropsListModel().add(propId, type);
 	}
 
 	bool VLObjectVarModel::removeProp(const QString& propName)
 	{
-		return mPropListModel.remove(propName);
+		return getOwnPropsListModel().remove(propName);
 	}
 
-	bool VLObjectVarModel::removeAt(int index)
+	// Redirects to propListModel
+	bool VLObjectVarModel::setChildType(const VLVarModel *child, const ObjectProperty::Type &newType)
 	{
-		return mPropListModel.removeAt(index);
+		return getOwnPropsListModel().setElementType(child, newType);
 	}
 
-	VLVarModel *VLObjectVarModel::at(int index)
+	const vl::Var &VLObjectVarModel::setChildValue(const VLVarModel *child, const vl::VarPtr &value)
 	{
-		return mPropListModel.at(index);
+		return getOwnPropsListModel().setElementValue(child, value);
 	}
 
-	VLVarModel *VLObjectVarModel::get(const QString &propId)
+	QVariant VLObjectVarModel::set(const QString &propId, const QVariant &data)
 	{
-		return mPropListModel.get(propId);
-	}
-
-	VLVarModel *VLObjectVarModel::set(const QString &propId, VLVarModel *var)
-	{
-		return mPropListModel.set(propId, var);
-	}
-
-	VLVarModel *VLObjectVarModel::set(const QString &propId, const QVariant &data)
-	{
-		return mPropListModel.set(propId, data);
-	}
-
-	vl::Var& VLObjectVarModel::setData(const std::string &propId, const vl::Var &v)
-	{
-		return mPropListModel.setData(propId, v);
+		return getOwnPropsListModel().set(propId, data);
 	}
 
 	std::string VLObjectVarModel::getFreeId(const std::string& desiredId) const
 	{
-		auto newId = desiredId.empty() ? "new_prop" : desiredId;
-		bool success = true;
-		if (has(newId))
-		{
-			std::string tpl = newId;
-			for (int i = 1; i < std::numeric_limits<short>::max(); i++)
-				if ((success = !has(newId = Utils::FormatStr("%s %d", tpl.c_str(), i))))
-					break;
-		}
-		if (success)
-			return newId;
-		return "";
+		return getOwnPropsListModel().getFreeId(desiredId);
 	}
 
 	QString VLObjectVarModel::freeId(const QString& desiredId) const
@@ -305,9 +332,31 @@ namespace dmb
 		return false;
 	}
 
-	int VLObjectVarModel::size() const
+	int VLObjectVarModel::sizeOwn() const
 	{
-		return mPropListModel.dataSize();
+		return getData().Size();
+	}
+
+	int VLObjectVarModel::sizeAll() const
+	{
+		std::unordered_set<std::string> s;
+		auto& data = getData();
+		if (auto& proto = data.GetPrototype())
+		{
+			proto.ForeachProp(
+			[&](const std::string& propName, const vl::Var& prop) {
+				if (propName == "proto")
+						return true;
+				s.insert(propName);
+				return true;
+			}, true);
+		}
+		data.ForeachProp(
+		[&](const std::string& propName, const vl::Var& prop) {
+			s.insert(propName);
+			return true;
+		});
+		return s.size();
 	}
 
 	bool VLObjectVarModel::setPrototype(const std::string &protoId)
@@ -318,16 +367,9 @@ namespace dmb
 		return false;
 	}
 
-	VLVarModelPtr VLObjectVarModel::getPtr()
-	{
-		if (auto ptr = Base::getPtr())
-			return ptr;
-		return std::dynamic_pointer_cast<VLVarModel>(shared_from_this());
-	}
-
 	QVariant VLObjectVarModel::protoId() const
 	{
-		if (auto protoModel = getModel("proto"))
+		if (auto& protoModel = getModel("proto"))
 			return protoModel->asObject()->typeId();
 		return QVariant();
 	}
@@ -336,6 +378,4 @@ namespace dmb
 	{
 		return QVariant(QString(getTypeId().c_str()));
 	}
-
-
 }

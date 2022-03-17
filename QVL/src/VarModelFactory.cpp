@@ -1,3 +1,4 @@
+#include "ObjectProperty.h"
 #include "VarModelFactory.h"
 #include "VLVarModel.h"
 #include "VLObjectVarModel.h"
@@ -44,18 +45,11 @@ namespace dmb
 		return ptr;
 	}
 
-//	VLVarModel* VarModelFactory::CreateFreeQtObject(const vl::Var &v)
-//	{
-//		VLVarModel* ptr = nullptr;
-//		if (v.IsObject())
-//			ptr = new VLObjectVarModel;
-//		else if (v.IsList())
-//			ptr = new VLListVarModel;
-//		else
-//			// TODO: make smth like VLVarModel<bool> or VLBoolModel
-//			ptr = new VLVarModel;
-//		return ptr;
-//	}
+	VLVarModelPtr VarModelFactory::createFromData(const QVariant &data)
+	{
+		vl::VarPtr v = ObjectProperty::makeVarFromData(data);
+		return VarModelFactory::Instance().Create(*v);
+	}
 
 	VarModelFactory& VarModelFactory::Instance()
 	{

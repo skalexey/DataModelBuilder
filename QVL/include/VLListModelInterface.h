@@ -1,6 +1,7 @@
 #ifndef VLLISTMODELINTERFACE_H
 #define VLLISTMODELINTERFACE_H
 
+#include <utility>
 #include <memory>
 #include <vector>
 #include <unordered_map>
@@ -9,12 +10,18 @@
 #include <QVariantList>
 #include "vl_fwd.h"
 #include "ObjectProperty.h"
+#include "ModelStorage.h"
 #include "ModelsFwd.h"
 
 namespace dmb
 {
 	class VLListModelInterface : public QAbstractListModel
 	{
+		typedef QAbstractListModel Base;
+
+		friend class ListModelStorageSubscriptionProcessor;
+		friend class ModelStorageSubscriptionProcessor;
+
 		Q_OBJECT
 	protected:
 		enum Role {
@@ -27,36 +34,69 @@ namespace dmb
 			InterfaceRoleCount
 		};
 
+		// Main access interface:
+		// getAt
+		// at
+		// atSp
+		// getAtSp
 	public:
 		// Constructors and initializers
-		explicit VLListModelInterface(QObject* parentModel);
-		~VLListModelInterface();
+		explicit VLListModelInterface(QObject* parent = nullptr);
+		explicit VLListModelInterface(QObject* parentModel, const ModelStoragePtr& storage);
+		explicit VLListModelInterface(QObject* parentModel, const VLListModelInterface& storageOwner);
+		virtual ~VLListModelInterface();
 		virtual bool Init(QObject* parentModel);
 		virtual bool Init(const VLVarModelPtr& parentModel);
 		// Strictly necessary
 		virtual int dataSize() const = 0;
-		virtual const vl::Var& getDataAt(int index) const = 0;
+		// Needed in all collections because of list-like representation
+		// of the ListModel in Qt
 		virtual bool doRemove(int index) = 0; // return true if success
+		// Non-const version of getAtSp
+		// Retrieve a raw pointer from the storage to a model at index
+		// Create a model if it doesn't exists
+		virtual const dmb::VLVarModelPtr& modelAt(int index) = 0;
+		virtual const VLVarModelPtr& getModelAt(int index) const = 0;
+		virtual bool loadElementModels() = 0;
+		virtual const VLVarModelPtr& setModelAt(int index, const VLVarModelPtr& modelPtr) = 0;
+		virtual bool doSetData(int index, const QVariant& value, int role) = 0;
+		virtual const vl::Var& setElementValue(const VLVarModel* e, const vl::VarPtr& value) = 0;
+		virtual bool setElementType(const VLVarModel *childPtr, ObjectProperty::Type type) = 0;
 
 	protected:
-		virtual vl::Var& setDataAt(int index, const vl::VarPtr& ptr, const std::function<VLVarModelPtr(bool alreadyExist)>& customModelLoader = nullptr) = 0;
+		virtual const ModelStorage& getStorage() const {
+			// Should always be
+			return *mStorage;
+		}
+		inline const ModelStoragePtr& getSharedStorage() const {
+			return mStorage;
+		}
+
+		// Begin of Common code which should be run on any storage holder
+		// when a model is put into it
+		void onModelPut(const VLVarModelPtr& model);
+		void onModelBeforeRemove(const VLVarModelPtr& m);
+		// End of Common code which should be run on any storage holder
 
 	public:
 		// Other
 		virtual int size() const;
 		virtual void clear(); // Clear the list
+		// Clears the model storage and call begin/endRemoveRows
+		// Not needed in subscribed approach
 		void clearAndNotify();
 		bool elementsLoaded() const;
-		bool loadElementModels();
 		void connectSignals(VLVarModel* model) const;
+		void disconnectSignals(VLVarModel* model) const;
+		virtual VLCollectionModel* asCollection();
+		virtual bool isCollection() const;
 		// Role getters
-		virtual QVariant role(const VLVarModel* m, int index, int role) const;
-		virtual QVariant roleType(const VLVarModel* m, int index) const;
-		virtual QVariant roleTypeStr(const VLVarModel* m, int index) const;
-		virtual QVariant roleValueStr(const VLVarModel* m, int index) const;
-		virtual QVariant roleValue(const VLVarModel* m, int index) const;
+		virtual QVariant role(const VLVarModelPtr& m, int index, int role) const;
+		virtual QVariant roleType(const VLVarModelPtr& m, int index) const;
+		virtual QVariant roleTypeStr(const VLVarModelPtr& m, int index) const;
+		virtual QVariant roleValueStr(const VLVarModelPtr& m, int index) const;
+		virtual QVariant roleValue(const VLVarModelPtr& m, int index) const;
 		// Write methods
-		virtual bool doSetData(int index, const QVariant& value, int role);
 
 	public:
 		// QAbstractListModel interface
@@ -70,56 +110,55 @@ namespace dmb
 
 	public:
 		// Public data interface
-		bool setType(int index, ObjectProperty::Type type);
 
 	protected:
 		// Protected data interface
-		// Non-const mirror implementation of getDataAt(int index) const
-		virtual vl::Var& getDataAt(int index);
-		// Setters
-		vl::Var& setDataAt(int index);
-		vl::Var& setDataAt(int index, const vl::Var& value);
-		template <typename T>
-		vl::Var& setDataAt(int index, const T& value)
-		{
-			return setDataAt(index, MakePtr(value));
-		}
+		// Non-const mirror implementation of getData(int index) const
+		const vl::Var& getData(int index) const;
 
 	public:
 		// Public Qt model interface
-		const dmb::VLVarModelPtr& getAtSp(int index) const;
-		const dmb::VLVarModelPtr& atSp(int index);
-		const dmb::VLVarModelPtr& setAt(int index, const dmb::VLVarModelPtr& modelPtr);
-		const dmb::VLVarModel* getAt(int index) const;
-		const VLVarModelPtr getParentModel() const;
-		int getElementIndex(const VLVarModel* elementPtr) const;
+		inline const VLVarModelPtr getParentModel() const {
+			return mParentModel.lock();
+		}
+		virtual inline int getElementIndex(const void* e) const {
+			return getStorage().getIndex(e);
+		}
 		bool foreachElement(const std::function<bool(int, const VLVarModelPtr&)>& pred, bool recursive = false) const;
 		bool foreachElement(const std::function<bool(int, const VLVarModelPtr&)>& pred, bool recursive = false);
 
 	protected:
 		// Protected Qt model interface
-		const VLVarModelPtr& loadElementModel(int index, int indexBefore = -1);
-		VLVarModelPtr getParentModel();
+		inline VLVarModelPtr getParentModel() {
+			return mParentModel.lock();
+		}
 
 	protected:
 		// Other
 		void resetList(const std::function<void()>& doWithList = nullptr);
+		inline ModelStorage& getStorage() {
+			return const_cast<ModelStorage&>(
+						const_cast<const VLListModelInterface*>(this)->getStorage()
+					);
+		}
+		void beginInsertNewRow();
 
 	public:
 		// Properties
-		Q_INVOKABLE dmb::VLVarModel* at(int index);
-		Q_INVOKABLE bool removeAt(int index);
+		Q_INVOKABLE QVariant at(int index);
+		Q_INVOKABLE virtual bool removeAt(int index);
 		Q_PROPERTY (int size READ size NOTIFY sizeChanged);
 		Q_PROPERTY (dmb::VLVarModel* parent READ getParentModelProp NOTIFY parentModelChanged);
 
 	protected:
 		// Properties implementation
 		dmb::VLVarModel *getParentModelProp() const;
+		virtual std::unique_ptr<ModelStorageSubscriptionProcessor> createStorageSubscriptionProcessor();
 
 	public slots:
-		virtual void onNameChanged(int index);
-		void onValueChanged(int index);
-		void onTypeChanged(int index);
+		virtual void onNameChanged();
+		void onValueChanged();
+		void onTypeChanged();
 		void onModelChanged(int indexFirst, int indexLast = -1);
 
 	signals:
@@ -127,28 +166,12 @@ namespace dmb
 		void parentModelChanged();
 
 	protected:
-		const VLVarModelPtr& putModel(int index, const VLVarModelPtr& ptr, int indexBefore = -1);
+		std::unique_ptr<ModelStorageSubscriptionProcessor> mStorageSubscriptionProcessor;
 
 	private:
 		// Data
-		class MStorage
-		{
-		public:
-			int getIndex(const VLVarModel* e) const;
-			int size() const;
-			void resize(int newSize);
-			void clear();
-			const VLVarModelPtr& put(int index, const VLVarModelPtr& ptr, int indexBefore = -1);
-			const VLVarModelPtr& operator[](int index) const;
-			VLVarModelPtr& at(int index);
-			void remove(int index);
-
-		protected:
-			std::vector<VLVarModelPtr> mElements;
-			std::map<const VLVarModel*, int> mElementIndex;
-		};
-		MStorage mStorage;
 		std::weak_ptr<VLVarModel> mParentModel;
+		ModelStoragePtr mStorage = nullptr;
 	};
 }
 

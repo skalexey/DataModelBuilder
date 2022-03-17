@@ -13,10 +13,13 @@
 namespace dmb
 {
 	class Model;
+	class ModelStorage;
 
 	class DMBModel : public QObject
 	{
 		friend class VLVarModel;
+		friend class ModelStorage;
+
 		Q_OBJECT
 		QML_NAMED_ELEMENT(DMBModel)
 
@@ -31,10 +34,13 @@ namespace dmb
 		const dmb::Model& getDataModel() const;
 		dmb::Model& getDataModel();
 		bool isLoaded() const;
-		dmb::VLVarModelPtr createPtrFromData(const QVariant& data);
+		const VLVarModelPtr& createFromDataPtr(const QVariant& data);
 		dmb::VLObjectVarModelPtr createObjectSp();
 		dmb::VLListVarModelPtr createListSp();
 		VLVarModelPtr takeStandaloneModel(const VLVarModel* p);
+		inline bool hasStandaloneModel(const VLVarModel* p) {
+			return mStandaloneModels.find(p) != mStandaloneModels.end();
+		}
 		bool removeStandaloneModel(const VLVarModel* p);
 		QString currentFile() const;
 		const std::string& getCurrentFile() const;
@@ -58,10 +64,15 @@ namespace dmb
 	protected:
 		const VLVarModelPtr &storeStandaloneModel(const VLVarModelPtr& ptr);
 		void setCurrentFile(const std::string& newFilePath);
+		inline const VLObjectVarModelPtr& getRoot() {
+			return mRoot;
+		}
+		void InitRoot();
 
 	protected:
 		VLObjectVarModelPtr mRoot = nullptr;
 		dmb::Model mDataModel;
+
 		std::string mFilePath;
 		std::unordered_map<const VLVarModel*, VLVarModelPtr> mStandaloneModels;
 

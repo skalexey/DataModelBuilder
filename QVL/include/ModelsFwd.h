@@ -2,6 +2,7 @@
 #define MODELSFWD_H
 
 #include <memory>
+#include <functional>
 
 namespace dmb {
 	class VLVarModel;
@@ -16,8 +17,28 @@ namespace dmb {
 	class VLListModelInterface;
 	class VLListModel;
 	class VLCollectionModel;
+	class OwnPropsCollectionModel;
+	class AllPropsCollectionModel;
+
+	class CollectionModelSubscriptionProcessor;
+	class OwnPropsSubscriptionProcessor;
+	class AllPropsSubscriptionProcessor;
+
+	class ModelStorage;
+	class ObjectModelStorage;
+	class ListModelStorage;
+
+	class ModelStorageSubscriptionProcessor;
+	class ObjectModelStorageSubscriptionProcessor;
+	class ListModelStorageSubscriptionProcessor;
 
 	class DMBModel;
+
+	class NotifContext;
+
+	typedef std::function<void()> VoidCb;
+	typedef std::function<void(int)> VoidCbInt;
+	typedef std::function<bool(const NotifContext&)> BoolCbContext;
 }
 
 #endif // MODELSFWD_H

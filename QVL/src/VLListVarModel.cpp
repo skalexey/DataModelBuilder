@@ -11,25 +11,31 @@ namespace dmb
 {
 	VLListVarModel::VLListVarModel(QObject *parent)
 		: Base(parent)
+		, mListModel(std::make_unique<VLListModel>(this, std::make_shared<ListModelStorage>()))
 	{}
-
-	VLListVarModel::~VLListVarModel()
-	{}
-
-	void VLListVarModel::Init(QObject *parent, const vl::Var& data, DMBModel* owner)
-	{
-		Base::Init(parent, data, owner);
-		mListModel.Init(shared_from_this());
-	}
 
 	VLListVarModel::VLListVarModel(const vl::Var& v, QObject* parent)
 		: Base(v, parent)
+		, mListModel(std::make_unique<VLListModel>(this, std::make_shared<ListModelStorage>()))
 	{}
+
+	VLListVarModel::~VLListVarModel()
+	{
+		qDebug() << "~VLListVarModel() " << this;
+		emit beforeRemove();
+		mListModel.reset();
+	}
+
+	void VLListVarModel::Init(QObject *parent, DMBModel* owner)
+	{
+		Base::Init(parent, owner);
+		getListModel().Init(shared_from_this());
+	}
 
 	void VLListVarModel::Init(const VLVarModelPtr &parent)
 	{
 		Base::Init(parent);
-		mListModel.Init(shared_from_this());
+		getListModel().Init(shared_from_this());
 	}
 
 	void VLListVarModel::Init(QObject *parent)
@@ -69,12 +75,12 @@ namespace dmb
 
 	const vl::Var &VLListVarModel::getChildData(const VLVarModel *childPtr) const
 	{
-		return mListModel.getDataAt(getChildIndex(childPtr));
+		return getListModel().getData(getChildIndex(childPtr));
 	}
 
 	int VLListVarModel::getChildIndex(const VLVarModel *childPtr) const
 	{
-		return mListModel.getElementIndex(childPtr);
+		return getListModel().getElementIndex(childPtr);
 	}
 
 	vl::List &VLListVarModel::data()
@@ -82,44 +88,39 @@ namespace dmb
 		return const_cast<vl::List&>(const_cast<const VLListVarModel*>(this)->getData());
 	}
 
-	const VLVarModel *VLListVarModel::getAt(int index) const
+	QVariant VLListVarModel::at(int index)
 	{
-		return mListModel.getAt(index);
+		return QVariant::fromValue(getListModel().at(index));
 	}
 
-	dmb::VLVarModel *VLListVarModel::at(int index)
+	const VLVarModelPtr &VLListVarModel::getModelAt(int index) const
 	{
-		return mListModel.at(index);
+		return getListModel().getModelAt(index);
 	}
 
-	const VLVarModelPtr &VLListVarModel::getAtSp(int index) const
+	const VLVarModelPtr &VLListVarModel::modelAt(int index)
 	{
-		return mListModel.getAtSp(index);
+		return getListModel().modelAt(index);
 	}
 
-	const VLVarModelPtr &VLListVarModel::atSp(int index)
+	QVariant VLListVarModel::add(ObjectProperty::Type type, int indexBefore)
 	{
-		return mListModel.atSp(index);
+		return getListModel().add(type, indexBefore);
 	}
 
-	VLVarModel* VLListVarModel::add(ObjectProperty::Type type, int indexBefore)
+	QVariant VLListVarModel::add(const QVariant &data, int indexBefore)
 	{
-		return mListModel.add(type, indexBefore);
+		return getListModel().add(data, indexBefore);
 	}
 
-	VLVarModel* VLListVarModel::add(const QVariant &data, int indexBefore)
+	QVariant VLListVarModel::add(const VLVarModel *model, int indexBefore)
 	{
-		return mListModel.add(data, indexBefore);
-	}
-
-	VLVarModel *VLListVarModel::add(const VLVarModel *model, int indexBefore)
-	{
-		return mListModel.add(model, indexBefore);
+		return getListModel().add(model, indexBefore);
 	}
 
 	const VLVarModelPtr &VLListVarModel::addModel(const VLVarModelPtr &modelPtr, int indexBefore)
 	{
-		return mListModel.addModel(modelPtr, indexBefore);
+		return getListModel().addModel(modelPtr, indexBefore);
 	}
 
 	bool VLListVarModel::removeChild(const VLVarModel *childPtr)
@@ -127,26 +128,24 @@ namespace dmb
 		return removeAt(getChildIndex(childPtr));
 	}
 
-	const VLVarModelPtr &VLListVarModel::getChildPtr(const VLVarModel *p) const
+	const VLVarModelPtr &VLListVarModel::getChild(const VLVarModel *p) const
 	{
-		return getAtSp(getChildIndex(p));
+		return getModelAt(getChildIndex(p));
 	}
 
-	VLVarModelPtr VLListVarModel::getPtr()
+	const vl::Var &VLListVarModel::setChildValue(const VLVarModel *child, const vl::VarPtr &value)
 	{
-		if (auto ptr = Base::getPtr())
-			return ptr;
-		return std::dynamic_pointer_cast<VLVarModel>(shared_from_this());
+		return getListModel().setElementValue(child, value);
 	}
 
 	bool VLListVarModel::removeAt(int index)
 	{
-		return mListModel.removeAt(index);
+		return getListModel().removeAt(index);
 	}
 
-	VLVarModel *VLListVarModel::find(const QVariant &data)
+	QVariant VLListVarModel::find(const QVariant &data)
 	{
-		return mListModel.find(data);
+		return getListModel().find(data);
 	}
 
 	void VLListVarModel::instantiate(const QString &typeId)
@@ -166,20 +165,20 @@ namespace dmb
 
 	int VLListVarModel::size() const
 	{
-		return mListModel.dataSize();
+		return getListModel().dataSize();
 	}
 
-	VLListModel *VLListVarModel::listModel()
+	QVariant VLListVarModel::listModel()
 	{
-		if (!mListModel.elementsLoaded())
+		if (!getListModel().elementsLoaded())
 			loadElements();
-		return &mListModel;
+		return QVariant::fromValue(&getListModel());
 	}
 
 	bool VLListVarModel::loadElements()
 	{
 //		qDebug() << "Load element models of list '" << getId().c_str() << "' ";
-		bool result = mListModel.loadElementModels();
+		bool result = getListModel().loadElementModels();
 //		if (result)
 //			qDebug() << " loaded\n";
 //		else

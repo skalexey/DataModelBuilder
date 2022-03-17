@@ -5,6 +5,16 @@
 #include "VLListVarModel.h"
 #include "VarModelFactory.h"
 #include "DMBModel.h"
+#include "Utils.h"
+
+#include "Log.h"
+#ifdef LOG_ON
+	#include <QDebug>
+#endif
+LOG_TITLE("VLVarModel")
+LOG_STREAM([]{return qDebug();})
+SET_LOG_VERBOSE(false)
+SET_LOG_DEBUG(true)
 
 namespace dmb
 {
@@ -14,7 +24,7 @@ namespace dmb
 	VLVarModel::VLVarModel(QObject *parent)
 		: QObject(parent)
 	{
-//		qDebug() << "Create VarModel " << this;
+		setParent(nullptr);
 	}
 
 	VLVarModel::VLVarModel(const vl::Var& v, QObject *parent)
@@ -25,7 +35,9 @@ namespace dmb
 
 	VLVarModel::~VLVarModel()
 	{
-//		qDebug() << "Destroy VarModel " << this;
+		LOCAL_DEBUG("Destroy VarModel " << this);
+		emit removed();
+		LOCAL_DEBUG(this << "->setParent(nullptr)");
 		setParent(nullptr);
 	}
 
@@ -34,15 +46,28 @@ namespace dmb
 		setParent(parent);
 	}
 
-	void VLVarModel::Init(QObject *parent, const vl::Var &data, DMBModel* owner)
+	void VLVarModel::Init(QObject *parent, DMBModel* owner)
 	{
+		if (getParentModel())
+		{
+			if (auto& data = getData())
+				mVarPtr = vl::MakePtr(data);
+			mParentModel.reset();
+		}
 		setParent(parent);
-		mVarPtr = vl::MakePtr(data);
 		setDataModel(owner);
 	}
 
+	void VLVarModel::Init(QObject *parent, const vl::Var &data, DMBModel* owner)
+	{
+		mVarPtr = vl::MakePtr(data);
+		Init(parent, owner);
+	}
+
+
 	void VLVarModel::Init(const VLVarModelPtr& parent)
 	{
+		LOCAL_DEBUG(this << "->setParent(" << parent.get() << ")");
 		setParent(parent.get());
 		if (mVarPtr)
 			mVarPtr.reset();
@@ -81,6 +106,7 @@ namespace dmb
 		return false;
 	}
 
+	// Gets the data through the parent
 	const vl::Var &VLVarModel::getData() const
 	{
 		if (mVarPtr)
@@ -90,7 +116,8 @@ namespace dmb
 		return vl::emptyVar;
 	}
 
-	vl::Var &VLVarModel::getData()
+	// Non-const mirror
+	vl::Var &VLVarModel::data()
 	{
 		return const_cast<vl::Var&>(const_cast<const VLVarModel*>(this)->getData());
 	}
@@ -144,15 +171,24 @@ namespace dmb
 		return QVariant::fromValue(mParentModel.lock().get());
 	}
 
-	bool VLVarModel::removeFromParent()
+	// Detaches model and data from the parent
+	// and keep both as a standalone model.
+	// The model itself remains valid
+	bool VLVarModel::detachFromParent()
 	{
 		if (auto parent = getParentModel())
 			if (auto owner = getDataModel())
 			{
-				auto ptr = parent->getChildPtr(this);
-				owner->storeStandaloneModel(ptr);
-				parent->removeChild(this);
-				return true;
+				if (auto ptr = parent->getChild(this))
+				{
+					owner->storeStandaloneModel(ptr);
+					parent->removeChild(this);
+					return true;
+				}
+				else
+				{
+					LOCAL_ERROR("detachFromParent: can't find this as a child of it's parent (this: " << this << " , parent: " << parent.get() << "'");
+				}
 			}
 		return false;
 	}
@@ -173,10 +209,12 @@ namespace dmb
 		VLVarModel* newParent = nullptr;
 		if (data.canConvert<VLVarModel*>())
 			newParent = qvariant_cast<VLVarModel*>(data);
+		if (!newParent)
+			return false;
 
 		auto currentParent = getParentModel();
 		auto currentId = getId();
-		if (removeFromParent())
+		if (detachFromParent())
 			if (auto ptr = getDataModel()->takeStandaloneModel(this))
 			{
 				if (auto newParentObject = newParent->asObject())
@@ -191,42 +229,28 @@ namespace dmb
 		return false;
 	}
 
-	int VLVarModel::getIndex() const
-	{
-		if (auto parent = getParentModel())
-			return parent->getChildIndex(this);
-		return -1;
-	}
-
-	int VLVarModel::getChildIndex(const VLVarModel *childPtr) const
-	{
-		// Only objects and lists can use this method
-		return -1;
-	}
-
 	bool VLVarModel::removeChild(const VLVarModel *childPtr)
 	{
 		// Only objects and lists can use this method
 		return false;
 	}
 
-	const VLVarModelPtr &VLVarModel::getChildPtr(const VLVarModel *p) const
+	const VLVarModelPtr &VLVarModel::getChild(const VLVarModel *p) const
 	{
 		// Only objects and lists can use this method
 		return nullVarModelPtr;
 	}
 
-	VLVarModelPtr VLVarModel::getPtr()
+	const VLVarModelPtr& VLVarModel::getPtr()
 	{
 		if (auto parent = getParentModel())
-			return parent->getChildPtr(this);
-		else // Objects and lists can return shared_from_this
-			return nullptr;
+			return parent->getChild(this);
+		else
+			return nullVarModelPtr;
 	}
 
 	bool VLVarModel::remove()
 	{
-		emit beforeRemove();
 		if (auto parent = parentModel())
 			return parent->removeChild(this);
 		else if (auto owner = getDataModel())
@@ -264,15 +288,17 @@ namespace dmb
 		return ObjectProperty::GetTypeStr(getData());
 	}
 
-	void VLVarModel::setType(const ObjectProperty::Type &newType)
+	bool VLVarModel::setType(const ObjectProperty::Type &newType)
 	{
 		if (auto parent = parentModel())
-		{
-			if (parent->isObject())
-				parent->asObject()->propListModel()->setType(getIndex(), newType);
-			else if (parent->isList())
-				parent->asList()->listModel()->setType(getIndex(), newType);
-		}
+			return parent->setChildType(this, newType);
+		return false;
+	}
+
+	const vl::Var &VLVarModel::setChildValue(const VLVarModel *child, const vl::VarPtr &value)
+	{
+		// Default logic
+		return vl::emptyVar;
 	}
 
 	QVariant VLVarModel::value() const
@@ -283,7 +309,10 @@ namespace dmb
 		else if (v.IsBool())
 			return QVariant(v.AsBool().Val());
 		else if (v.IsString())
+		{
+			LOCAL_VERBOSE(this << "->value() string requested '" << v.AsString().Val().c_str() << "'");
 			return QVariant(v.AsString().Val().c_str());
+		}
 		else if (v.IsNumber())
 			return QVariant(v.AsNumber().Val());
 		else if (v.IsList())
@@ -294,20 +323,20 @@ namespace dmb
 
 	bool VLVarModel::setValue(const QVariant &newValue)
 	{
-		return setValueInternal(newValue, true);
-	}
-
-	bool VLVarModel::setValueInternal(const QVariant &newValue, bool emitValueChanged)
-	{
-		auto& v = getData();
-		if (v.IsString())
-			v.AsString() = newValue.toString().toStdString();
-		else if (v.IsNumber())
-			v.AsNumber() = newValue.toInt();
-		else if (v.IsBool())
-			v.AsBool() = newValue.toBool();
-		if (emitValueChanged)
-			emit valueChanged(getIndex());
+		// Set through the parent to let the vl object propogate events
+		if (auto parent = getParentModel())
+			parent->setChildValue(this, ObjectProperty::makeVarFromData(newValue));
+		else
+		{
+			auto& v = data();
+			if (v.IsString())
+				v.AsString() = newValue.toString().toStdString();
+			else if (v.IsNumber())
+				v.AsNumber() = newValue.toInt();
+			else if (v.IsBool())
+				v.AsBool() = newValue.toBool();
+			emit valueChanged();
+		}
 		return true;
 	}
 
@@ -315,8 +344,32 @@ namespace dmb
 	{
 		if (auto parent = getParentModel())
 			if (parent->isObject())
-				return parent->asObject()->getChildId(this);
+				if (auto id = parent->asObject()->getChildId(this))
+					return *id;
 		return emptyString;
+	}
+
+	std::string VLVarModel::getStringId() const
+	{
+		if (auto parent = getParentModel())
+		{
+			if (parent->isObject())
+			{
+				if (auto id = parent->asObject()->getChildId(this))
+					return *id;
+			}
+			else if (parent->isList())
+				return Utils::FormatStr("[%d]", parent->asList()->getChildIndex(this));
+		}
+		return emptyString;
+	}
+
+	int VLVarModel::getIndex() const
+	{
+		if (auto parent = getParentModel())
+			if (parent->isList())
+				return parent->asList()->getChildIndex(this);
+		return -1;
 	}
 
 	QVariant VLVarModel::valueStr() const

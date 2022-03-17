@@ -4,6 +4,7 @@
 #include <memory>
 #include <functional>
 #include <QObject>
+#include <QVariant>
 #include "DMBCore.h"
 #include "vl_fwd.h"
 #include "ModelsFwd.h"
@@ -18,6 +19,7 @@ namespace dmb
 		VLVarModelPtr CreateEmpty(const vl::Var& var);
 		VLObjectVarModelPtr CreateObject();
 		VLListVarModelPtr CreateList();
+		VLVarModelPtr createFromData(const QVariant &data);
 
 	protected:
 		// ====== End of User interface =======

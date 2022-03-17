@@ -1,25 +1,28 @@
 #ifndef VLLISTVARMODEL_H
 #define VLLISTVARMODEL_H
 
-#include <QObject>
-#include <QString>
-#include <QDebug>
+#include <utility>
 #include <string>
 #include <unordered_map>
 #include <functional>
 #include <memory>
+#include <QObject>
+#include <QString>
+#include <QDebug>
 #include "VLCollectionModel.h"
 #include "vl.h"
-#include "VLListModel.h" // No forward def instead because of Qt meta object resolution
+#include "VLListModel.h"
 #include "VLVarModel.h"
 
 namespace dmb
 {
 	class VLVarModel;
 
-	class VLListVarModel : public VLVarModel, public std::enable_shared_from_this<VLListVarModel>
+	class VLListVarModel : public VLVarModel
 	{
 		typedef VLVarModel Base;
+
+		friend class VLListModel;
 
 		Q_OBJECT
 
@@ -30,7 +33,7 @@ namespace dmb
 		VLListVarModel(const vl::Var& v, QObject* parent = nullptr);
 		~VLListVarModel();
 		void Init(QObject* parent = nullptr) override;
-		void Init(QObject *parent, const vl::Var& data, DMBModel* owner) override;
+		void Init(QObject *parent, DMBModel* owner) override;
 		void Init(const VLVarModelPtr& parent) override;
 
 	public:
@@ -41,52 +44,36 @@ namespace dmb
 		bool isList() const override;
 
 	public:
-		// Public data interface
-		const vl::List& getData() const;
-		const vl::Var& getData(int index) const;
-		const vl::Var& getChildData(const VLVarModel* childPtr) const override;
-
-	protected:
-		// Protected data interface
-		vl::List& data();
-		vl::Var& data(int index);
-
-	public:
 		// Public Qt model interface
-		const VLVarModel* getAt(int index) const;
 		inline const VLListModel &getListModel() const {
-			return mListModel;
+			static VLListModel emptyModel;
+			return mListModel ? *mListModel : emptyModel;
 		}
+
 		inline VLListModel &getListModel() {
-			return mListModel;
+			static VLListModel emptyModel;
+			return mListModel ? *mListModel : emptyModel;
 		}
-		const VLVarModelPtr& getAtSp(int index) const;
-		const VLVarModelPtr& atSp(int index);
-		VLListModel *listModel();
-		int getChildIndex(const VLVarModel* childPtr) const override;
-		VLVarModel* add(const dmb::VLVarModel* model, int indexBefore = -1);
+
+		const VLVarModelPtr& getModelAt(int index) const;
+		// Non-const version of getModelAt
+		const VLVarModelPtr& modelAt(int index);
+		int getChildIndex(const VLVarModel* childPtr) const;
 		const VLVarModelPtr& addModel(const VLVarModelPtr& modelPtr, int indexBefore = -1);
 		bool removeChild(const VLVarModel* childPtr) override;
-		const VLVarModelPtr& getChildPtr(const VLVarModel* p) const override;
-		VLVarModelPtr getPtr() override;
-
-	protected:
-		// Protected Qt model interface
-
-	protected:
-		// Other
-		bool loadElements();
+		const VLVarModelPtr& getChild(const VLVarModel* p) const override;
+		const vl::Var& setChildValue(const VLVarModel* child, const vl::VarPtr& value) override;
 
 	public:
 		// Properties
-		Q_INVOKABLE dmb::VLVarModel* at(int index);
-		Q_INVOKABLE dmb::VLVarModel* add(ObjectProperty::Type type, int indexBefore = -1);
-		Q_INVOKABLE dmb::VLVarModel* add(const QVariant& data, int indexBefore = -1);
+		Q_INVOKABLE QVariant at(int index);
+		Q_INVOKABLE QVariant add(ObjectProperty::Type type, int indexBefore = -1);
+		Q_INVOKABLE QVariant add(const QVariant& data, int indexBefore = -1);
 		Q_INVOKABLE bool removeAt(int index);
-		Q_INVOKABLE dmb::VLVarModel* find(const QVariant& data);
+		Q_INVOKABLE QVariant find(const QVariant& data);
 		// Creates an instance of a type typeId
 		Q_INVOKABLE void instantiate(const QString& typeId);
-		Q_PROPERTY (VLListModel* listModel READ listModel NOTIFY listChanged)
+		Q_PROPERTY (QVariant listModel READ listModel NOTIFY listChanged)
 		Q_INVOKABLE int size() const;
 
 	signals:
@@ -94,9 +81,22 @@ namespace dmb
 		void instantiated(const QString& instId);
 		void instantiateRefused(const QString& error);
 
+	protected:
+		// For Qt interface
+		QVariant listModel();
+		QVariant add(const dmb::VLVarModel* model, int indexBefore = -1);
+		// Protected data interface
+		vl::List& data();
+		vl::Var& data(int index);
+		const vl::List& getData() const;
+		const vl::Var& getData(int index) const;
+		const vl::Var& getChildData(const VLVarModel* childPtr) const override;
+		// Other
+		bool loadElements();
+
 	private:
 		// Data
-		VLListModel mListModel;
+		std::unique_ptr<VLListModel> mListModel = nullptr;
 	};
 	typedef std::shared_ptr<VLListVarModel> VLListVarModelPtr;
 }

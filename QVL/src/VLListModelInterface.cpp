@@ -9,7 +9,15 @@
 #include "VLObjectVarModel.h"
 #include "VLListVarModel.h"
 #include "DMBModel.h"
+#include "ListModelStorageSubscriptionProcessor.h"
+
 #include "Log.h"
+#ifdef LOG_ON
+	#include <QDebug>
+#endif
+LOG_TITLE("VLListModelInterface")
+LOG_STREAM([]{return qDebug();})
+SET_LOG_VERBOSE(false)
 
 namespace {
 	dmb::VLVarModelPtr emptyVarModelPtr;
@@ -19,23 +27,39 @@ namespace dmb
 {
 	QVector<int> emptyList;
 
-	VLListModelInterface::VLListModelInterface(QObject* parent)
-		: QAbstractListModel(parent)
+	VLListModelInterface::VLListModelInterface(QObject *parent)
+		: Base(parent)
 	{}
+
+	VLListModelInterface::VLListModelInterface(QObject* parent, const ModelStoragePtr& storage)
+		: QAbstractListModel(parent)
+	{
+		assert(storage != nullptr);
+		mStorage = storage;		
+	}
+
+	VLListModelInterface::VLListModelInterface(QObject *parentModel, const VLListModelInterface &storageOwner)
+		: VLListModelInterface(parentModel, storageOwner.getSharedStorage())
+	{
+		if (auto parent = storageOwner.getParentModel())
+			Init(parent);
+	}
 
 	VLListModelInterface::~VLListModelInterface()
 	{
-		setParent(nullptr);
-		auto sz = mStorage.size();
-		for (int i = 0; i < sz; i++)
-			if (auto ptr = mStorage.at(i))
-				emit ptr->beforeRemove();
+		if (mStorageSubscriptionProcessor)
+		{
+			if (mStorage)
+				mStorage->Detach(mStorageSubscriptionProcessor.get());
+			mStorageSubscriptionProcessor.reset();
+		}
 	}
 
 	bool VLListModelInterface::Init(QObject* p)
 	{
 		if (parent() == p)
 			return false;
+		qDebug() << this << "->(listInterface)setParent(" << p << ")";
 		setParent(p);
 		return true;
 	}
@@ -45,132 +69,75 @@ namespace dmb
 		if (getParentModel() == parentModel)
 			return false;
 		mParentModel = parentModel;
+		if ((mStorageSubscriptionProcessor = createStorageSubscriptionProcessor()))
+			mStorage->Attach(mStorageSubscriptionProcessor.get());
+		getStorage().Init(parentModel);
+		Init(parentModel.get());
 		return true;
+	}
+
+	// Common code which should be run on any storage holder
+	// when a model is put into it
+	void VLListModelInterface::onModelPut(const VLVarModelPtr& m)
+	{
+		connectSignals(m.get());
+	}
+
+	void VLListModelInterface::onModelBeforeRemove(const VLVarModelPtr& m)
+	{
+		disconnectSignals(m.get());
 	}
 
 	bool VLListModelInterface::elementsLoaded() const
 	{
-		return mStorage.size() >= dataSize();
-	}
-
-	bool VLListModelInterface::loadElementModels()
-	{
-		auto sz = dataSize();
-		mStorage.resize(sz);
-		for (int i = 0; i < sz; i++)
-			if (!loadElementModel(i))
-				return false;
-		return true;
-	}
-
-	const VLVarModelPtr& VLListModelInterface::loadElementModel(int index, int indexBefore)
-	{
-		if (index >= dataSize())
-			return emptyVarModelPtr;
-		bool complete = false;
-		if (auto parent = getParentModel())
-		{
-			if (parent->isObject())
-			{
-				auto& id = parent->asObject()->getId(index);
-				//qDebug() << "Create model for '" << id.c_str() << "'";
-				if (id == "proto")
-				{
-					auto& protoData = getDataAt(index).AsObject();
-					if (auto dmbModel = parent->getDataModel())
-					{
-						auto protoId = dmbModel->getDataModel().GetTypeId(protoData);
-						if (auto& p = dmbModel->modelByTypeId(protoId))
-						{
-							auto& ptr = mStorage.put(index, p, indexBefore);
-							connectSignals(ptr.get());
-							return ptr;
-						}
-						else
-						{
-							qDebug() << Utils::FormatStr("Can't find or create a model for proto '%s'", protoId.c_str()).c_str();
-						}
-					}
-					else
-					{
-						// Any element in the hierarchy should have a link to the model
-						assert(false);
-					}
-				}
-			}
-			if (!complete)
-			{
-				// Container should be prepared to fit in the range
-				auto& ptr = mStorage.put(index
-							 , VarModelFactory::Instance().CreateEmpty(getDataAt(index))
-							 , indexBefore);
-				ptr->Init(parent);
-				connectSignals(ptr.get());
-				return ptr;
-			}
-		}
-		else
-		{
-			// Parent should exist
-			assert(false);
-		}
-		return emptyVarModelPtr;
+		return getStorage().size() >= dataSize();
 	}
 
 	void VLListModelInterface::connectSignals(VLVarModel* model) const
 	{
-		QObject::connect(model, SIGNAL(idChanged(int)), this, SLOT(onNameChanged(int)));
-		QObject::connect(model, SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
-		QObject::connect(model, SIGNAL(typeChanged(int)), this, SLOT(onTypeChanged(int)));
+		QObject::connect(model, SIGNAL(idChanged()), this, SLOT(onNameChanged()));
+		QObject::connect(model, SIGNAL(valueChanged()), this, SLOT(onValueChanged()));
+		QObject::connect(model, SIGNAL(typeChanged()), this, SLOT(onTypeChanged()));
+	}
+
+	void VLListModelInterface::disconnectSignals(VLVarModel *model) const
+	{
+		QObject::disconnect(model, SIGNAL(idChanged()), this, SLOT(onNameChanged()));
+		QObject::disconnect(model, SIGNAL(valueChanged()), this, SLOT(onValueChanged()));
+		QObject::disconnect(model, SIGNAL(typeChanged()), this, SLOT(onTypeChanged()));
 	}
 	// ======= Begin of Public interface =======
-	vl::Var &VLListModelInterface::getDataAt(int index)
+	QVariant VLListModelInterface::roleValueStr(const VLVarModelPtr& m, int index) const
 	{
-		return const_cast<vl::Var&>(const_cast<const VLListModelInterface*>(this)->getDataAt(index));
+		return m->valueStr();
 	}
 
-	vl::Var& VLListModelInterface::setDataAt(int index)
-	{
-		return setDataAt(index, MakePtr(vl::NullVar()));
-	}
-
-	vl::Var& VLListModelInterface::setDataAt(int index, const vl::Var& value)
-	{
-		return setDataAt(index, MakePtr(value));
-	}
-
-	QVariant VLListModelInterface::roleValueStr(const VLVarModel* m, int index) const
-	{
-		if (auto model = getAt(index))
-			return model->valueStr();
-		return QVariant();
-	}
-
-	QVariant VLListModelInterface::roleValue(const VLVarModel* m, int index) const
+	QVariant VLListModelInterface::roleValue(const VLVarModelPtr& m, int index) const
 	{
 		return m->value();
 	}
 
-	QVariant VLListModelInterface::roleTypeStr(const VLVarModel* m, int index) const
+	QVariant VLListModelInterface::roleTypeStr(const VLVarModelPtr& m, int index) const
 	{
 		return QVariant(QString(ObjectProperty::GetTypeStr(m->getData())));
 	}
 
-	QVariant VLListModelInterface::roleType(const VLVarModel* m, int index) const
+	QVariant VLListModelInterface::roleType(const VLVarModelPtr& m, int index) const
 	{
 		return QVariant(ObjectProperty::ConvertVLType(m->getData()));
 	}
 
 	int VLListModelInterface::size() const
 	{
-		return mStorage.size();
+		return getStorage().size();
 	}
 
 	void VLListModelInterface::clear()
 	{
-		mStorage.clear();
+		getStorage().clear();
 	}
 
+	// Not needed in subscribed approach
 	void VLListModelInterface::clearAndNotify()
 	{
 		auto sz = size();
@@ -181,7 +148,7 @@ namespace dmb
 		endRemoveRows();
 	}
 
-	QVariant VLListModelInterface::role(const VLVarModel* m, int index, int role) const
+	QVariant VLListModelInterface::role(const VLVarModelPtr& m, int index, int role) const
 	{
 		switch (role) {
 			case RoleId:
@@ -213,73 +180,37 @@ namespace dmb
 		endResetModel();
 	}
 
-	VLVarModel *VLListModelInterface::at(int index)
+	void VLListModelInterface::beginInsertNewRow()
 	{
-		return atSp(index).get();
+		auto sz = dataSize();
+		QModelIndex index = this->index(sz, 0, QModelIndex());
+		beginInsertRows(QModelIndex(), sz, sz);
 	}
 
-	const VLVarModelPtr& VLListModelInterface::getAtSp(int index) const
+	// Q_INVOKABLE
+	// Non-const version of getAt
+	// Redirect to atSp
+	// Retrieve a raw pointer from the storage to a model at index
+	// Create a model if it doesn't exists
+	QVariant VLListModelInterface::at(int index)
 	{
-		if (index < 0 || index >= size())
-			return nullVarModelPtr;
-		return mStorage[index];
-	}
-
-	const VLVarModelPtr& VLListModelInterface::atSp(int index)
-	{
-		if (index < 0)
-			return nullVarModelPtr;
-		else if (index >= size())
-			return loadElementModel(index);
-		else if (auto& ptr = mStorage.at(index))
-			return ptr;
-		else
-			return loadElementModel(index);
-	}
-
-	const VLVarModelPtr &VLListModelInterface::setAt(int index, const VLVarModelPtr &modelPtr)
-	{
-		if (index < 0 || index >= size())
-			mStorage.resize(index + 1);
-		setDataAt(index, vl::MakePtr(modelPtr->getData()), [&](bool) {
-			return modelPtr;
-		});
-		return mStorage[index];
-	}
-
-	const VLVarModel *VLListModelInterface::getAt(int index) const
-	{
-		return getAtSp(index).get();
-	}
-
-	const VLVarModelPtr VLListModelInterface::getParentModel() const
-	{
-		return mParentModel.lock();
-	}
-	VLVarModelPtr VLListModelInterface::getParentModel()
-	{
-		return mParentModel.lock();
-	}
-
-	int VLListModelInterface::getElementIndex(const VLVarModel *elementPtr) const
-	{
-		return mStorage.getIndex(elementPtr);
+		return QVariant::fromValue(modelAt(index).get());
 	}
 
 	bool VLListModelInterface::foreachElement(const std::function<bool (int, const VLVarModelPtr &)> &pred, bool recursive) const
 	{
 		auto sz = size();
 		for (int i = 0; i < sz; i++)
-			if (auto m = getAtSp(i))
+			if (auto& m = getModelAt(i))
 			{
 				if (recursive)
 				{
 					if (auto o = m->asObject())
-						o->getPropListModel().foreachElement(pred, recursive);
+						o->getOwnPropsListModel().foreachElement(pred, recursive);
 					if (auto l = m->asList())
 						l->getListModel().foreachElement(pred, recursive);
 				}
-				if (!pred(i, getAtSp(i)))
+				if (!pred(i, getModelAt(i)))
 					return false;
 
 			}
@@ -297,36 +228,58 @@ namespace dmb
 		return const_cast<const VLListModelInterface*>(this)->foreachElement(pred2, recursive);
 	}
 
+	const vl::Var &VLListModelInterface::setElementValue(const VLVarModel *e, const vl::VarPtr &value)
+	{
+		// Default logic
+		return vl::emptyVar;
+	}
+
 	bool VLListModelInterface::removeAt(int index)
 	{
 		if (index >= 0 && index < size())
 		{
 			beginRemoveRows(QModelIndex(), index, index);
 			bool result = doRemove(index);
-			mStorage.remove(index);
+			if (auto& m = getStorage().at(index))
+				onModelBeforeRemove(m);
+			getStorage().remove(index);
 			endRemoveRows();
 			return result;
 		}
 		return false;
 	}
 
-	void VLListModelInterface::onNameChanged(int i)
+	void VLListModelInterface::onNameChanged()
 	{
 		// Only objects can use this
 	}
 
-	void VLListModelInterface::onValueChanged(int i)
+	void VLListModelInterface::onValueChanged()
 	{
+		auto sender = QObject::sender();
+		auto i = getElementIndex(sender);
+		if (i < 0)
+		{
+			LOG_ERROR("VLListModelInterface::onValueChanged slot received a signal from an unregistered sender " << QObject::sender());
+			return;
+		}
 		QModelIndex index = this->index(i, 0, QModelIndex());
 		emit dataChanged(index, index, QVector<int>() << RoleValue << RoleValueStr);
 	}
 
-	void VLListModelInterface::onTypeChanged(int i)
+	void VLListModelInterface::onTypeChanged()
 	{
+		auto sender = QObject::sender();
+		auto i = getElementIndex(sender);
+		if (i < 0)
+		{
+			LOG_ERROR("VLListModelInterface::onTypeChanged slot received a signal from an unregistered sender " << sender);
+			return;
+		}
 		QModelIndex index = this->index(i, 0, QModelIndex());
 		emit dataChanged(index, index, QVector<int>() << RoleType << RoleTypeStr);
-		if (auto model = getAt(i))
-			emit model->valueChanged(i);
+		if (auto& model = getModelAt(i))
+			emit model->valueChanged();
 	}
 
 	void VLListModelInterface::onModelChanged(int i, int last)
@@ -356,48 +309,29 @@ namespace dmb
 		// other (valid) parents, rowCount() should return 0 so that it does not become a tree model.
 		if (parent.isValid())
 			return 0;
-		return size();
+		auto sz = size();
+		LOCAL_VERBOSE("rowCount: " << int(sz));
+		return sz;
 	}
 
 	QVariant VLListModelInterface::data(const QModelIndex &index, int role) const
 	{
 		int intIndex = index.row();
 		if (index.isValid() && size() > intIndex)
-			if (auto m = getAt(intIndex))
+			if (auto& m = getModelAt(intIndex))
 				return this->role(m, intIndex, role);
 		return QVariant();
 	}
 
-	bool VLListModelInterface::setType(int index, ObjectProperty::Type type)
+	VLCollectionModel *VLListModelInterface::asCollection()
 	{
-		auto& v = getDataAt(index);
-		if (ObjectProperty::ConvertVLType(v) != type)
-		{
-			if (auto parentModel = getParentModel())
-			{
-				auto newDataPtr = ObjectProperty::MakeVarPtr(type);
-				auto newModel = VarModelFactory::Instance().Create(*newDataPtr);
-				connectSignals(newModel.get());
-				return setDataAt(index, newDataPtr, [&] (bool modelAlreadyExists) {
-					newModel->Init(parentModel);
-					return newModel;
-				});
-			}
-		}
-		return false;
+		// Default logic
+		return nullptr;
 	}
 
-	bool VLListModelInterface::doSetData(int index, const QVariant& value, int role)
+	bool VLListModelInterface::isCollection() const
 	{
-		switch (role) {
-			case RoleType:
-				// Emit dataChanged signal
-				return setType(index, qvariant_cast<ObjectProperty::Type>(value));
-			case RoleValue:
-				// Should exist as we have checked the index range in setData
-				// Emit dataChanged signal
-				return at(index)->setValue(value);
-		}
+		// Default logic
 		return false;
 	}
 
@@ -431,81 +365,14 @@ namespace dmb
 		return roles;
 	}
 
-	const VLVarModelPtr& VLListModelInterface::putModel(int index, const VLVarModelPtr &ptr, int indexBefore)
-	{
-		return mStorage.put(index, ptr, indexBefore);
-	}
-
-	int VLListModelInterface::MStorage::getIndex(const VLVarModel *e) const
-	{
-		auto it = mElementIndex.find(e);
-		if (it != mElementIndex.end())
-			return it->second;
-		return -1;
-	}
-
-	int VLListModelInterface::MStorage::size() const
-	{
-		return mElements.size();
-	}
-
-	void VLListModelInterface::MStorage::resize(int newSize)
-	{
-		mElements.resize(newSize);
-	}
-
-	void VLListModelInterface::MStorage::clear()
-	{
-		mElements.clear();
-		mElementIndex.clear();
-	}
-
-	const VLVarModelPtr& VLListModelInterface::MStorage::put(int index, const VLVarModelPtr& ptr, int indexBefore)
-	{
-		if (!ptr)
-			qDebug() << "Warning! An attemption to put nullptr in the container chilren models storage";
-
-		auto sz = mElements.size();
-		if (indexBefore >= 0)
-		{
-			for (auto& [p, i] : mElementIndex)
-				if (i >= index)
-					i++;
-			mElements.resize(sz + 1);
-			sz++;
-			for (int i = sz - 2; i >= index && i >= 0; i--)
-				mElements[i + 1] = mElements[i];
-		}
-		else if (index >= sz)
-			resize(index + 1);
-		auto& result = mElements[index] = ptr;
-		mElementIndex[ptr.get()] = index;
-		return result;
-	}
-
-	const VLVarModelPtr &VLListModelInterface::MStorage::operator[](int index) const
-	{
-		return mElements[index];
-	}
-
-	VLVarModelPtr &VLListModelInterface::MStorage::at(int index)
-	{
-		return mElements[index];
-	}
-
-	void VLListModelInterface::MStorage::remove(int index)
-	{
-		auto e = mElements[index].get();
-		mElementIndex.erase(e);
-		mElements.erase(mElements.begin() + index);
-		for (auto& [_, i] : mElementIndex)
-			if (i > index)
-				i--;
-	}
-
 	dmb::VLVarModel *VLListModelInterface::getParentModelProp() const
 	{
 		return getParentModel().get();
+	}
+
+	std::unique_ptr<ModelStorageSubscriptionProcessor> VLListModelInterface::createStorageSubscriptionProcessor()
+	{
+		return std::make_unique<ListModelStorageSubscriptionProcessor>(*this);
 	}
 
 	// ====== End of QAbstractListModel interface ======

@@ -1,6 +1,7 @@
 #include <QQmlApplicationEngine>
 #include "ObjectProperty.h"
 #include "vl.h"
+#include "VLVarModel.h"
 
 namespace dmb
 {
@@ -80,20 +81,52 @@ namespace dmb
 		}
 	}
 
-	vl::VarPtr ObjectProperty::makeVarFromData(const QVariant &data)
+	vl::VarPtr ObjectProperty::makeVarFromData(const QVariant &data, vl::Type type)
 	{
-		switch (data.userType())
+		if (type != vl::Type::Count)
 		{
-		case QMetaType::QString:
-			return vl::MakePtr(data.toString().toStdString());
-		case QMetaType::Int:
-		case QMetaType::Double:
-		case QMetaType::Float:
-			return vl::MakePtr(data.toInt());
-		case QMetaType::Bool:
-			return vl::MakePtr(data.toBool());
-		default:
-			return vl::MakePtr(data.toString().toStdString());
+			switch (type)
+			{
+			case vl::Type::Bool:
+				return vl::MakePtr(data.toBool());
+			case vl::Type::Number:
+				return vl::MakePtr(data.toInt());
+			case vl::Type::String:
+				return vl::MakePtr(data.toString().toStdString());
+			case vl::Type::Object:
+			{
+				if (data.canConvert<VLVarModel*>())
+					return vl::MakePtr(qvariant_cast<VLVarModel*>(data)->getData().AsObject());
+				break;
+			}
+			case vl::Type::List:
+			{
+				if (data.canConvert<VLVarModel*>())
+					return vl::MakePtr(qvariant_cast<VLVarModel*>(data)->getData().AsList());
+				break;
+			}
+			case vl::Type::Null:
+				return vl::MakePtr();
+			default:
+				return vl::MakePtr();
+			}
+			return vl::MakePtr();
+		}
+		else
+		{
+			switch (data.userType())
+			{
+			case QMetaType::QString:
+				return vl::MakePtr(data.toString().toStdString());
+			case QMetaType::Int:
+			case QMetaType::Double:
+			case QMetaType::Float:
+				return vl::MakePtr(data.toInt());
+			case QMetaType::Bool:
+				return vl::MakePtr(data.toBool());
+			default:
+				return vl::MakePtr(data.toString().toStdString());
+			}
 		}
 	}
 

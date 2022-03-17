@@ -1,16 +1,28 @@
 #include <limits>
 #include <QQmlApplicationEngine>
 #include <QVariantList>
+#include "vl.h"
 #include "VLCollectionModel.h"
 #include "VLObjectVarModel.h"
-#include "Utils.h"
-#include "vl.h"
+#include "VarModelFactory.h"
+#include "VLVarModel.h"
 #include "DMBModel.h"
+#include "Utils.h"
+#include "ObjectModelStorageSubscriptionProcessor.h"
+
 #include "Log.h"
+#ifdef LOG_ON
+	#include <QDebug>
+#endif
+LOG_TITLE("VLCollectionModel")
+LOG_STREAM([]{return qDebug();})
+SET_LOG_VERBOSE(false)
+SET_LOG_DEBUG(true)
 
 namespace
 {
-	dmb::VLVarModelPtr emptyModelPtr;
+	dmb::VLVarModelPtr nullVarModelPtr;
+	const bool modelOverwriteRestricted = true;
 }
 
 namespace dmb
@@ -19,22 +31,51 @@ namespace dmb
 		: Base(parent)
 	{}
 
-	bool VLCollectionModel::Init(const VLVarModelPtr& objectPtr)
+	VLCollectionModel::VLCollectionModel(QObject *parent, const ObjectModelStoragePtr& storage)
+		: Base(parent, storage)
+	{}
+
+	VLCollectionModel::VLCollectionModel(QObject *parent, const VLListModelInterface &storageOwner)
+		: Base(parent, storageOwner)
+	{}
+
+	VLCollectionModel::~VLCollectionModel()
 	{
-		if (!Base::Init(objectPtr))
+		LOCAL_DEBUG("~VLCollectionModel()");
+		LOCAL_DEBUG(this << "->(collection)setParent(nullptr)");
+		mVLSubscriptionProcessor.reset();
+	}
+
+	bool VLCollectionModel::Init(const VLVarModelPtr& newParent)
+	{
+		if (auto parent = getParentModel())
+			if (parent != newParent)
+				if (mVLSubscriptionProcessor)
+					getData().AsObject().Detach(mVLSubscriptionProcessor.get());
+
+		// If newParent is the same as own
+		if (!Base::Init(newParent))
 			return false;
-		UpdateIdList();
+
+		if (auto parent = getParentModel())
+			if ((mVLSubscriptionProcessor = createVLSubacriptionProcessor()))
+				getData().AsObject().Attach(mVLSubscriptionProcessor.get());
 		return true;
+	}
+
+	std::unique_ptr<CollectionModelSubscriptionProcessor> VLCollectionModel::createVLSubacriptionProcessor()
+	{
+		// Default processor
+		return std::make_unique<CollectionModelSubscriptionProcessor>(*this);
 	}
 
 	void VLCollectionModel::UpdateIdList()
 	{
 		resetList([&]() {
-			clear();
+			getObjectStorage().idList().clear();
 			getData().ForeachProp(
 			[&](const std::string& propName, const vl::Var& prop) {
-				mPropIndex[propName] = mIdList.size();
-				mIdList.push_back(propName);
+				getObjectStorage().idList().put(propName);
 				return true;
 			});
 		});
@@ -42,22 +83,115 @@ namespace dmb
 
 	int VLCollectionModel::dataSize() const
 	{
-		return getData().Size();
+		if (auto parent = getParentModel())
+			return parent->sizeOwn();
+		return 0;
 	}
 
 	// ======= Begin of Base interface =======
-	const vl::Var& VLCollectionModel::getDataAt(int index) const
+	// Work with indexes
+	// Needed for VLListModelInterface
+	// as it works with the list-like container
+	const VLVarModelPtr &VLCollectionModel::setModelAt(int index, const VLVarModelPtr& ptr)
 	{
-		if (index >= 0 && index < mIdList.size())
-			return getData().Get(getId(index));
-		return vl::emptyVar;
+		if (auto id = getId(index))
+			return setModel(*id, ptr);
+		LOCAL_ERROR("Can't find id at index '" << index << "' through the call " << "setModelAt(" << index << ", " << ptr.get() << ")");
+		return nullVarModelPtr;
 	}
 
-	// overriden pure virtual Base::set(int index, const vl::VarPtr& ptr)
-	vl::Var& VLCollectionModel::setDataAt(int index, const vl::VarPtr& ptr, const std::function<VLVarModelPtr(bool alreadyExist)>& customModelLoader)
+	const VLVarModelPtr &VLCollectionModel::modelAt(int index)
 	{
-		return setData(getId(index), ptr, customModelLoader);
+		if (index < 0 || index >= dataSize())
+			return nullVarModelPtr;
+		if (auto id = getId(index))
+			return model(*id);
+		return nullVarModelPtr;
 	}
+
+	// Needed for VLListModelInterface
+	// as it works with the list-like container
+	const VLVarModelPtr &VLCollectionModel::getModelAt(int index) const
+	{
+		if (auto id = getId(index))
+			return getObjectStorage().get(*id);
+		return nullVarModelPtr;
+	}
+
+	bool VLCollectionModel::doRemove(int index)
+	{
+		if (auto id = getId(index))
+			return getData().RemoveProperty(*id);
+		return false;
+	}
+
+	bool VLCollectionModel::doSetData(int index, const QVariant& value, int role)
+	{
+		auto& id = *getId(index);
+		switch (role) {
+			case RoleType:
+				// Emit dataChanged signal
+				return setType(id, qvariant_cast<ObjectProperty::Type>(value));
+			case RoleName:
+				if (renameElement(id, value.toString().toStdString()))
+					return true;
+				else
+					emit nameAlreadyTaken();
+			case RoleValue:
+				// Emit dataChanged signal
+				auto& data = getData(id);
+				return setData(id, ObjectProperty::makeVarFromData(value, data.GetType()));
+		}
+		return false;
+	}
+
+	bool VLCollectionModel::setType(const std::string& propId, ObjectProperty::Type type)
+	{
+		if (auto& model = getObjectStorage().get(propId))
+			if (ObjectProperty::ConvertVLType(model->getData()) != type)
+			{
+				auto newDataPtr = ObjectProperty::MakeVarPtr(type);
+				auto newModel = VarModelFactory::Instance().Create(*newDataPtr);
+				return setModel(propId, newModel) != nullptr;
+			}
+		return false;
+	}
+
+	QVariant VLCollectionModel::role(const VLVarModelPtr& m, int index, int role) const
+	{
+		// Index already checked by the base functional
+		switch (role) {
+			case RoleName:
+				// use internal name instead of model name
+				// because the model name is the proto's object name
+				return QVariant(getId(index)->c_str());
+			default:
+				return Base::role(m, index, role);
+		}
+	}
+
+	QVariant VLCollectionModel::roleValueStr(const VLVarModelPtr& m, int index) const
+	{
+		// use internal name instead of model name
+		// because the model name is the proto's object name
+		if (*getId(index) == "proto")
+			return QVariant(
+				Utils::FormatStr("{%s}"
+				, m->getTypeId().c_str()).c_str()
+			);
+		else
+			return Base::roleValueStr(m, index);
+	}
+	// ======= End of Base interface =======
+
+	// Redirects to remove
+	bool VLCollectionModel::removeAt(int index)
+	{
+		if (auto id = getId(index))
+			return remove(*id);
+		return false;
+	}
+	// End of working with indexes
 
 	// Object-specific setters
 	vl::Var& VLCollectionModel::setData(const std::string& propId)
@@ -70,151 +204,98 @@ namespace dmb
 		return setData(propId, MakePtr(value));
 	}
 
-	vl::Var& VLCollectionModel::setData(const std::string& propId, const vl::VarPtr& ptr, const std::function<VLVarModelPtr(bool alreadyExist)>& customModelLoader)
+	vl::Var& VLCollectionModel::setData(
+			const std::string& propId
+			, const vl::VarPtr& ptr
+			, const VoidCb& onBeforeAdd
+			, const VoidCb& onAfterAdd
+			)
 	{
-		if (!hasData(propId))
-		{
-			auto sz = size();
-			QModelIndex index = this->index(sz, 0, QModelIndex());
-			beginInsertRows(index, sz, sz);
-			auto& result = getData().Set(propId, ptr);
-			mPropIndex[propId] = sz;
-			mIdList.push_back(propId);
-			if (customModelLoader)
-				customModelLoader(false);
-			else
-				loadElementModel(sz);
-			endInsertRows();
-			return result;
-		}
-		else
-		{
-			auto& oldData = getData().Get(propId);
-			bool newType = ObjectProperty::ConvertVLType(oldData) != ObjectProperty::ConvertVLType(*ptr);
-			auto& result = getData().Set(propId, ptr);
-			if (customModelLoader)
-			{
-				auto modelPtr = customModelLoader(true);
-				putModel(getIndex(propId), modelPtr);
-			}
-			auto i = getIndex(propId);
-			if (auto model = getModel(propId))
-			{
-				if (newType)
-					// Call VLListModelInterface::onTypeChanged
-					// + VLListModelInterface::onValueChanged
-					emit model->typeChanged(i);
-				else
-					// Call VLListModelInterface::onValueChanged
-					emit model->valueChanged(i);
-			}
-			return result;
-		}
+		return getData().Set(propId, ptr);
 	}
 
-
-	void VLCollectionModel::clear()
+	// Begin of Helper data-model setters
+	const VLVarModelPtr& VLCollectionModel::setDataAndLoadModel(const std::string &propId, const vl::VarPtr &value)
 	{
-		Base::clear();
-		mPropIndex.clear();
-		mIdList.clear();
+		setData(propId, value);
+		return model(propId);
 	}
 
-	bool VLCollectionModel::doRemove(int index)
+	ModelInsertRet VLCollectionModel::addDataAndLoadModel(const std::string &propId, const vl::VarPtr &value)
 	{
-		auto& id = getId(index);
-		getData().RemoveProperty(id);
-		mPropIndex.erase(id);
-		for (auto& e : mPropIndex)
-			if (e.second > index)
-				e.second--;
-		mIdList.erase(mIdList.begin() + index);
-		return true;
+		const auto& data = getData();
+		auto id = getFreeId(propId);
+		return { id, setDataAndLoadModel(id, value) };
 	}
-
-	QVariant VLCollectionModel::role(const VLVarModel* m, int index, int role) const
-	{
-		// Index already checked by the base functional
-		switch (role) {
-			case RoleName:
-				// use internal name instead of model name
-				// because the model name is the proto's object name
-				return QVariant(getId(index).c_str());
-			default:
-				return Base::role(m, index, role);
-		}
-	}
-
-	QVariant VLCollectionModel::roleValueStr(const VLVarModel* m, int index) const
-	{
-		// use internal name instead of model name
-		// because the model name is the proto's object name
-		if (getId(index) == "proto")
-			return QVariant(
-				Utils::FormatStr("{%s}"
-				, m->getTypeId().c_str()).c_str()
-			);
-		else
-			return Base::roleValueStr(m, index);
-	}
-
-	bool VLCollectionModel::renameElement(int index, const std::string& newId)
-	{
-		if (index >= 0 && index < mIdList.size())
-			return renameElement(getId(index), newId);
-		return false;
-	}
+	// End of Helper data-model setters
 
 	bool VLCollectionModel::renameElement(const std::string& propId, const std::string& newId)
 	{
-		auto it = mPropIndex.find(propId);
-		if (it == mPropIndex.end())
+		if (!mVLSubscriptionProcessor)
 			return false;
-		auto index = it->second;
-		if (!getData().RenameProperty(propId, newId))
-			return false;
-		mPropIndex.erase(it);
-		mPropIndex[newId] = index;
-		mIdList[index] = newId;
-		if (auto model = getAt(index))
-			// Call onNameChanged
-			emit model->idChanged(index);
-		return true;
-	}
-
-	bool VLCollectionModel::doSetData(int index, const QVariant& value, int role)
-	{
-		auto& id = getId(index);
-		switch (role) {
-			case RoleName:
-				if (renameElement(index, value.toString().toStdString()))
+		bool result = true;
+		mVLSubscriptionProcessor->setOnAfterUpdate([&, propId] (const NotifContext& context) {
+			auto& o = context.getNotifData();
+			if (o.Get("rename").AsString().Val() == propId)
+				if (o.Has("after"))
+				{
+					// If there is no such id entry or a model in the storage
+					// Then nothing to rename and we should return false
+					if (!o.Has("renamedInStorage"))
+						result = false;
 					return true;
-				else
-					emit nameAlreadyTaken();
-			default:
-				return Base::doSetData(index, value, role);
-		}
-		return false;
+				}
+			return false;
+		});
+		return result && getData().RenameProperty(std::string(propId), newId);
 	}
 
-	bool VLCollectionModel::hasData(const std::string &propId) const
+	bool VLCollectionModel::hasDataOwn(const std::string &propId) const
 	{
-		return getData().Has(propId);
+		return getData().HasOwn(propId);
 	}
-	// ======= End of Base interface =======
+
 	// ====== Begin of QAbstractListModel interface ======
+	int VLCollectionModel::rowCount(const QModelIndex &parent) const
+	{
+		// For list models only the root node (an invalid parent) should return the list's size. For all
+		// other (valid) parents, rowCount() should return 0 so that it does not become a tree model.
+		if (parent.isValid())
+			return 0;
+		auto sz = dataSize();
+		LOCAL_VERBOSE("rowCount: " << sz);
+		return sz;
+	}
+
 	QHash<int, QByteArray> VLCollectionModel::roleNames() const
 	{
 		QHash<int, QByteArray> roles = Base::roleNames();
 		roles[RoleName] = "name";
 		return roles;
 	}
+	// ====== End of QAbstractListModel interface ======
 
+	bool VLCollectionModel::isCollection() const
+	{
+		return true;
+	}
+
+	VLCollectionModel *VLCollectionModel::asCollection()
+	{
+		return this;
+	}
+
+	// Begin of Data getters
 	const vl::Object &VLCollectionModel::getData() const
 	{
 		if (const auto* parentModel = getParentModel().get())
 			return parentModel->getData();
 		return vl::nullObject;
+	}
+
+	vl::Object &VLCollectionModel::getData()
+	{
+		return const_cast<vl::Object&>(const_cast<const VLCollectionModel*>(this)->getData());
 	}
 
 	const vl::Var &VLCollectionModel::getData(const std::string &propId) const
@@ -226,55 +307,117 @@ namespace dmb
 	{
 		return const_cast<vl::Var&>(const_cast<const VLCollectionModel*>(this)->getData(propId));
 	}
-	// ====== End of QAbstractListModel interface ======
+	// End of Data getters
 
-	bool VLCollectionModel::addData(const std::string &name, ObjectProperty::Type type)
+	std::string VLCollectionModel::getFreeId(const std::string &desiredId) const
 	{
-		const auto& data = getData();
-		auto id = name;
-		bool success = true;
-		if (data.Has(id)) {
-			auto tpl = id;
-			for (int i = 2; i < std::numeric_limits<short>::max(); i++)
-				if ((success = !data.Has(id = Utils::FormatStr("%s %d", tpl.c_str(), i))))
-					break;
-		}
-		if (success) {
-			setData(id, ObjectProperty::MakeVarPtr(type));
-			return true;
-		}
+		return getObjectStorage().getIdList().getFreeId(desiredId);
+	}
+
+	// Remove a model with it's data from the object and this collection
+	bool VLCollectionModel::remove(const std::string& propId)
+	{
+		if (!mVLSubscriptionProcessor)
+			return false;
+		bool result = true;
+		mVLSubscriptionProcessor->setOnAfterUpdate([&] (const NotifContext& context) {
+			auto& o = context.getNotifData();
+			auto& l = context.getLocalData();
+			if (o.Get("remove").AsString().Val() == propId)
+			{
+				if (o.Has("after"))
+				{
+					// If there is already no such element in the storage
+					// Then nothing to remove and we should return false
+					if (!l.Has("indexFromStorage") || !l.Has("removedFromStorage"))
+						result = false;
+					return true;
+				}
+			}
+			return false;
+		});
+		return result && getData().RemoveProperty(propId);
+	}
+
+	// Redirects to remove
+	bool VLCollectionModel::removeElement(const VLVarModel *childPtr)
+	{
+		if (auto id = getElementId(childPtr))
+			return remove(*id);
 		return false;
 	}
 
-	bool VLCollectionModel::add(const QString& propId, ObjectProperty::Type type)
+	const vl::Var &VLCollectionModel::setElementValue(const VLVarModel *e, const vl::VarPtr &value)
 	{
-		return addData(propId.toStdString(), type);
+		if (auto id = getElementId(e))
+			return setData(*id, value);
+		return vl::emptyVar;
 	}
 
-	bool VLCollectionModel::add(ObjectProperty::Type type)
+	bool VLCollectionModel::setElementType(const VLVarModel *e, ObjectProperty::Type newType)
 	{
-		return addData("New prop", type);
+		if (auto id = getElementId(e))
+			return setType(*id, newType);
+		return false;
 	}
 
-	bool VLCollectionModel::remove(const std::string& propId)
-	{
-		return removeAt(getIndex(propId));
-	}
+	// Removes model childPtr and replace it with a new having newType
 
-	bool VLCollectionModel::remove(const QString &propId)
-	{
-		return remove(propId.toStdString());
-	}
 
-	void VLCollectionModel::onNameChanged(int i)
+	// ======= Begin of public slots =======
+	void VLCollectionModel::onNameChanged()
 	{
+		auto i = getElementIndex(QObject::sender());
+		if (i < 0)
+		{
+			LOG_ERROR("VLCollectionModel::onNameChanged slot received a signal from an unregistered sender");
+			return;
+		}
 		QModelIndex index = this->index(i, 0, QModelIndex());
 		emit dataChanged(index, index, QVector<int>() << RoleName);
 	}
 
-	vl::Object &VLCollectionModel::getData()
+	void VLCollectionModel::onRowsAboutToBeInserted(const QModelIndex &parent, int first, int last)
 	{
-		return const_cast<vl::Object&>(const_cast<const VLCollectionModel*>(this)->getData());
+		beginInsertRows(parent, first, last);
+	}
+
+	void VLCollectionModel::onRowsInserted(const QModelIndex &parent, int first, int last)
+	{
+		endInsertRows();
+	}
+
+	void VLCollectionModel::onRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last)
+	{
+		beginRemoveRows(parent, first, last);
+	}
+
+	void VLCollectionModel::onRowsRemoved(const QModelIndex &parent, int first, int last)
+	{
+		endRemoveRows();
+	}
+	// ======= End of public slots =======
+
+	// Store the model ptr in the storage
+	// and init it with the parent (this collection's owner)
+	// indexBefore is not used on the higher levels now
+	const VLVarModelPtr &VLCollectionModel::putModel(const std::string &propId, const VLVarModelPtr &ptr, int indexBefore) {
+		if (auto& ret = putToStorage(propId, ptr, indexBefore))
+		{
+			if (auto collectionOwner = getParentModel())
+			{
+				if (!ret->getParentModel())
+					ret->Init(collectionOwner);
+			}
+			else
+				LOCAL_ERROR("putModel(" << propId.c_str() << ") no parent present in the collection model. The putting model will not be initialized");
+			return ret;
+		}
+		else
+		{
+			LOCAL_ERROR("putModel(" << propId.c_str() << ") return nullptr through the storage");
+		}
+		return nullVarModelPtr;
 	}
 
 	VLObjectVarModelPtr VLCollectionModel::getParentModel() const
@@ -289,148 +432,225 @@ namespace dmb
 		return const_cast<const VLCollectionModel*>(this)->getParentModel();
 	}
 
+	bool VLCollectionModel::loadElementModels()
+	{
+		UpdateIdList();
+		return getObjectStorage().getIdList().ForeachKey([&](auto& k) {
+			if (!getObjectStorage().get(k))
+				if (!loadElementModel(k))
+					return false;
+			return true;
+		});
+	}
+
+	// Create a model and store it
+	// indexBefore is not used on the higher levels now
+	const VLVarModelPtr& VLCollectionModel::loadElementModel(const std::string& propId, int indexBefore)
+	{
+		auto& data = getData();
+		if (!data.Has(propId))
+			return nullVarModelPtr;
+		auto& propData = data.Get(propId);
+		bool complete = false;
+		if (auto collectionOwner = getParentModel())
+		{
+			LOCAL_VERBOSE("Create model for '" << propId.c_str() << "'");
+			if (propId == "proto")
+				if (auto& m = loadProtoModel(propData, collectionOwner, indexBefore))
+					return m;
+			if (!complete)
+			{
+				// Container should be prepared to fit in the range
+				auto& ptr = putModel(propId
+							 , VarModelFactory::Instance().CreateEmpty(propData)
+							 , indexBefore);
+				return ptr;
+			}
+		}
+		else
+		{
+			// Parent should exist
+			assert(false);
+		}
+		return nullVarModelPtr;
+	}
+
+	// Called from loadElementModel for it's code reuse
+	// indexBefore is not used on the higher levels now
+	const VLVarModelPtr& VLCollectionModel::loadProtoModel(const vl::Var& data, const VLObjectVarModelPtr& collectionOwner, int indexBefore)
+	{
+		auto& protoData = data.AsObject();
+		if (auto dmbModel = collectionOwner->getDataModel())
+		{
+			auto protoId = dmbModel->getDataModel().GetTypeId(protoData);
+			if (auto& p = dmbModel->modelByTypeId(protoId))
+				return putModel("proto", p, indexBefore);
+			else
+				LOCAL_WARNING(Utils::FormatStr("Can't find or create a model for proto '%s'", protoId.c_str()).c_str());
+		}
+		else
+		{
+			// Any element in the hierarchy should have a link to the model
+			LOCAL_ERROR("No owner of a model present during loading the proto model");
+			assert(false);
+		}
+		return nullVarModelPtr;
+	}
+
+	std::unique_ptr<ModelStorageSubscriptionProcessor> VLCollectionModel::createStorageSubscriptionProcessor()
+	{
+		return std::make_unique<ObjectModelStorageSubscriptionProcessor>(*this);
+	}
+
+	const VLVarModelPtr &VLCollectionModel::setModel(const std::string &propId, const VLVarModelPtr &m)
+	{
+		if (!mVLSubscriptionProcessor)
+			return nullVarModelPtr;
+
+		if (!m)
+		{
+			LOG_ERROR("Null model passed to setModel('" << propId.c_str() << ")");
+			return nullVarModelPtr;
+		}
+
+		vl::VarPtr dataPtr = nullptr;
+		VLVarModelPtr modelPtr = m;
+
+		// Check if it is a standalone model
+		if (!m->getParentModel())
+			if (auto owner = m->getDataModel())
+			{
+//				if (modelOverwriteRestricted)
+//				{
+//					if (owner->hasStandaloneModel(m.get()))
+//						dataPtr = vl::MakePtr(m->getData());
+//				}
+//				else
+					if (auto standaloneModel = owner->takeStandaloneModel(m.get()))
+					{
+						modelPtr = standaloneModel;
+						dataPtr = vl::MakePtr(standaloneModel->getData());
+					}
+			}
+		// Put a proto
+		if (propId == "proto")
+			dataPtr = vl::MakePtr(m->getData());
+
+		if (!dataPtr)
+			// Otherwise just take its data as a copy
+			dataPtr = m->getData().Copy();
+			// and then return a newly created model
+			// We don't support sharing other models as prototypes
+
+		// Send Qt list model insert rows signal
+		// Set the data
+		const VLVarModelPtr* result = &nullVarModelPtr;
+
+		if (modelOverwriteRestricted)
+		{
+			// Put our modelPtr only if we have no such one
+			result = &getModel("propId");
+			modelPtr = nullptr;
+		}
+		if (modelPtr)
+			mVLSubscriptionProcessor->setOnBeforeUpdate([&, propId] (const NotifContext& c) {
+				auto& o = c.getNotifData();
+				if (o.Get("add").AsString().Val() == propId
+				|| o.Get("set").AsString().Val() == propId)
+					if (o.Has("after"))
+					{
+						// Put the model if it is not restricted by a flag
+						// or if there is no such model yet
+						result = &putModel(propId, modelPtr);
+						return true;
+					}
+				return false;
+			});
+		setData(propId, dataPtr);
+		if (*result)
+			return *result;
+		else // If propId is already in the collection
+			// then just load its model after setting the data
+			return model(propId);
+	}
+
+	const VLVarModelPtr& VLCollectionModel::getModel(const std::string &propId) const
+	{
+		if (auto& m = getObjectStorage().get(propId))
+			return m;
+		if (propId == "proto")
+			return nullVarModelPtr;
+		if (auto proto = getModel("proto"))
+			return proto->asObject()->getModel(propId);
+		return nullVarModelPtr;
+	}
+
+	const VLVarModelPtr& VLCollectionModel::model(const std::string &propId)
+	{
+		if (hasDataOwn(propId))
+		{
+			if (auto& m = getObjectStorage().get(propId))
+				return m;
+			else
+				return loadElementModel(propId);
+		}
+		if (propId == "proto")
+			return nullVarModelPtr;
+		if (auto proto = model("proto"))
+			return proto->asObject()->model(propId);
+		return nullVarModelPtr;
+	}
+
+	// ======= Begin of Qt interface =======
 	bool VLCollectionModel::has(const QString& propId) const
 	{
-		return has(propId.toStdString());
+		return hasDataOwn(propId.toStdString());
 	}
 
-	bool VLCollectionModel::has(const std::string &propId) const
+	QVariant VLCollectionModel::get(const QString& propId)
 	{
-		return getData().Has(propId);
+		return QVariant::fromValue(model(propId.toStdString()).get());
 	}
 
-	VLVarModel *VLCollectionModel::model(const std::string &propId)
+	const VLVarModelPtr& VLCollectionModel::set(const std::string &propId, VLVarModel *v)
 	{
-		//return const_cast<VLVarModel*>(const_cast<const VLCollectionModel*>(this)->getAt(getIndex(propId)));
-		// Better to use at instead of const_cast
-
-		if (auto m = at(getIndex(propId)))
-			return m;
-		if (propId == "proto")
-			return nullptr;
-		if (auto proto = at(getIndex("proto")))
-			return proto->asObject()->model(propId);
-		return nullptr;
-	}
-
-	const VLVarModelPtr &VLCollectionModel::setModel(const std::string &propId, const VLVarModelPtr &modelPtr)
-	{
-		const VLVarModel* m = modelPtr.get();
-		auto dataPtr = vl::MakePtr(m->getData());
-		auto parent = getParentModel();
-		setData(propId, dataPtr, [&] (bool) {
-			if (!modelPtr->getParentModel())
-			{
-				if (auto owner = modelPtr->getDataModel())
-					if (auto standaloneModel = owner->takeStandaloneModel(modelPtr.get()))
-					{
-						putModel(getIndex(propId), standaloneModel);
-						standaloneModel->Init(parent);
-						return standaloneModel;
-					}
-				putModel(getIndex(propId), modelPtr);
-				modelPtr->Init(parent);
-				return modelPtr;
-			}
-			putModel(getIndex(propId), modelPtr);
-			return modelPtr;
-		});
-		return getModelSp(propId);
-	}
-
-	const VLVarModel *VLCollectionModel::getModel(const std::string &propId) const
-	{
-		return getModelSp(propId).get();
-	}
-
-	const VLVarModelPtr& VLCollectionModel::getModelSp(const std::string &propId) const
-	{
-		if (auto& m = getAtSp(getIndex(propId)))
-			return m;
-		if (propId == "proto")
-			return emptyModelPtr;
-		if (auto proto = getModel("proto"))
-			return proto->asObject()->getModelSp(propId);
-		return emptyModelPtr;
-	}
-
-	const VLVarModelPtr& VLCollectionModel::modelSp(const std::string &propId)
-	{
-		if (auto& m = atSp(getIndex(propId)))
-			return m;
-		if (propId == "proto")
-			return emptyModelPtr;
-		if (auto proto = model("proto"))
-			return proto->asObject()->modelSp(propId);
-		return emptyModelPtr;
-	}
-
-	VLVarModel *VLCollectionModel::get(const QString& propId)
-	{
-		return modelSp(propId.toStdString()).get();
-	}
-
-	VLVarModel *VLCollectionModel::set(const QString &propId, VLVarModel *v)
-	{
-		if (auto parentModel = getParentModel()) {
-			if (auto dataModel = parentModel->getDataModel())
-			{
-				const VLVarModel* m = v;
-				auto id = propId.toStdString();
-				auto dataPtr = vl::MakePtr(m->getData());
-				if (auto modelPtr = dataModel->takeStandaloneModel(v))
-				{
-					setData(id, dataPtr, [&] (bool modelAlreadyExists) {
-						modelPtr->Init(parentModel);
-						putModel(getIndex(id), modelPtr);
-						return modelPtr;
-					});
-				}
-				return at(getIndex(id));
-			}
+		if (!v)
+		{
+			LOG_ERROR("Null model passed to set('" << propId.c_str() << ")");
+			return nullVarModelPtr;
 		}
-		return nullptr;
+		return setModel(propId, v->shared_from_this());
 	}
 
-	VLVarModel *VLCollectionModel::set(const QString &propId, const QVariant &data)
+	QVariant VLCollectionModel::set(const QString &propId, const QVariant &data)
 	{
 		if (data.canConvert<VLVarModel*>())
-			return set(propId, qvariant_cast<VLVarModel*>(data));
-		if (auto parent = getParentModel())
-		{
-			if (auto dataModel = parent->getDataModel())
-			{
-				auto propIdStd = propId.toStdString();
-				if (auto model = getModel(propIdStd))
-					if (ObjectProperty::typeFromQVariant(data) == model->type())
-					{
-						setData(propIdStd, ObjectProperty::makeVarFromData(data));
-						// Return through the const method (without creation)
-						// to be sure that the model has been created through setData
-						return getModelSp(propIdStd).get();
-					}
-				return set(propId, dataModel->createFromData(data));
-			}
-		}
-		return nullptr;
+			return QVariant::fromValue(set(propId.toStdString(), qvariant_cast<VLVarModel*>(data)).get());
+		return QVariant::fromValue(setDataAndLoadModel(propId.toStdString(), ObjectProperty::makeVarFromData(data)).get());
 	}
 
-	const std::string &VLCollectionModel::getId(int index) const
+	// Adds a new model with propId and type to the end of the list
+	// stores and return it
+	// If the passed id is already taken
+	// then take the free similar to the passed with an added suffix
+	QVariant VLCollectionModel::add(const QString& propId, ObjectProperty::Type type)
 	{
-		// Don't check index as it should be checked on the above level
-		return mIdList[index];
+		auto propIdStd = propId.toStdString();
+		if (auto ret = addDataAndLoadModel(propIdStd, ObjectProperty::MakeVarPtr(type)))
+			return QVariant::fromValue(ret.data.get());
+		return QVariant();
 	}
 
-	std::string& VLCollectionModel::getId(int index)
+	// Redirects to add(const QString&)
+	QVariant VLCollectionModel::add(ObjectProperty::Type type)
 	{
-		return const_cast<std::string&>(const_cast<const VLCollectionModel*>(this)->getId(index));
+		return add("New prop", type);
 	}
 
-	int VLCollectionModel::getIndex(const std::string &propId) const
+	// Redirects to remove(const std::string&)
+	bool VLCollectionModel::remove(const QString &propId)
 	{
-		auto it = mPropIndex.find(propId);
-		if (it != mPropIndex.end())
-			return it->second;
-		return -1;
+		return remove(propId.toStdString());
 	}
+	// ======= End of Qt interface =======
 }
