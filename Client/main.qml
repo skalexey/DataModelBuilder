@@ -360,11 +360,19 @@ Window {
 			};
 
 			varListFooterAddClicked = function(listModel, type) {
-				preInstantiateDialog.show();
-				preInstantiateDialog.initialText = listModel.parent.freeId("New prop");
-				preInstantiateDialog.onConfirm = function(enteredText) {
-					log("Add new prop '" + enteredText + "' of type '" + type + "'");
-					listModel.add(enteredText, type);
+				var listModelOwner = listModel.parent;
+				if (listModelOwner.type === ObjectProperty.Object)
+				{
+					preInstantiateDialog.show();
+					preInstantiateDialog.initialText = listModel.parent.freeId("New prop");
+					preInstantiateDialog.onConfirm = function(enteredText) {
+						log("Add new prop '" + enteredText + "' of type '" + type + "'");
+						listModel.add(enteredText, type);
+					}
+				}
+				else if (listModelOwner.type === ObjectProperty.List)
+				{
+					listModel.add(type);
 				}
 			}
 		}
