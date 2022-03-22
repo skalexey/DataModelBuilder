@@ -1,0 +1,38 @@
+{
+    "content": {},
+    "types": {
+        "pear": {
+            "isFruit": true,
+            "color": "Yellow",
+            "radius": 0.30000001192092896,
+            "branchCount": 1.0
+        },
+        "bush": {
+            "leafColor": "Green",
+            "isTree": true,
+            "y": 0.0,
+            "leafPerBranch": 6.0,
+            "branches": [
+                {
+                    "leafCount": 10.0,
+                    "fruit": {},
+                    "branches": [
+                        {
+                            "leafCount": 10.0,
+                            "fruit": {},
+                            "branches": []
+                        }
+                    ]
+                }
+            ],
+            "x": 0.0
+        }
+    },
+    "private": {
+        "branch": {
+            "leafCount": 10.0,
+            "branches": [],
+            "fruit": {}
+        }
+    }
+}

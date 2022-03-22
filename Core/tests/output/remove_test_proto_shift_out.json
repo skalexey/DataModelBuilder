@@ -1,0 +1,23 @@
+{
+    "content": {
+        "list": [
+            {
+                "proto": "",
+                "title": "Orange"
+            },
+            {
+                "proto": "",
+                "title": "Apple"
+            },
+            {
+                "title": "Vegetable"
+            },
+            {
+                "proto": "content.list.[2]",
+                "title": "Cucumber"
+            }
+        ]
+    },
+    "types": {},
+    "private": {}
+}

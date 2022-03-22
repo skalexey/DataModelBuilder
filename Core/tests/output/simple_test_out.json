@@ -1,0 +1,13 @@
+{
+    "content": {
+        "fruit": {
+            "title": "Fruit"
+        },
+        "orange": {
+            "proto": "content.fruit",
+            "title": "Orange"
+        }
+    },
+    "types": {},
+    "private": {}
+}

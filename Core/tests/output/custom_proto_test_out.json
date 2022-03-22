@@ -1,0 +1,53 @@
+{
+    "content": {
+        "fruitList": [
+            {
+                "isFruit": true,
+                "color": "Yellow",
+                "radius": 0.30000001192092896,
+                "branchCount": 1.0
+            },
+            {
+                "isFruit": true,
+                "color": "Green",
+                "radius": 0.5,
+                "branchCount": 1.0
+            },
+            {
+                "isFruit": true,
+                "color": "Orange",
+                "radius": 0.699999988079071,
+                "branchCount": 1.0
+            }
+        ]
+    },
+    "types": {
+        "bush": {
+            "leafColor": "Green",
+            "isTree": true,
+            "y": 0.0,
+            "leafPerBranch": 6.0,
+            "branches": [
+                {
+                    "leafCount": 10.0,
+                    "fruit": {},
+                    "branches": [
+                        {
+                            "leafCount": 10.0,
+                            "fruit": {},
+                            "branches": []
+                        }
+                    ]
+                }
+            ],
+            "x": 0.0
+        }
+    },
+    "private": {
+        "branch": {
+            "leafCount": 10.0,
+            "branches": [],
+            "fruit": {}
+        }
+    }
+}

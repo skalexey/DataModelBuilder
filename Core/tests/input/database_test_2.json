@@ -1,0 +1,43 @@
+{
+    "content": {
+        "rootSkill": {
+            "proto": "Skill",
+            "children": [
+            ]
+        },
+        "skillLibrary": [
+            {
+                "proto": "Skill",
+                "name": "Development",
+                "x": 2.0,
+                "iconPath": "development.png",
+                "y": "2"
+            },
+            {
+                "proto": "Skill",
+                "name": "Organisation",
+                "iconPath": "organisation.png"
+            },
+            {
+                "proto": "Skill",
+                "description": "",
+                "name": "Testskill 43863",
+                "iconPath": "file:///C:/Users/skoro/Downloads/programming-icon-png-6.jpg"
+            }
+        ]
+    },
+    "types": {
+        "Skill": {
+            "name": "",
+            "frameImgPath": "border.png",
+            "description": "",
+            "iconPath": "",
+            "children": []
+        },
+        "SkillWithLevel": {
+            "proto": "Skill",
+            "level": 0.0
+        }
+    },
+    "private": {}
+}

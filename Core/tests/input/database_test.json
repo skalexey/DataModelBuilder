@@ -1,0 +1,65 @@
+{
+    "content": {
+        "rootSkill": {
+            "proto": "Skill",
+            "children": [
+                {
+                    "proto": "Skill",
+                    "name": "Accuracy",
+                    "iconPath": "accuracy.png",
+                    "position": 4.0
+                },
+                {
+                    "proto": "Skill",
+                    "name": "Productivity",
+                    "iconPath": "productivity.png",
+                    "position": 36.0
+                },
+                {
+                    "proto": "content.skillLibrary.[1]",
+                    "iconPath": "productivity.png",
+                    "position": 62.0
+                },
+                {
+                    "proto": "content.skillLibrary.[2]",
+                    "position": 103.0
+                },
+                {
+                    "proto": "content.skillLibrary.[0]",
+                    "position": 105.0
+                }
+            ]
+        },
+        "skillLibrary": [
+            {
+                "proto": "Skill",
+                "name": "Development",
+                "iconPath": "development.png"
+            },
+            {
+                "proto": "Skill",
+                "name": "Organisation",
+                "iconPath": "organisation.png"
+            },
+            {
+                "proto": "Skill",
+                "name": "Learning",
+                "iconPath": "learning.png"
+            }
+        ]
+    },
+    "types": {
+        "Skill": {
+            "frameImgPath": "border.png",
+            "name": "",
+            "description": "",
+            "iconPath": "",
+            "children": []
+        },
+        "SkillWithLevel": {
+            "proto": "Skill",
+            "level": 0.0
+        }
+    },
+    "private": {}
+}

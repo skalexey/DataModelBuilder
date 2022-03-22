@@ -1,0 +1,36 @@
+{
+    "fruitTree": {
+        "typeid": "bush",
+        "leafColor": "Gold",
+        "isTree": true,
+        "y": 0.0,
+        "leafPerBranch": 6.0,
+        "branches": [
+            {
+                "leafCount": 10.0,
+                "fruit": {},
+                "branches": [
+                    {
+                        "leafCount": 10.0,
+                        "fruit": {},
+                        "branches": []
+                    }
+                ]
+            }
+        ],
+        "x": 0.0
+    },
+    "fieldSize": 4.0,
+    "animalsAround": [
+        {
+            "typeid": "animal",
+            "type": "bear",
+            "isMammal": true
+        },
+        {
+            "typeid": "animal",
+            "type": "bird"
+        },
+        {}
+    ]
+}
