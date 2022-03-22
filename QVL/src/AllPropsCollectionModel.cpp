@@ -34,22 +34,12 @@ namespace dmb
 	{
 		resetList([&]() {
 			getObjectStorage().idList().clear();
-			auto& data = getData();
-			if (auto& proto = data.GetPrototype())
-			{
-				proto.ForeachProp(
+			getData().ForeachProp(
 				[&](const std::string& propName, const vl::Var& prop) {
-					if (propName == "proto")
-							return true;
 					getObjectStorage().idList().put(propName);
 					return true;
-				}, true);
-			}
-			data.ForeachProp(
-			[&](const std::string& propName, const vl::Var& prop) {
-				getObjectStorage().idList().put(propName);
-				return true;
-			});
+				}, true
+			);
 		});
 	}
 

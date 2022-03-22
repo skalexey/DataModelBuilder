@@ -339,24 +339,14 @@ namespace dmb
 
 	int VLObjectVarModel::sizeAll() const
 	{
-		std::unordered_set<std::string> s;
-		auto& data = getData();
-		if (auto& proto = data.GetPrototype())
-		{
-			proto.ForeachProp(
+		int i = 0;
+		getData().ForeachProp(
 			[&](const std::string& propName, const vl::Var& prop) {
-				if (propName == "proto")
-						return true;
-				s.insert(propName);
+				i++;
 				return true;
-			}, true);
-		}
-		data.ForeachProp(
-		[&](const std::string& propName, const vl::Var& prop) {
-			s.insert(propName);
-			return true;
-		});
-		return s.size();
+			}, true
+		);
+		return i;
 	}
 
 	bool VLObjectVarModel::setPrototype(const std::string &protoId)
