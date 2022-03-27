@@ -4,6 +4,9 @@ rm -rf Src
 
 includePath="../include/"
 srcPath="../src/"
+jsonConverterPath="../dependencies/VL/JSONConverter"
+jsonConverterInclude="$jsonConverterPath/include/"
+jsonConverterSrc="$jsonConverterPath/src/"
 
 mkdir Src
 cd Src
@@ -12,8 +15,12 @@ cd Src
 	mkdir Extensions
 	mv DMBCore/VLBackwardTraversable.h Extensions
 	mkdir Extensions/src
-	mv DMBCore/src/VLBackwardTraversable.cpp Extensions/src
-	
+	cd Extensions
+		mv ../DMBCore/src/VLBackwardTraversable.cpp src
+		cp -r ../../$jsonConverterInclude .
+		mv include JSONConverter
+		cp -r ../../$jsonConverterSrc JSONConverter
+	cd ..
 	mkdir Utility
 	mv DMBCore/VLUtility.h Utility
 	mkdir Utility/src
