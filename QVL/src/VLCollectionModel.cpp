@@ -516,6 +516,7 @@ namespace dmb
 		vl::VarPtr dataPtr = nullptr;
 		VLVarModelPtr modelPtr = m;
 
+		bool standalone = false;
 		// Check if it is a standalone model
 		if (!m->getParentModel())
 			if (auto owner = m->getDataModel())
@@ -530,6 +531,7 @@ namespace dmb
 					{
 						modelPtr = standaloneModel;
 						dataPtr = vl::MakePtr(standaloneModel->getData());
+						standalone = true;
 					}
 			}
 		// Put a proto
@@ -546,10 +548,10 @@ namespace dmb
 		// Set the data
 		const VLVarModelPtr* result = &nullVarModelPtr;
 
-		if (modelOverwriteRestricted)
+		if (modelOverwriteRestricted && !standalone)
 		{
 			// Put our modelPtr only if we have no such one
-			result = &getModel("propId");
+			result = &getModel(propId);
 			modelPtr = nullptr;
 		}
 		if (modelPtr)
