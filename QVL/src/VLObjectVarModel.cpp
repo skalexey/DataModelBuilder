@@ -1,5 +1,6 @@
 #include <unordered_set>
 #include <QObject>
+#include <QVariant>
 #include "VLObjectVarModel.h"
 #include "VLCollectionModel.h"
 #include "VLListModel.h"
@@ -320,15 +321,24 @@ namespace dmb
 		}
 	}
 
-	bool VLObjectVarModel::setPrototype(const QString& protoId)
+	bool VLObjectVarModel::setPrototype(const QVariant& arg)
 	{
-		return setPrototype(protoId.toStdString());
+		if (arg.canConvert<VLObjectVarModel*>())
+		{
+			if (auto model = qvariant_cast<VLObjectVarModel*>(arg))
+				if (auto modelPtr = model->shared_from_this())
+					return setModel("proto", modelPtr) != nullptr;
+		}
+		else if (arg.userType() == QMetaType::QString)
+			return setPrototype(arg.toString().toStdString());
+		return false;
 	}
 
-	bool VLObjectVarModel::setPrototype(VLObjectVarModel *model)
+	bool VLObjectVarModel::setPrototype(const std::string &protoId)
 	{
-		if (auto modelPtr = model->shared_from_this())
-			return setModel("proto", modelPtr) != nullptr;
+		if (auto owner = getDataModel())
+			if (auto modelPtr = owner->modelByTypeId(protoId))
+				return setModel("proto", modelPtr) != nullptr;
 		return false;
 	}
 
@@ -347,14 +357,6 @@ namespace dmb
 			}, true
 		);
 		return i;
-	}
-
-	bool VLObjectVarModel::setPrototype(const std::string &protoId)
-	{
-		if (auto owner = getDataModel())
-			if (auto modelPtr = owner->modelByTypeId(protoId))
-				return setModel("proto", modelPtr) != nullptr;
-		return false;
 	}
 
 	QVariant VLObjectVarModel::protoId() const

@@ -103,8 +103,7 @@ namespace dmb
 		// Creates an instance of a type typeId with name instanceName
 		// If instanceName is not set then instantiateRequested signal with generated suggested name is called
 		Q_INVOKABLE void instantiate(const QString& typeId, const QString& instanceName = "");
-		Q_INVOKABLE bool setPrototype(const QString& protoId);
-		Q_INVOKABLE bool setPrototype(dmb::VLObjectVarModel* model);
+		Q_INVOKABLE bool setPrototype(const QVariant& arg);
 		Q_INVOKABLE int sizeOwn() const;
 		Q_INVOKABLE int sizeAll() const;
 		Q_INVOKABLE QString freeId(const QString& desiredId) const;
