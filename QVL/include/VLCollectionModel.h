@@ -34,8 +34,7 @@ namespace dmb
 
 	protected:
 		enum CollectionRole {
-			RoleName = InterfaceRoleCount,
-			RoleParent
+			RoleName = InterfaceRoleCount
 		};
 
 	public:

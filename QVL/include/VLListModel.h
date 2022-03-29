@@ -26,11 +26,6 @@ namespace dmb
 
 		Q_OBJECT
 
-		enum ListRole
-		{
-			RoleParentModel = InterfaceRoleCount
-		};
-
 	public:
 		// Constructors and initializers
 		explicit VLListModel(QObject* parent = nullptr);
