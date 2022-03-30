@@ -325,7 +325,7 @@ namespace dmb
 	{
 		// Set through the parent to let the vl object propogate events
 		if (auto parent = getParentModel())
-			parent->setChildValue(this, ObjectProperty::makeVarFromData(newValue));
+			parent->setChildValue(this, ObjectProperty::makeVarFromData(newValue, getData().GetType()));
 		else
 		{
 			auto& v = data();
