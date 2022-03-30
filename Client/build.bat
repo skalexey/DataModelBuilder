@@ -24,19 +24,6 @@ for %%x in (%*) do (
 	)
 )
 
-echo --- Build QVL
-
-set curDir=%CD%
-cd ../QVL
-setLocal
-call build.bat %*
-endLocal
-if not errorlevel 0 (
-	echo --- QVL build failed. Error code: %errorlevel%
-	goto end
-)
-
-echo --- QVL build done
 
 cd %curDir%
 
