@@ -162,11 +162,8 @@ namespace dmb
 		auto fPath = getAbsolutePath(url);
 		clear();
 
-		mRoot.reset();
-
 		if (getDataModel().Load(fPath))
 		{
-			InitRoot();
 			LOCAL_DEBUG("Put 'ROOT " << (long)this << "' " << mRoot.get());
 			mRoot->loadPropList();
 			setCurrentFile(fPath.c_str());
@@ -235,6 +232,9 @@ namespace dmb
 //		}, true);
 		mDataModel.Clear(true);
 		setCurrentFile("");
+		mRoot.reset();
+		mDataModel.Init();
+		InitRoot();
 	}
 
 	bool DMBModel::hasChanges() const

@@ -81,6 +81,7 @@ namespace dmb
 	public:
 		Model();
 		~Model();
+		void Init();
 		Registry& GetRegistry() { return mRegistry; }
 		Registry& GetPrivateScope() { return mPrivate; }
 		Content& GetContent() { return mContent; }
@@ -96,8 +97,6 @@ namespace dmb
 		inline const vl::VarNodeRegistry& GetVarNodeRegistry() const {
 			return mVarNodeRegistry;
 		}
-	protected:
-		void Init();
 
 	protected:
 		vl::Object mData;
