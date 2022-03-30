@@ -99,16 +99,6 @@ namespace dmb
 		return nullptr;
 	}
 
-	const Model &DMBModel::getDataModel() const
-	{
-		return mDataModel;
-	}
-
-	Model &DMBModel::getDataModel()
-	{
-		return mDataModel;
-	}
-
 	bool DMBModel::store(const QString &filePath, bool pretty)
 	{
 		auto fPath = getAbsolutePath(filePath);

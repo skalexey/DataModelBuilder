@@ -31,8 +31,12 @@ namespace dmb
 		const VLObjectVarModel* getContentModel() const;
 		VLObjectVarModel* typesModel();
 		const VLObjectVarModel* getTypesModel() const;
-		const dmb::Model& getDataModel() const;
-		dmb::Model& getDataModel();
+		inline const dmb::Model& getDataModel() const {
+			return mDataModel;
+		}
+		inline dmb::Model& getDataModel() {
+			return mDataModel;
+		}
 		bool isLoaded() const;
 		const VLVarModelPtr& createFromDataPtr(const QVariant& data);
 		dmb::VLObjectVarModelPtr createObjectSp();
