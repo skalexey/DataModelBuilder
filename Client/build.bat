@@ -24,8 +24,7 @@ for %%x in (%*) do (
 	)
 )
 
-
-cd %curDir%
+set build=%buildFolderPrefix%-cmake
 
 echo --- Build DataModelBuilder
 
