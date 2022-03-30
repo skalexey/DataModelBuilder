@@ -517,8 +517,9 @@ namespace dmb
 		VLVarModelPtr modelPtr = m;
 
 		bool standalone = false;
+		bool hasParent = m->getParentModel() != nullptr;
 		// Check if it is a standalone model
-		if (!m->getParentModel())
+		if (!hasParent)
 			if (auto owner = m->getDataModel())
 			{
 //				if (modelOverwriteRestricted)
@@ -548,7 +549,7 @@ namespace dmb
 		// Set the data
 		const VLVarModelPtr* result = &nullVarModelPtr;
 
-		if (modelOverwriteRestricted && !standalone)
+		if (modelOverwriteRestricted && !standalone && hasParent)
 		{
 			// Put our modelPtr only if we have no such one
 			result = &getModel(propId);
