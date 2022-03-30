@@ -16,6 +16,7 @@ Item {
 	}
 	property var stateChooseFile: function() {
 		state = "chooseFile";
+		emptyListText.visible = Qt.binding(function() {return !recentFilesList.model || recentFilesList.model.rowCount() === 0});
 	}
 
 	property var isFileOpenedState: function() {
