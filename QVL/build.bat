@@ -7,7 +7,6 @@ set cmakeGppArg=
 set gppArg=
 set cmakeLogOnArg= -DLOG_ON=ON
 
-echo --- Build config: %buildConfig% ---
 set argCount=0
 for %%x in (%*) do (
 	set /A argCount+=1
@@ -25,22 +24,7 @@ for %%x in (%*) do (
 	)
 )
 
-rem Now is run by CMake
-rem echo --- Build DMBCore
-
-rem set curDir=%CD%
-rem cd ../Core
-rem setLocal
-rem call build.bat %*
-rem endLocal
-rem if not errorlevel 0 (
-rem 	echo --- Core build failed. Error code: %errorlevel%
-rem 	goto end
-rem )
-
-rem echo --- Core build done
-
-cd %curDir%
+echo --- Build config: %buildConfig% ---
 
 echo --- Build QVL
 
