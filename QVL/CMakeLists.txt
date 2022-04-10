@@ -16,6 +16,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (LOG_ON)
 	add_compile_definitions("LOG_ON")
+	message("Build QVL with logs")
+else ()
+	message("Build QVL without logs")
 endif ()
 
 find_package(Qt6 COMPONENTS Core)
