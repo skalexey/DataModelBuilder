@@ -304,7 +304,7 @@ namespace dmb
 			else
 			{
 				auto instId = instanceName.toStdString();
-				if (has(instId))
+				if (hasOwn(instId))
 					emit instantiateRefused("Name error");
 				else
 				{
