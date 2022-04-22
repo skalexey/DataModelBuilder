@@ -22,12 +22,14 @@ Item {
 	property alias saveAsDialog: saveAsDialog
 	property alias dialogMessage: dialogMessage
 	property alias bodyBlock: bodyBlock
+	property alias actionText: actionText
 	// ======= Types list models
 	property var typesListsModel: ["No modifier", "Shift", "Control"]
 	property var typesListsModelDetailed: [{"No modifier": 0}, {"Shift": 1}, {"Control": 2}]
 
 	// ======= Files properties ========
 	property var textCurrentFile: "No file opened"
+	property var textAction: "Action defult text"
 	// ======= Recent files properties ========
 	property var recentFileRelPath: function(fPath) {
 		// Default handler. Will be overriden in main.qml
@@ -254,8 +256,8 @@ Item {
 
 	// ======= Screen properties =======
 	property var openFileClicked: function() { log("openFileClicked default handler"); }
-	property var saveAsClicked: function() { log("saveAsClicked default handler"); }
-	property var saveClicked: function() { log("saveClicked default handler"); }
+	property var saveAsClicked: function() { log("saveAsClicked default handler");}
+	property var saveClicked: function() { log("saveClicked default handler"); actionText.show("Saved");}
 	property var onOpenFile: function(fPath) { log("onOpenFile default handler"); }
 	property var newClicked: function() { log("newClicked default handler"); }
 	property var closeFileClicked: function() { log("closeFileClicked default handler"); }
@@ -291,6 +293,30 @@ Item {
 				text: textCurrentFile
 			}
 
+			Text {
+				anchors.verticalCenter: parent.verticalCenter
+				anchors.right: parent.right
+				anchors.rightMargin: 100
+				id: actionText
+				text: textAction
+				opacity: 0
+				color: "#239600"
+				property var show: function(textToShow) {
+					text = "";
+					text = textToShow;
+				}
+
+				Behavior on text {
+					SequentialAnimation {
+						NumberAnimation { target: actionText; property: "opacity"; to: 1 }
+						PauseAnimation {
+							duration: 6000
+						}
+						NumberAnimation { target: actionText; property: "opacity"; to: 0 }
+					}
+				}
+			}
+
 			FileMenu {
 				id: fileMenu
 			}
@@ -320,6 +346,10 @@ Item {
 			id: dialogMessage
 		}
 
+		Shortcuts {
+
+		}
+
 	}
 	// ======= End of Screen definition =======
 }
@@ -330,6 +360,7 @@ Item {
 
 /*##^##
 Designer {
-	D{i:0;formeditorZoom:0.66}D{i:33}D{i:40}D{i:41}D{i:42}D{i:43}D{i:32}
+	D{i:0;formeditorZoom:0.66}D{i:0}D{i:0}D{i:0}D{i:0}D{i:0}D{i:0}D{i:0}D{i:0}D{i:0}D{i:0}
+D{i:0}D{i:0}D{i:0}D{i:0}D{i:0}
 }
 ##^##*/

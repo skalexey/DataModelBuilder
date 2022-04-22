@@ -40,5 +40,6 @@
 <file>./DialogMessage.qml</file>
 <file>./CurrentFileMenu.qml</file>
 <file>./FileMenu.qml</file>
+<file>./Shortcuts.qml</file>
 </qresource>
 </RCC>

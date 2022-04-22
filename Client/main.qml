@@ -444,6 +444,7 @@ Window {
 
 		property var modelStored: function(f) {
 			storeRecentFile(f);
+			uiRoot.actionText.show(qsTr("Stored"));
 		}
 
 		property var modelStoreError: function(f, e) {
