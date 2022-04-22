@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QVL 1.0
 
 InteractiveListElement {
 	id: obj
@@ -7,7 +8,11 @@ InteractiveListElement {
 	height: paramValue.height
 	state: "base"
 
-	menuModel: ListModel {
+	function isList() {
+		return getParentModel().type === ObjectProperty.List;
+	}
+
+	property var objectMenuModel: ListModel {
 		ListElement {
 			title: "Rename"
 			cmd: function(i) {
@@ -37,6 +42,31 @@ InteractiveListElement {
 		}
 	}
 
+	property var listMenuModel: ListModel {
+		ListElement {
+			title: "Edit Value"
+			cmd: function(i) {
+				paramValue.state = "textEdit";
+				paramValue.valueInput.edit(getValue());
+			}
+		}
+		ListElement {
+			title: "Edit Type"
+			cmd: function(i) {
+				obj.state = "editType";
+				paramTypeInput.currentIndex = getType()
+			}
+		}
+		ListElement {
+			title: "Delete"
+			cmd: function(i) {
+				getParentModel().removeAt(index);
+			}
+		}
+	}
+
+	menuModel: isList() ? listMenuModel: objectMenuModel;
+
 	Item {
 		id: infoBox
 		width: parent.width
@@ -53,6 +83,7 @@ InteractiveListElement {
 			font.bold: true
 			width: 200
 			clip: true
+			visible: !isList()
 		}
 
 		Text {
@@ -63,6 +94,15 @@ InteractiveListElement {
 			anchors.verticalCenter: parent.verticalCenter
 			font.pixelSize: 12
 			anchors.horizontalCenter: parent.horizontalCenter
+		}
+
+		Text {
+			id: indexText
+			x: 27
+			y: 12
+			text: "[" + index + "]"
+			font.pixelSize: 12
+			visible: isList()
 		}
 
 		ComboBox {

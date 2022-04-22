@@ -119,7 +119,7 @@ Column {
 			id: arrayContentList
 			width: parent.width
 			implicitHeight: contentItem.childrenRect.height
-			delegate: VLListElement {
+			delegate: ParamInItem {
 				container: arrayContentList
 				width: ownPropList.width
 				getValue: function() { return value; }
