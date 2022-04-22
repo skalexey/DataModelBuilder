@@ -14,7 +14,7 @@ namespace dmb
 	class CollectionModelSubscriptionProcessor : public vl::Observer
 	{
 	public:
-		CollectionModelSubscriptionProcessor(VLCollectionModel& owner)
+		CollectionModelSubscriptionProcessor(VLListModelInterface& owner)
 			: mOwner(&owner) {}
 
 		~CollectionModelSubscriptionProcessor() = default;
@@ -34,9 +34,8 @@ namespace dmb
 		bool updateContext(vl::Var& info, const std::string& path = "");
 		bool processUpdate(vl::Var& info, const std::string& path = "");
 
-		inline VLCollectionModel& getOwner() {
-			return *mOwner;
-		}
+		VLCollectionModel& getOwner();
+		VLListModelInterface& getOwnerBase();
 
 		// Add
 		virtual void onAdd();
@@ -84,7 +83,7 @@ namespace dmb
 
 	protected:
 		// Data
-		VLCollectionModel* mOwner;
+		VLListModelInterface* mOwner;
 		BoolCbContext mOnBeforeUpdate;
 		BoolCbContext mOnAfterUpdate;
 

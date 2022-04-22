@@ -35,6 +35,30 @@ namespace dmb
 	{
 		qDebug() << "~VLListModel()";
 		qDebug() << this << "->(list)setParent(nullptr)";
+		mVLSubscriptionProcessor.reset();
+	}
+
+	bool VLListModel::Init(const VLVarModelPtr& newParent)
+	{
+		if (auto parent = getParentModel())
+			if (parent != newParent)
+				if (mVLSubscriptionProcessor)
+					getData().AsList().Detach(mVLSubscriptionProcessor.get());
+
+		// If newParent is the same as own
+		if (!Base::Init(newParent))
+			return false;
+
+		if (auto parent = getParentModel())
+			if ((mVLSubscriptionProcessor = createVLSubacriptionProcessor()))
+				getData().AsList().Attach(mVLSubscriptionProcessor.get());
+		return true;
+	}
+
+	std::unique_ptr<ListModelSubscriptionProcessor> VLListModel::createVLSubacriptionProcessor()
+	{
+		// Default processor
+		return std::make_unique<ListModelSubscriptionProcessor>(*this);
 	}
 
 	VLListVarModelPtr VLListModel::getParentModel() const
@@ -98,6 +122,16 @@ namespace dmb
 		if (index < 0 || index >= size())
 			return nullVarModelPtr;
 		return getStorage()[index];
+	}
+
+	bool VLListModel::isList() const
+	{
+		return true;
+	}
+
+	VLListModel *VLListModel::asList()
+	{
+		return this;
 	}
 	// ======= End of VLListModelInterface interface =======
 

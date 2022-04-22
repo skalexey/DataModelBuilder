@@ -1,3 +1,4 @@
+#include <utility>
 #include "CollectionModelSubscriptionProcessor.h"
 #include "vl.h"
 #include "VLCollectionModel.h"
@@ -32,9 +33,19 @@ namespace dmb
 		}
 	}
 
+	VLCollectionModel &CollectionModelSubscriptionProcessor::getOwner() {
+
+		return *mOwner->asCollection();
+	}
+
+	VLListModelInterface &CollectionModelSubscriptionProcessor::getOwnerBase() {
+
+		return *mOwner;
+	}
+
 	void CollectionModelSubscriptionProcessor::Update(vl::Observable* sender, vl::VarPtr info)
 	{
-		if (auto parent = getOwner().getParentModel())
+		if (auto parent = std::as_const(getOwnerBase()).getParentModel())
 			LOCAL_DEBUG("Update vl notification on object '" << parent->getStringId().c_str() << "' and collection " << this);
 
 		LOCAL_DEBUG("msg: " << vl::VarToJSON(*info).c_str());
@@ -116,7 +127,7 @@ namespace dmb
 
 	void CollectionModelSubscriptionProcessor::onNoRelativePath(const std::string& id)
 	{
-		if (auto parent = getOwner().getParentModel())
+		if (auto parent = std::as_const(getOwnerBase()).getParentModel())
 			LOCAL_ERROR("Can't find relative path for id '" << id.c_str() << "' in the object '" << parent->getStringId().c_str() );
 		else
 			LOCAL_ERROR("Can't find relative path for id '" << id.c_str() << "' because there is no parent attached to the collection model " << &mOwner);
@@ -384,18 +395,18 @@ namespace dmb
 	{
 		auto& c = context();
 		auto& l = c.localData();
-		auto sz = getOwner().size();
+		auto sz = getOwnerBase().size();
 		if (sz > 0)
 		{
 			l.Set("apply", sz);
-			//getOwner().beginRemoveRows(QModelIndex(), 0, sz - 1);
-			getOwner().clear();
+			//getOwnerBase().beginRemoveRows(QModelIndex(), 0, sz - 1);
+			getOwnerBase().clear();
 		}
 	}
 
 	void CollectionModelSubscriptionProcessor::onAfterClear()
 	{
 		//if (o.Has("size"))
-			//getOwner().endRemoveRows();
+			//getOwnerBase().endRemoveRows();
 	}
 }

@@ -237,15 +237,7 @@ namespace dmb
 	bool VLListModelInterface::removeAt(int index)
 	{
 		if (index >= 0 && index < size())
-		{
-			beginRemoveRows(QModelIndex(), index, index);
-			bool result = doRemove(index);
-			if (auto& m = getStorage().at(index))
-				onModelBeforeRemove(m);
-			getStorage().remove(index);
-			endRemoveRows();
-			return result;
-		}
+			return doRemove(index);
 		return false;
 	}
 
@@ -329,7 +321,19 @@ namespace dmb
 		return nullptr;
 	}
 
+	VLListModel *VLListModelInterface::asList()
+	{
+		// Default logic
+		return nullptr;
+	}
+
 	bool VLListModelInterface::isCollection() const
+	{
+		// Default logic
+		return false;
+	}
+
+	bool VLListModelInterface::isList() const
 	{
 		// Default logic
 		return false;

@@ -89,7 +89,9 @@ namespace dmb
 		void connectSignals(VLVarModel* model) const;
 		void disconnectSignals(VLVarModel* model) const;
 		virtual VLCollectionModel* asCollection();
+		virtual VLListModel* asList();
 		virtual bool isCollection() const;
+		virtual bool isList() const;
 		// Role getters
 		virtual QVariant role(const VLVarModelPtr& m, int index, int role) const;
 		virtual QVariant roleType(const VLVarModelPtr& m, int index) const;

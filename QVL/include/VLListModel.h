@@ -1,6 +1,7 @@
 #ifndef VLLISTMODEL_H
 #define VLLISTMODEL_H
 
+#include <memory>
 #include <functional>
 #include <string>
 #include <vector>
@@ -9,6 +10,7 @@
 #include "vl.h"
 #include "ModelsFwd.h"
 #include "ListModelStorage.h"
+#include "ListModelSubscriptionProcessor.h"
 
 namespace dmb
 {
@@ -23,6 +25,7 @@ namespace dmb
 		typedef VLListModelInterface Base;
 
 		friend class VLListVarModel;
+		friend class ListModelSubscriptionProcessor;
 
 		Q_OBJECT
 
@@ -32,6 +35,7 @@ namespace dmb
 		explicit VLListModel(QObject *parent, const ListModelStoragePtr& storage);
 		explicit VLListModel(QObject* parent, const VLListModelInterface& storageOwner);
 		~VLListModel();
+		bool Init(const VLVarModelPtr& newParent) override;
 
 	public:
 		// ======= Begin of VLListModelInterface interface =======
@@ -50,6 +54,8 @@ namespace dmb
 	public:
 		// Other
 		QHash<int,QByteArray> roleNames() const override;
+		bool isList() const override;
+		VLListModel* asList() override;
 		// ======= End of VLListModelInterface interface =======
 
 	public:
@@ -97,6 +103,14 @@ namespace dmb
 		}
 
 		const VLVarModelPtr& putModel(int index, const VLVarModelPtr& ptr, int indexBefore = -1);
+
+	protected:
+		// Other
+		virtual std::unique_ptr<ListModelSubscriptionProcessor> createVLSubacriptionProcessor();
+
+	protected:
+		// Composition
+		std::unique_ptr<ListModelSubscriptionProcessor> mVLSubscriptionProcessor;
 	};
 }
 #endif // VLLISTMODEL_H
