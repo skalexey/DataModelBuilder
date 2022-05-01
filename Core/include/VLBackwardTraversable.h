@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <functional>
 #include <string>
 #include <unordered_map>
@@ -37,7 +38,7 @@ namespace vl
 		virtual ListTreeNode* AsList();
 		virtual const ListTreeNode* AsList() const;
 		void Update(Observable* sender, vl::VarPtr info) override;
-		virtual int ChildCount() const;
+		virtual std::size_t ChildCount() const;
 		inline const vl::Var* GetData() const {
 			return mData;
 		}
@@ -77,7 +78,7 @@ namespace vl
 		bool Has(const std::string& childId) const;
 		void Set(const std::string& childId, const VarTreeNodePtr& node);
 		const VarTreeNodePtr& Get(const std::string& childId) const;
-		int ChildCount() const override;
+		std::size_t ChildCount() const override;
 		ObjectTreeNode* AsObject() override;
 		const ObjectTreeNode* AsObject() const override;
 		bool IsObject() const override;
@@ -100,7 +101,7 @@ namespace vl
 		ListTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent);
 		~ListTreeNode();
 		void Update(Observable* sender, vl::VarPtr info) override;
-		inline int ChildCount() const override {
+		inline std::size_t ChildCount() const override {
 			return mChildren.size();
 		}
 		void Set(int index, const VarTreeNodePtr& node);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <string>
 #include "vl.h"
@@ -50,7 +51,7 @@ namespace dmb
 		vl::Object& Add(const std::string&, vl::Object& proto);
 		// Put any value as it is. Objects and lists are copied
 		vl::Var& Add(const std::string&, vl::Var& value);
-		int ItemCount() const;
+		std::size_t ItemCount() const;
 		vl::Var& Get(const std::string& entityName);
 		const vl::Var& Get(const std::string& entityName) const;
 		bool Has(const std::string& entityName) const;

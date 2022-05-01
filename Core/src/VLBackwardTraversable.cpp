@@ -121,7 +121,7 @@ namespace vl
 		// Nothing to do in the base class
 	}
 
-	int vl::VarTreeNode::ChildCount() const
+	std::size_t vl::VarTreeNode::ChildCount() const
 	{
 		// By default container with no children
 		return 0;
@@ -531,7 +531,7 @@ namespace vl
 		return shared_from_this();
 	}
 
-	int vl::ObjectTreeNode::ChildCount() const
+	std::size_t vl::ObjectTreeNode::ChildCount() const
 	{
 		return mChildren.size();
 	}

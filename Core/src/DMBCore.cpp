@@ -101,7 +101,7 @@ vl::Var& dmb::Content::Add(const std::string& entityName, vl::Var& value)
 		return mData.Set(entityName, value);
 }
 
-int dmb::Content::ItemCount() const
+std::size_t dmb::Content::ItemCount() const
 {
 	return mData.PropCount();
 }
