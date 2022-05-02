@@ -92,11 +92,15 @@ namespace dmb
 		bool Store(const std::string& fileName, const vl::CnvParams& params = vl::CnvParams());
 		std::string JSONStr(const vl::CnvParams& params = vl::CnvParams());
 		std::string GetTypeId(const vl::Object& obj) const;
+		bool IsType(const vl::Object& obj) const;
 		const vl::Object& GetData();
 		void Clear(bool recursive = false);
 		std::string DataStr(bool pretty = true) const;
 		inline const vl::VarNodeRegistry& GetVarNodeRegistry() const {
 			return mVarNodeRegistry;
+		}
+		inline const TypeResolver& GetTypeResolver() const {
+			return mTypeResolver;
 		}
 
 	protected:

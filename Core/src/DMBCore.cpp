@@ -189,7 +189,8 @@ dmb::Model::Model()
 	: mVarNodeRegistry(&mData)
 	, mTypeResolver([&](const vl::Object& o) {
 			return GetTypeId(o);
-		}, [&](const std::string& typeRef) {
+		}
+		, [&](const std::string& typeRef) {
 			if (auto node = mVarNodeRegistry.GetNode(typeRef))
 			{
 				if (auto data = node->GetData())
@@ -198,6 +199,9 @@ dmb::Model::Model()
 					LOG_ERROR(Utils::FormatStr("Found node with null data during type resolution of '%s'", typeRef.c_str()));
 			}
 			return vl::nullObject;
+		}
+		, [&](const vl::Object& o) {
+			return IsType(o);
 		}
 	)
 {
@@ -239,32 +243,40 @@ std::string dmb::Model::JSONStr(const vl::CnvParams& params)
 	return converter.JSONStr(mData, mTypeResolver, params);
 }
 
+bool searchObject (const vl::Var& where, const vl::Object& what, std::string& typeId)
+{
+	if (where.IsNull())
+		return false;
+	return !where.AsObject().ForeachProp(
+		[&](const std::string& propName, const vl::Var& propVal) {
+			if (propVal.AsObject() == what)
+			{
+				typeId = propName;
+				return false;
+			}
+			return true;
+		});
+};
+
 std::string dmb::Model::GetTypeId(const vl::Object& obj) const
 {
 	// TODO: avoid iteration
 	auto& context = mData;
 	std::string type;
-	auto search = [&](const vl::Var& r) {
-		if (r.IsNull())
-			return false;
-		return !r.AsObject().ForeachProp(
-			[&](const std::string& propName, const vl::Var& propVal) {
-				if (propVal.AsObject() == obj)
-				{
-					type = propName;
-					return false;
-				}
-				return true;
-			});
-	};
-	if (search(context.Get("types")))
+	if (searchObject(context.Get("types"), obj, type))
 		return type;
-	else if (search(context.Get("private")))
+	else if (searchObject(context.Get("private"), obj, type))
 		return type;
 	else // Construct a path to the object recursively
 		if (auto node = mVarNodeRegistry.GetNode(obj))
 			return node->GetPath();
 	return type;
+}
+
+bool dmb::Model::IsType(const vl::Object& obj) const
+{
+	std::string type;
+	return searchObject(mData.Get("types"), obj, type);
 }
 
 const vl::Object& dmb::Model::GetData()
