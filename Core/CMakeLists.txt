@@ -20,11 +20,6 @@ option(DMB_TESTS "Include DMBTest target" OFF)
 
 set(DEPS "dependencies")
 
-include_directories(${PROJECT_BINARY_DIR})
-include_directories("${PROJECT_SOURCE_DIR}/include")
-include_directories("${DEPS}/VL/include")
-include_directories("${DEPS}/VL/JSONConverter/include")
-
 if (USE_JSONCONVERTER)
 	set (EXTRA_LIBS ${EXTRA_LIBS} JSONConverter)
 	add_subdirectory("${DEPS}/VL/JSONConverter")
@@ -32,6 +27,15 @@ else()
 	set (EXTRA_LIBS ${EXTRA_LIBS} VL)
 	add_subdirectory("${DEPS}/VL")
 endif () 
+
+set(DMBCORE_INCLUDES
+	"${PROJECT_SOURCE_DIR}/include"
+	"${JSONCONVERTER_INCLUDES}"
+)
+set(DMBCORE_INCLUDES ${DMBCORE_INCLUDES} PARENT_SCOPE)
+
+include_directories(${PROJECT_BINARY_DIR})
+include_directories("${DMBCORE_INCLUDES}")
 
 file(GLOB SRC "src/*")
 file(GLOB HEADERS "include/*")
