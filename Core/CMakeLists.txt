@@ -18,20 +18,34 @@ option(DMB_TESTS "Include DMBTest target" OFF)
 
 #message("DMBCore CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
-set(DEPS "dependencies")
+# Setup dependencies
+
+if ("${DEPS}" STREQUAL "")
+	message("WARNING: DEPS is not specified. Take the default value")
+	set(DEPS "${PROJECT_SOURCE_DIR}/dependencies")
+else()
+	message("DEPS: ${DEPS}")
+endif()
+
+if (CMAKE_CXX_COMPILER EQUAL "g++")
+	set(BUILD_DIR_NAME "Build-g++")
+else ()
+	set(BUILD_DIR_NAME "Build-cmake")
+endif ()
 
 if (USE_JSONCONVERTER)
 	set (EXTRA_LIBS ${EXTRA_LIBS} JSONConverter)
-	add_subdirectory("${DEPS}/VL/JSONConverter")
+	add_subdirectory("${DEPS}/VL/JSONConverter" "${DEPS}/VL/JSONConverter/${BUILD_DIR_NAME}")
 else()
 	set (EXTRA_LIBS ${EXTRA_LIBS} VL)
-	add_subdirectory("${DEPS}/VL")
+	add_subdirectory("${DEPS}/VL" "${DEPS}/VL/${BUILD_DIR_NAME}")
 endif () 
 
 set(DMBCORE_INCLUDES
 	"${PROJECT_SOURCE_DIR}/include"
 	"${JSONCONVERTER_INCLUDES}"
 )
+
 set(DMBCORE_INCLUDES ${DMBCORE_INCLUDES} PARENT_SCOPE)
 
 include_directories(${PROJECT_BINARY_DIR})
