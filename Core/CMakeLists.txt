@@ -13,6 +13,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(DataModelBuilderCore)
+
+message("=== DMBCore project CMake build configuration process started ===")
+
 option(USE_JSONCONVERTER "Use JSONConverter lib" ON)
 option(DMB_TESTS "Include DMBTest target" OFF)
 
