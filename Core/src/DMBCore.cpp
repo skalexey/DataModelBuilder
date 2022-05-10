@@ -1,9 +1,9 @@
 #include <cstdlib>
 #include "JSONConverter.h"
 #include "DMBCore.h"
-#include "Log.h"
+#include "utils/Log.h"
 #ifdef LOG_ON
-	#include "Utils.h"
+	#include "utils/Utils.h"
 #endif
 #define DMB_LOG_ON
 #ifdef DMB_LOG_ON

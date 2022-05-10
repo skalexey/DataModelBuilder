@@ -4,11 +4,10 @@
 #include "DMBModel.h"
 #include "VarModelFactory.h"
 #include "vl.h"
-#include "Utils.h"
+#include "utils/Utils.h"
 #include "OwnPropsSubscriptionProcessor.h"
 #include "OwnPropsStorageSubscriptionProcessor.h"
-
-#include "Log.h"
+#include "utils/Log.h"
 #ifdef LOG_ON
 	#include <QDebug>
 #endif

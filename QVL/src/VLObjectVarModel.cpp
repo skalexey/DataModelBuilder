@@ -7,9 +7,8 @@
 #include "VLVarModel.h"
 #include "vl.h"
 #include "DMBModel.h"
-#include "Utils.h"
-
-#include "Log.h"
+#include "utils/Utils.h"
+#include "utils/Log.h"
 #ifdef LOG_ON
 	#include <QDebug>
 #endif

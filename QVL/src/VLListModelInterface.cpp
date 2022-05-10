@@ -2,7 +2,7 @@
 #include <QVariantList>
 #include <QVector>
 #include "VLListModelInterface.h"
-#include "Utils.h"
+#include "utils/Utils.h"
 #include "vl.h"
 #include "VarModelFactory.h"
 #include "VLVarModel.h"
@@ -10,8 +10,7 @@
 #include "VLListVarModel.h"
 #include "DMBModel.h"
 #include "ListModelStorageSubscriptionProcessor.h"
-
-#include "Log.h"
+#include "utils/Log.h"
 #ifdef LOG_ON
 	#include <QDebug>
 #endif

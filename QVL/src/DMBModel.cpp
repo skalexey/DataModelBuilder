@@ -3,12 +3,11 @@
 #include <QDir>
 #include "DMBModel.h"
 #include "DMBCore.h"
-#include "Utils.h"
+#include "utils/Utils.h"
 #include "VLObjectVarModel.h"
 #include "VLListVarModel.h"
 #include "VarModelFactory.h"
-
-#include "Log.h"
+#include "utils/Log.h"
 #ifdef LOG_ON
 	#include <QDebug>
 #endif
