@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <cstddef>
 #include <functional>
 #include <string>
@@ -86,10 +87,13 @@ namespace dmb
 		Registry& GetRegistry() { return mRegistry; }
 		Registry& GetPrivateScope() { return mPrivate; }
 		Content& GetContent() { return mContent; }
+		const Registry& GetRegistry() const { return mRegistry; }
+		const Registry& GetPrivateScope() const { return mPrivate; }
+		const Content& GetContent() const { return mContent; }
 		vl::Object& GetType(const std::string& typeName);
-		bool Load(const std::string& fileName);
+		bool Load(const std::string& filePath);
 		bool IsLoaded() const;
-		bool Store(const std::string& fileName, const vl::CnvParams& params = vl::CnvParams());
+		bool Store(const std::string& filePath = "", const vl::CnvParams& params = vl::CnvParams());
 		std::string JSONStr(const vl::CnvParams& params = vl::CnvParams());
 		std::string GetTypeId(const vl::Object& obj) const;
 		bool IsType(const vl::Object& obj) const;
@@ -111,5 +115,31 @@ namespace dmb
 		vl::VarNodeRegistry mVarNodeRegistry;
 		TypeResolver mTypeResolver;
 		bool mIsLoaded = false;
+		struct StoreState
+		{
+		public:
+			StoreState() = default;
+			StoreState(const std::string& __path, const vl::CnvParams& __params)
+				: m_path(__path)
+				, m_params(std::make_unique<vl::CnvParams>(__params))
+			{}
+			
+			inline const std::string& GetPath() const { return m_path; }
+			inline const vl::CnvParams* GetParams() const { return m_params.get(); }
+			inline void SetPath(const std::string& path) { m_path = path; }
+			inline const vl::CnvParams* SetParams(const vl::CnvParams& params) {
+				m_params = std::make_unique<vl::CnvParams>(params);
+			}
+			inline void Reset() {
+				m_path = "";
+				m_params.reset();
+			}
+			
+		private:
+			std::string m_path;
+			std::unique_ptr<vl::CnvParams> m_params;
+		};
+		StoreState mStoreState; // Set after every Store or Load operation
+		
 	};
 }

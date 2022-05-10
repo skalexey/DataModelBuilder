@@ -213,16 +213,19 @@ vl::Object& dmb::Model::GetType(const std::string& typeName)
 	return mRegistry.GetType(typeName).AsObject();
 }
 
-bool dmb::Model::Load(const std::string& fileName)
+bool dmb::Model::Load(const std::string& filePath)
 {
-	DMB_LOG_INFO(Utils::FormatStr("dmb::Model::Load(%s)", fileName.c_str()));
+	DMB_LOG_INFO(Utils::FormatStr("dmb::Model::Load(%s)", filePath.c_str()));
 	mIsLoaded = false;
 	vl::JSONConverter converter;
 	mData.Attach(&mVarNodeRegistry.GetTree());
-	if (!converter.Load(mData, fileName, mTypeResolver))
+	if (!converter.Load(mData, filePath, mTypeResolver))
 		return false;
 	Init();
 	mIsLoaded = true;
+	if (mStoreState.GetPath() != filePath)
+		mStoreState.Reset(); // Don't allow to store with no path without knowing the store parameters
+	mStoreState.SetPath(filePath);
 	return true;
 }
 
@@ -231,10 +234,19 @@ bool dmb::Model::IsLoaded() const
 	return mIsLoaded;
 }
 
-bool dmb::Model::Store(const std::string& fileName, const vl::CnvParams& params)
+bool dmb::Model::Store(const std::string& filePath, const vl::CnvParams& params)
 {
 	vl::JSONConverter converter;
-	return converter.Store(mData, mTypeResolver, fileName, params);
+	if (filePath.empty())
+		if (!mStoreState.GetParams())
+			if (params == vl::CnvParams())
+				return false; // Don't allow to store with no path without knowing the store parameters
+	if (converter.Store(mData, mTypeResolver, !filePath.empty() ? filePath : mStoreState.GetPath(), params))
+	{
+		mStoreState = {filePath, params};
+		return true;
+	}
+	return false;
 }
 
 std::string dmb::Model::JSONStr(const vl::CnvParams& params)
