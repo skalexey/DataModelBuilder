@@ -70,3 +70,9 @@ if (DMB_TESTS)
 	target_link_libraries(DMBTest DMBCore)
 endif ()
 
+add_custom_command(
+    TARGET DMBCore PRE_BUILD
+    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/get_dependencies.sh ${CMAKE_BUILD_TYPE} "${CMAKE_CURRENT_SOURCE_DIR}"
+    VERBATIM
+)
+
