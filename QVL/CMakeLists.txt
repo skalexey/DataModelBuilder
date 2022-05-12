@@ -61,7 +61,7 @@ endif()
 
 add_custom_command(
     TARGET qvl PRE_BUILD
-    COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/build_dmbcore.sh ${CMAKE_BUILD_TYPE} "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build_dmbcore.sh ${CMAKE_BUILD_TYPE} "${CMAKE_CURRENT_SOURCE_DIR}"
     VERBATIM
 )
 
