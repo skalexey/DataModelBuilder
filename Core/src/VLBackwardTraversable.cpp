@@ -1,7 +1,7 @@
 #include "VLBackwardTraversable.h"
 #include "utils/Log.h"
 #ifdef LOG_ON
-	#include "utils/Utils.h"
+	#include <utils/string_utils.h>
 #endif
 #include "vl.h"
 
@@ -26,7 +26,7 @@ namespace vl
 	VarTreeNode::~VarTreeNode()
 	{
 		mRegistry.RemoveNode(this);
-		LOG_VERBOSE(Utils::FormatStr("~VarTreeNode() %p", this));
+		LOG_VERBOSE(utils::format_str("~VarTreeNode() %p", this));
 	}
 
 	const std::string& vl::VarTreeNode::GetId() const
@@ -68,7 +68,7 @@ namespace vl
 		{
 			auto index = GetIndex();
 			if (index >= 0)
-				id = Utils::FormatStr("[%d]", index);
+				id = utils::format_str("[%d]", index);
 			else
 			{
 				LOG_ERROR("Can't get id of a VarTreeNode with a parent. Maybe the parent has a wrong type or the registry has a wrong data");
@@ -220,17 +220,17 @@ namespace vl
 							}
 							else
 							{
-								//LOG_ERROR(Utils::FormatStr("Trying to reindex an indexed node %p which is not registered as indexed node", child));
+								//LOG_ERROR(utils::format_str("Trying to reindex an indexed node %p which is not registered as indexed node", child));
 							}
 						}
 					}
-					//LOG_INFO(Utils::FormatStr("Remove %p from indexed nodes", node));
+					//LOG_INFO(utils::format_str("Remove %p from indexed nodes", node));
 					mIndexedNodes.erase(it);
 					result &= true;
 				}
 				else
 				{
-					//LOG_ERROR(Utils::FormatStr("Trying to remove an indexed node %p which is not registered as indexed node", node));
+					//LOG_ERROR(utils::format_str("Trying to remove an indexed node %p which is not registered as indexed node", node));
 				}
 			}
 		}
@@ -294,13 +294,13 @@ namespace vl
 					node = l->At(index).get();
 				else
 				{
-					LOG_ERROR(Utils::FormatStr("Wrong index %d in the path '%s' used for node '%s'", index, path.c_str(), lastId.c_str()));
+					LOG_ERROR(utils::format_str("Wrong index %d in the path '%s' used for node '%s'", index, path.c_str(), lastId.c_str()));
 					return nullptr;
 				}
 			}
 			else
 			{
-				LOG_ERROR(Utils::FormatStr("Wrong container type during parsing the node path '%s'", path.c_str()));
+				LOG_ERROR(utils::format_str("Wrong container type during parsing the node path '%s'", path.c_str()));
 				return nullptr;
 			}
 			cursor = dotPos + 1;
@@ -313,7 +313,7 @@ namespace vl
 	vl::ObjectTreeNode::ObjectTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent)
 		: Base(registry, data, parent)
 	{
-		LOG_VERBOSE(Utils::FormatStr("Create ObjectTreeNode %p for data %p with parent %p", this, data, parent));
+		LOG_VERBOSE(utils::format_str("Create ObjectTreeNode %p for data %p with parent %p", this, data, parent));
 
 		if (mData)
 			mData->AsObject().Attach(this);
@@ -402,7 +402,7 @@ namespace vl
 	vl::ListTreeNode::ListTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent)
 		: Base(registry, data, parent)
 	{
-		LOG_VERBOSE(Utils::FormatStr("Create ListTreeNode %p for data %p with parent %p", this, data, parent));
+		LOG_VERBOSE(utils::format_str("Create ListTreeNode %p for data %p with parent %p", this, data, parent));
 
 		if (mData)
 			mData->AsList().Attach(this);
@@ -509,7 +509,7 @@ namespace vl
 
 	bool vl::ObjectTreeNode::Remove(const std::string& childId)
 	{
-		LOG_VERBOSE(Utils::FormatStr("Erase child '%s' from %p", childId.c_str(), this));
+		LOG_VERBOSE(utils::format_str("Erase child '%s' from %p", childId.c_str(), this));
 		auto it = mChildren.find(childId);
 		if (it != mChildren.end())
 		{
@@ -517,7 +517,7 @@ namespace vl
 			return true;
 		}
 		else
-			LOG_WARNING(Utils::FormatStr("Attempt to remove non-existent child '%s' of an object '%s'", childId.c_str(), GetId().c_str()));
+			LOG_WARNING(utils::format_str("Attempt to remove non-existent child '%s' of an object '%s'", childId.c_str(), GetId().c_str()));
 		return false;
 	}
 
@@ -571,7 +571,7 @@ namespace vl
 
 	void vl::ListTreeNode::Remove(int index)
 	{
-		LOG_VERBOSE(Utils::FormatStr("Erase child '%d' from %p", index, this));
+		LOG_VERBOSE(utils::format_str("Erase child '%d' from %p", index, this));
 		mChildren.erase(mChildren.begin() + index);
 	}
 

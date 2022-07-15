@@ -3,7 +3,7 @@
 #include "DMBCore.h"
 #include "utils/Log.h"
 #ifdef LOG_ON
-	#include "utils/Utils.h"
+	#include <utils/string_utils.h>
 #endif
 #define DMB_LOG_ON
 #ifdef DMB_LOG_ON
@@ -196,7 +196,7 @@ dmb::Model::Model()
 				if (auto data = node->GetData())
 					return data->AsObject();
 				else
-					LOG_ERROR(Utils::FormatStr("Found node with null data during type resolution of '%s'", typeRef.c_str()));
+					LOG_ERROR(utils::format_str("Found node with null data during type resolution of '%s'", typeRef.c_str()));
 			}
 			return vl::nullObject;
 		}
@@ -215,7 +215,7 @@ vl::Object& dmb::Model::GetType(const std::string& typeName)
 
 bool dmb::Model::Load(const std::string& filePath)
 {
-	DMB_LOG_INFO(Utils::FormatStr("dmb::Model::Load(%s)", filePath.c_str()));
+	DMB_LOG_INFO(utils::format_str("dmb::Model::Load(%s)", filePath.c_str()));
 	mIsLoaded = false;
 	vl::JSONConverter converter;
 	mData.Attach(&mVarNodeRegistry.GetTree());
