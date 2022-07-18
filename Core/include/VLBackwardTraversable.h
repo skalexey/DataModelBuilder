@@ -106,10 +106,10 @@ namespace vl
 		}
 		void Set(int index, const VarTreeNodePtr& node);
 		void Add(const VarTreeNodePtr& node);
-		inline void Resize(int newSize) {
+		inline void Resize(std::size_t newSize) {
 			mChildren.resize(newSize);
 		}
-		const VarTreeNodePtr& At(int index) const;
+		const VarTreeNodePtr& At(std::size_t index) const;
 		bool Clear(int index);
 		ListTreeNode* AsList() override;
 		bool IsList() const override;

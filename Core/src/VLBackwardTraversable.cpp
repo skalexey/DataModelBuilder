@@ -585,7 +585,7 @@ namespace vl
 		return std::enable_shared_from_this<ListTreeNode>::shared_from_this();
 	}
 
-	const vl::VarTreeNodePtr& vl::ListTreeNode::At(int index) const
+	const vl::VarTreeNodePtr& vl::ListTreeNode::At(std::size_t index) const
 	{
 		return mChildren[index];
 	}
