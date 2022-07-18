@@ -241,9 +241,12 @@ bool dmb::Model::Store(const std::string& filePath, const vl::CnvParams& params)
 		if (!mStoreState.GetParams())
 			if (params == vl::CnvParams())
 				return false; // Don't allow to store with no path without knowing the store parameters
-	if (converter.Store(mData, mTypeResolver, !filePath.empty() ? filePath : mStoreState.GetPath(), params))
+	auto fpath = !filePath.empty() ? filePath : mStoreState.GetPath();
+	auto prms = (params == vl::CnvParams() && mStoreState.GetParams()) ?
+		*mStoreState.GetParams() : params;
+	if (converter.Store(mData, mTypeResolver, fpath, prms))
 	{
-		mStoreState = {filePath, params};
+		mStoreState = {fpath, prms};
 		return true;
 	}
 	return false;
