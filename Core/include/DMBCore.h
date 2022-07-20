@@ -27,7 +27,7 @@ namespace dmb
 		bool RemoveType(const std::string& typeName);
 		bool RenameType(const std::string& typeName, const std::string& newName);
 		bool HasType(const std::string& typeName);
-		// TODO: think how to keep int under the hood
+		// TODO: think how to keep it under the hood
 		vl::Object& GetData();
 		const vl::Object& GetData() const;
 		void Clear(bool recursive = false);
