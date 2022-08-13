@@ -94,11 +94,11 @@ namespace dmb
 
 	protected:
 		// Storage interface
-		inline ListModelStorage& getListStorage() {
+		ListModelStorage& getListStorage() {
 			return *std::dynamic_pointer_cast<ListModelStorage>(getSharedStorage());
 		}
 
-		inline const ListModelStorage& getListStorage() const{
+		const ListModelStorage& getListStorage() const{
 			return *std::dynamic_pointer_cast<ListModelStorage>(getSharedStorage());
 		}
 

@@ -30,7 +30,7 @@ namespace dmb
 		virtual void onBeforeRename(const std::string& id, const std::string& newId);
 		virtual void onAfterRename(const std::string& id, const std::string& newId);
 
-		inline VLListModelInterface& getOwner() {
+		VLListModelInterface& getOwner() {
 			return *mOwner;
 		}
 

@@ -24,7 +24,7 @@ namespace dmb
 		void onAfterRename(const std::string& id, const std::string& newId) override;
 
 	protected:
-		inline OwnPropsCollectionModel& getOwner() {
+		OwnPropsCollectionModel& getOwner() {
 			return *dynamic_cast<OwnPropsCollectionModel*>(mOwner);
 		}
 	};

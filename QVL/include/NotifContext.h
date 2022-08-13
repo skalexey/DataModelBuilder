@@ -22,22 +22,22 @@ namespace dmb
 		vl::Object& notifData();
 		const vl::Object& getLocalData() const;
 		const vl::Object& getNotifData() const;
-		inline const std::string& cmd() {
+		const std::string& cmd() {
 			return mCmd;
 		}
-		inline const std::string& path() {
+		const std::string& path() {
 			return mPath;
 		}
 
-		inline bool operator == (const NotifContext& right) {
+		bool operator == (const NotifContext& right) {
 			return right.mPath == mPath && right.mCmd == mCmd;
 		}
-		inline void processCbBeforeUpdate() {
+		void processCbBeforeUpdate() {
 			if (mOnBeforeUpdate)
 				if (mOnBeforeUpdate(*this))
 					mOnBeforeUpdate = nullptr;
 		}
-		inline void processCbAfterUpdate() {
+		void processCbAfterUpdate() {
 			if (mOnAfterUpdate)
 				if (mOnAfterUpdate(*this))
 					mOnAfterUpdate = nullptr;

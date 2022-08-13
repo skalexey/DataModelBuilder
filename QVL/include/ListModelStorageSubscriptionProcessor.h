@@ -20,7 +20,7 @@ namespace dmb
 		void onAfterModelPut(vl::Object& o) override;
 		void onBeforeRemove(vl::Object& o) override;
 
-		inline VLListModelInterface& getOwner() {
+		VLListModelInterface& getOwner() {
 			return *mOwner;
 		}
 	};

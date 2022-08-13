@@ -24,13 +24,13 @@ namespace dmb
 		explicit OwnPropsCollectionModel(QObject* parent, const VLListModelInterface& storageOwner);
 
 		// Begin of VLListModelInterface
-		inline int getElementIndex(const void* e) const override {
+		int getElementIndex(const void* e) const override {
 			if (auto id = getObjectStorage().getId(e))
 				return getIndex(*id);
 			return -1;
 		}
 
-		inline void clear() override {
+		void clear() override {
 			mIdList.clear();
 		}
 		// End of VLListModelInterface
@@ -43,10 +43,10 @@ namespace dmb
 		const VLVarModelPtr& model(const std::string& propId) override;
 
 	protected:
-		inline const std::string* getId(int index) const override {
+		const std::string* getId(int index) const override {
 			return mIdList.at(index);
 		}
-		inline int getIndex(const std::string& propId) const override {
+		int getIndex(const std::string& propId) const override {
 			return mIdList.index(propId);
 		}
 		int dataSize() const override;
@@ -69,7 +69,7 @@ namespace dmb
 		std::unique_ptr<ModelStorageSubscriptionProcessor> createStorageSubscriptionProcessor() override;
 
 	protected:
-		inline UniqueIdList& getIdList() {
+		UniqueIdList& getIdList() {
 			return mIdList;
 		}
 

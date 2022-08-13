@@ -45,12 +45,12 @@ namespace dmb
 
 	public:
 		// Public Qt model interface
-		inline const VLListModel &getListModel() const {
+		const VLListModel &getListModel() const {
 			static VLListModel emptyModel;
 			return mListModel ? *mListModel : emptyModel;
 		}
 
-		inline VLListModel &getListModel() {
+		VLListModel &getListModel() {
 			static VLListModel emptyModel;
 			return mListModel ? *mListModel : emptyModel;
 		}

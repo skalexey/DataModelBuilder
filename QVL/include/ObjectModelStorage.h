@@ -17,10 +17,10 @@ namespace dmb
 		~ObjectModelStorage();
 		// Begin of ModelStorage int0erface
 		int getIndex(const void* e) const override;
-		inline int size() const override {
+		int size() const override {
 			return mElements.size();
 		}
-		inline bool empty() const override {
+		bool empty() const override {
 			return mElements.empty();
 		}
 		void clear() override;
@@ -30,10 +30,10 @@ namespace dmb
 		bool remove(int index) override;
 		// End of ModelStorage interface
 		bool remove(const std::string& propId);
-		inline const UniqueIdList& getIdList() const {
+		const UniqueIdList& getIdList() const {
 			return mIdList;
 		}
-		inline UniqueIdList& idList() {
+		UniqueIdList& idList() {
 			return mIdList;
 		}
 		const std::string* getId(const void* e) const;

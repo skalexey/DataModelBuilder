@@ -22,11 +22,11 @@ namespace dmb
 		// Observer interface
 		void Update(vl::Observable* sender, vl::VarPtr info = nullptr);
 
-		inline void setOnBeforeUpdate(const BoolCbContext& cb) {
+		void setOnBeforeUpdate(const BoolCbContext& cb) {
 			mOnBeforeUpdate = cb;
 		}
 
-		inline void setOnAfterUpdate(const BoolCbContext& cb) {
+		void setOnAfterUpdate(const BoolCbContext& cb) {
 			mOnAfterUpdate = cb;
 		}
 

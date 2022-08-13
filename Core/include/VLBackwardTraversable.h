@@ -39,24 +39,24 @@ namespace vl
 		virtual const ListTreeNode* AsList() const;
 		void Update(Observable* sender, vl::VarPtr info) override;
 		virtual std::size_t ChildCount() const;
-		inline const vl::Var* GetData() const {
+		const vl::Var* GetData() const {
 			return mData;
 		}
 		// Needed because of non-virtuality of std::shared_from_this()
 		virtual VarTreeNodePtr SharedFromThis();
-		inline bool IsRoot() const {
+		bool IsRoot() const {
 			return mParent == nullptr;
 		}
-		inline const VarTreeNode* GetParent() const {
+		const VarTreeNode* GetParent() const {
 			return mParent;
 		}
-		inline const void* DataPtr() const {
+		const void* DataPtr() const {
 			return mDataPtr;
 		}
 
 	protected:
 		bool ForeachChildren(const std::function<bool(VarTreeNode&)>& pred);
-		inline void SetParent(VarTreeNode* newParent) {
+		void SetParent(VarTreeNode* newParent) {
 			mParent = newParent;
 		}
 	protected:
@@ -101,12 +101,12 @@ namespace vl
 		ListTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent);
 		~ListTreeNode();
 		void Update(Observable* sender, vl::VarPtr info) override;
-		inline std::size_t ChildCount() const override {
+		std::size_t ChildCount() const override {
 			return mChildren.size();
 		}
 		void Set(int index, const VarTreeNodePtr& node);
 		void Add(const VarTreeNodePtr& node);
-		inline void Resize(std::size_t newSize) {
+		void Resize(std::size_t newSize) {
 			mChildren.resize(newSize);
 		}
 		const VarTreeNodePtr& At(std::size_t index) const;
@@ -142,7 +142,7 @@ namespace vl
 		int GetIndex(const VarTreeNode* node) const;
 		const VarTreeNode* GetNode(const vl::Var& varPtr) const;
 		const VarTreeNode* GetNode(const std::string& path) const;
-		inline VarTreeNode& GetTree() {
+		VarTreeNode& GetTree() {
 			return mTree;
 		}
 

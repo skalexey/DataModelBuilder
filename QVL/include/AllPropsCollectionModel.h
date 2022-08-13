@@ -25,7 +25,7 @@ namespace dmb
 		const VLVarModelPtr& model(const std::string& propId) override;
 		// End of CollectionModel overrides
 		// Begin of VLListModelInterface interface
-		inline void clear() override {
+		void clear() override {
 			getObjectStorage().clear();
 		}
 

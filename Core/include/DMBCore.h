@@ -100,10 +100,10 @@ namespace dmb
 		const vl::Object& GetData();
 		void Clear(bool recursive = false);
 		std::string DataStr(bool pretty = true) const;
-		inline const vl::VarNodeRegistry& GetVarNodeRegistry() const {
+		const vl::VarNodeRegistry& GetVarNodeRegistry() const {
 			return mVarNodeRegistry;
 		}
-		inline const TypeResolver& GetTypeResolver() const {
+		const TypeResolver& GetTypeResolver() const {
 			return mTypeResolver;
 		}
 
@@ -124,13 +124,13 @@ namespace dmb
 				, m_params(std::make_unique<vl::CnvParams>(__params))
 			{}
 			
-			inline const std::string& GetPath() const { return m_path; }
-			inline const vl::CnvParams* GetParams() const { return m_params.get(); }
-			inline void SetPath(const std::string& path) { m_path = path; }
-			inline const vl::CnvParams* SetParams(const vl::CnvParams& params) {
+			const std::string& GetPath() const { return m_path; }
+			const vl::CnvParams* GetParams() const { return m_params.get(); }
+			void SetPath(const std::string& path) { m_path = path; }
+			const vl::CnvParams* SetParams(const vl::CnvParams& params) {
 				m_params = std::make_unique<vl::CnvParams>(params);
 			}
-			inline void Reset() {
+			void Reset() {
 				m_path = "";
 				m_params.reset();
 			}

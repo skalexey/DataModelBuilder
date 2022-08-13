@@ -20,26 +20,26 @@ namespace dmb
 			operator bool() { return index >= 0; }
 		};
 	public:
-		inline size_t size() const {
+		size_t size() const {
 			return mIdList.size();
 		}
-		inline bool empty() const {
+		bool empty() const {
 			return mIdList.empty();
 		}
 		// Redirects to find(std::string)
-		inline bool has(const std::string& id) const {
+		bool has(const std::string& id) const {
 			return find(id);
 		}
 		// Returns id. Checks for size
 		const std::string* at(int index) const;
-		inline int index(const std::string& id) const {
+		int index(const std::string& id) const {
 			return find(id).index;
 		}
 		// Retirns id. Doesn't check for size
 		const std::string& operator[](int index) const;
 
 		int put(const std::string& id, int indexBefore = -1);
-		inline bool remove(const std::string& id) {
+		bool remove(const std::string& id) {
 			return erase(find(id));
 		}
 

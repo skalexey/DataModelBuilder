@@ -17,10 +17,10 @@ namespace dmb
 		int size() const override {
 			return mElements.size();
 		}
-		inline bool empty() const override {
+		bool empty() const override {
 			return mElements.empty();
 		}
-		inline void resize(int newSize) {
+		void resize(int newSize) {
 			mElements.resize(newSize);
 		}
 		void clear() override;

@@ -68,7 +68,7 @@ namespace dmb
 			// Should always be
 			return *mStorage;
 		}
-		inline const ModelStoragePtr& getSharedStorage() const {
+		const ModelStoragePtr& getSharedStorage() const {
 			return mStorage;
 		}
 
@@ -120,10 +120,10 @@ namespace dmb
 
 	public:
 		// Public Qt model interface
-		inline const VLVarModelPtr getParentModel() const {
+		const VLVarModelPtr getParentModel() const {
 			return mParentModel.lock();
 		}
-		virtual inline int getElementIndex(const void* e) const {
+		virtual int getElementIndex(const void* e) const {
 			return getStorage().getIndex(e);
 		}
 		bool foreachElement(const std::function<bool(int, const VLVarModelPtr&)>& pred, bool recursive = false) const;
@@ -131,14 +131,14 @@ namespace dmb
 
 	protected:
 		// Protected Qt model interface
-		inline VLVarModelPtr getParentModel() {
+		VLVarModelPtr getParentModel() {
 			return mParentModel.lock();
 		}
 
 	protected:
 		// Other
 		void resetList(const std::function<void()>& doWithList = nullptr);
-		inline ModelStorage& getStorage() {
+		ModelStorage& getStorage() {
 			return const_cast<ModelStorage&>(
 						const_cast<const VLListModelInterface*>(this)->getStorage()
 					);

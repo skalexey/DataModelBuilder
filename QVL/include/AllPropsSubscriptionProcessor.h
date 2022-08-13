@@ -33,7 +33,7 @@ namespace dmb
 		void onAfterRename(const std::string& id, const std::string& newId) override;
 
 	protected:
-		inline AllPropsCollectionModel& getOwner() {
+		AllPropsCollectionModel& getOwner() {
 			return *dynamic_cast<AllPropsCollectionModel*>(mOwner);
 		}
 	};

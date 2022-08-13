@@ -31,10 +31,10 @@ namespace dmb
 		const VLObjectVarModel* getContentModel() const;
 		VLObjectVarModel* typesModel();
 		const VLObjectVarModel* getTypesModel() const;
-		inline const dmb::Model& getDataModel() const {
+		const dmb::Model& getDataModel() const {
 			return mDataModel;
 		}
-		inline dmb::Model& getDataModel() {
+		dmb::Model& getDataModel() {
 			return mDataModel;
 		}
 		bool isLoaded() const;
@@ -42,7 +42,7 @@ namespace dmb
 		dmb::VLObjectVarModelPtr createObjectSp();
 		dmb::VLListVarModelPtr createListSp();
 		VLVarModelPtr takeStandaloneModel(const VLVarModel* p);
-		inline bool hasStandaloneModel(const VLVarModel* p) {
+		bool hasStandaloneModel(const VLVarModel* p) {
 			return mStandaloneModels.find(p) != mStandaloneModels.end();
 		}
 		bool removeStandaloneModel(const VLVarModel* p);
@@ -68,7 +68,7 @@ namespace dmb
 	protected:
 		const VLVarModelPtr &storeStandaloneModel(const VLVarModelPtr& ptr);
 		void setCurrentFile(const std::string& newFilePath);
-		inline const VLObjectVarModelPtr& getRoot() {
+		const VLObjectVarModelPtr& getRoot() {
 			return mRoot;
 		}
 		void InitRoot();
