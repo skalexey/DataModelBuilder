@@ -25,10 +25,10 @@ namespace dmb
 		void Notify(vl::VarPtr info = nullptr) override;
 
 	protected:
-		inline VLVarModelPtr getParent() {
+		VLVarModelPtr getParent() {
 			return mParentModel.lock();
 		}
-		inline VLVarModelPtr getRoot() {
+		VLVarModelPtr getRoot() {
 			return mRootModel.lock();
 		}
 

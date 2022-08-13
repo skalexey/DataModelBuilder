@@ -67,19 +67,19 @@ namespace dmb
 		QVariant protoId() const;
 		QVariant typeId() const;
 
-		inline const VLCollectionModel& getAllPropsListModel() const {
+		const VLCollectionModel& getAllPropsListModel() const {
 			static VLCollectionModel emptyModel;
 			return mAllPropsListModel ? *mAllPropsListModel : emptyModel;
 		}
-		inline VLCollectionModel& getAllPropsListModel() {
+		VLCollectionModel& getAllPropsListModel() {
 			static VLCollectionModel emptyModel;
 			return mAllPropsListModel ? *mAllPropsListModel : emptyModel;
 		}
-		inline const VLCollectionModel& getOwnPropsListModel() const {
+		const VLCollectionModel& getOwnPropsListModel() const {
 			static VLCollectionModel emptyModel;
 			return mOwnPropsListModel ? *mOwnPropsListModel : emptyModel;
 		}
-		inline VLCollectionModel& getOwnPropsListModel() {
+		VLCollectionModel& getOwnPropsListModel() {
 			static VLCollectionModel emptyModel;
 			return mOwnPropsListModel ? *mOwnPropsListModel : emptyModel;
 		}
@@ -127,7 +127,7 @@ namespace dmb
 		vl::Object& data();
 		bool has(const std::string& propId) const;
 		bool hasOwn(const std::string& propId) const;
-		inline const std::string* getId(int index) const {
+		const std::string* getId(int index) const {
 			return getOwnPropsListModel().getId(index);
 		}
 		std::string getFreeId(const std::string& desiredId) const;

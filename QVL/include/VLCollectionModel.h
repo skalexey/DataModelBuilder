@@ -68,18 +68,18 @@ namespace dmb
 		// ======= End of VLListModelInterface interface =======
 
 		virtual std::string getFreeId(const std::string& desiredId) const;
-		inline const std::string* getElementId(const void* e) const {
+		const std::string* getElementId(const void* e) const {
 			return getObjectStorage().getId(e);
 		}
 
 	public:
 		// Public data interface
 		// Returns id by the index belonging the local id list indexation space
-		virtual inline const std::string* getId(int index) const {
+		virtual const std::string* getId(int index) const {
 			return getObjectStorage().getId(index);
 		}
 		// Returns index in the local id list indexation space of the given id
-		virtual inline int getIndex(const std::string& propId) const {
+		virtual int getIndex(const std::string& propId) const {
 			return getObjectStorage().getIdList().index(propId);
 		}
 
@@ -172,7 +172,7 @@ namespace dmb
 		// to be able work in their own indexation space
 
 		// indexBefore is not used on the higher levels now
-		inline virtual const VLVarModelPtr& putToStorage(
+		virtual const VLVarModelPtr& putToStorage(
 				const std::string& propId
 				, const VLVarModelPtr& model
 				, int indexBefore = -1) {
@@ -186,11 +186,11 @@ namespace dmb
 
 	protected:
 		// Storage interface
-		inline ObjectModelStorage& getObjectStorage() {
+		ObjectModelStorage& getObjectStorage() {
 			return *std::dynamic_pointer_cast<ObjectModelStorage>(getSharedStorage());
 		}
 
-		inline const ObjectModelStorage& getObjectStorage() const{
+		const ObjectModelStorage& getObjectStorage() const{
 			return *std::dynamic_pointer_cast<ObjectModelStorage>(getSharedStorage());
 		}
 

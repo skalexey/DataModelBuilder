@@ -84,7 +84,7 @@ namespace dmb
 		QString typeStr() const;
 		bool setType(const ObjectProperty::Type &newType);
 		// Destroys the child model and replace it by a new with newType
-		virtual inline bool setChildType(const VLVarModel* child, const ObjectProperty::Type &newType) {
+		virtual bool setChildType(const VLVarModel* child, const ObjectProperty::Type &newType) {
 			// Default logic
 			return false;
 		}
