@@ -6,9 +6,7 @@ deps_scenario()
 	source deps_config.sh
 
 	download_dependency "VL" "$depsLocation" "git@github.com:skalexey/VL.git"
-	local curentDir=${PWD}
-
-	cd $currentDir
+	source "$depsLocation/VL/deps_scenario.sh"
 }
 
 deps_scenario $@
