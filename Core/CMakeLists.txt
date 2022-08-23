@@ -1,18 +1,24 @@
 cmake_minimum_required(VERSION 3.21)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Uncomment the next line if want to experiment with g++ compliation
 #set(CMAKE_CXX_COMPILER "g++")
+
+project(DataModelBuilderCore C CXX)
 
 if (LOG_ON)
 	add_compile_definitions("LOG_ON")
 endif ()
 
-set(CMAKE_CXX_STANDARD 17)
+if(MSVC)
+	# fix __cplusplus macro for MSVC
+	add_compile_options(
+		"/Zc:__cplusplus"
+		"/std:c++latest"
+	)
+else()
+	set(CMAKE_CXX_STANDARD 20)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-project(DataModelBuilderCore)
 
 message("=== DMBCore project CMake build configuration process started ===")
 
@@ -39,16 +45,14 @@ endif ()
 if (USE_JSONCONVERTER)
 	set (EXTRA_LIBS ${EXTRA_LIBS} JSONConverter)
 	add_subdirectory("${DEPS}/VL/JSONConverter" "${DEPS}/VL/JSONConverter/${BUILD_DIR_NAME}")
+	set(DMBCORE_INCLUDES ${DMBCORE_INCLUDES} "${JSONCONVERTER_INCLUDES}")
 else()
 	set (EXTRA_LIBS ${EXTRA_LIBS} VL)
 	add_subdirectory("${DEPS}/VL" "${DEPS}/VL/${BUILD_DIR_NAME}")
+	set(DMBCORE_INCLUDES ${DMBCORE_INCLUDES} "${VL_INCLUDES}")
 endif () 
 
-set(DMBCORE_INCLUDES
-	"${PROJECT_SOURCE_DIR}/include"
-	"${JSONCONVERTER_INCLUDES}"
-)
-
+set(DMBCORE_INCLUDES ${DMBCORE_INCLUDES} "${PROJECT_SOURCE_DIR}/include")
 set(DMBCORE_INCLUDES ${DMBCORE_INCLUDES} PARENT_SCOPE)
 
 include_directories(${PROJECT_BINARY_DIR})
