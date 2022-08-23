@@ -1,7 +1,6 @@
 #include <cstdlib>
-#include "JSONConverter.h"
-#include "DMBCore.h"
-#include "utils/Log.h"
+#include <JSONConverter.h>
+#include <utils/Log.h>
 #ifdef LOG_ON
 	#include <utils/string_utils.h>
 #endif
@@ -12,7 +11,7 @@
 #else
 #define DMB_LOG_INFO(msg)
 #endif
-
+#include "DMBCore.h"
 
 vl::Object& dmb::Registry::CreateType(const std::string& typeName)
 {
