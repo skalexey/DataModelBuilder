@@ -129,6 +129,7 @@ namespace dmb
 			void SetPath(const std::string& path) { m_path = path; }
 			const vl::CnvParams* SetParams(const vl::CnvParams& params) {
 				m_params = std::make_unique<vl::CnvParams>(params);
+				return m_params.get();
 			}
 			void Reset() {
 				m_path = "";

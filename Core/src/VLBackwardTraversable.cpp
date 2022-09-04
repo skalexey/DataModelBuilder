@@ -1,8 +1,6 @@
 #include "VLBackwardTraversable.h"
 #include "utils/Log.h"
-#ifdef LOG_ON
-	#include <utils/string_utils.h>
-#endif
+#include <utils/string_utils.h>
 #include "vl.h"
 
 namespace

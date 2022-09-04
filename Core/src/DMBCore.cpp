@@ -1,9 +1,7 @@
 #include <cstdlib>
 #include <JSONConverter.h>
 #include <utils/Log.h>
-#ifdef LOG_ON
-	#include <utils/string_utils.h>
-#endif
+#include <utils/string_utils.h>
 #define DMB_LOG_ON
 #ifdef DMB_LOG_ON
 #include <iostream>
