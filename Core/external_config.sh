@@ -7,3 +7,5 @@ if is_windows; then
 else
 	export dmbcore_deps="${HOME}/Projects"
 fi
+
+[ ! -z dmbcore_deps ] && export dmbcore_deps=$vocabulary_deps
