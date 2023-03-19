@@ -2,7 +2,9 @@
 #include <QVariantList>
 #include <QVector>
 #include "VLListModelInterface.h"
-#include "utils/Utils.h"
+#include <utils/Utils.h>
+#include <utils/Log.h>
+#include <utils/common.h>
 #include "vl.h"
 #include "VarModelFactory.h"
 #include "VLVarModel.h"
@@ -10,7 +12,7 @@
 #include "VLListVarModel.h"
 #include "DMBModel.h"
 #include "ListModelStorageSubscriptionProcessor.h"
-#include "utils/Log.h"
+
 #ifdef LOG_ON
 	#include <QDebug>
 #endif
@@ -169,7 +171,7 @@ namespace dmb
 		return QVariant();
 	}
 
-	void VLListModelInterface::resetList(const std::function<void()>& doWithList)
+	void VLListModelInterface::resetList(const utils::void_cb& doWithList)
 	{
 		beginResetModel();
 		if (doWithList)

@@ -8,6 +8,7 @@
 #include <functional>
 #include <QAbstractListModel>
 #include <QVariantList>
+#include <utils/common.h>
 #include "vl_fwd.h"
 #include "ObjectProperty.h"
 #include "ModelStorage.h"
@@ -137,7 +138,7 @@ namespace dmb
 
 	protected:
 		// Other
-		void resetList(const std::function<void()>& doWithList = nullptr);
+		void resetList(const utils::void_cb& doWithList = nullptr);
 		ModelStorage& getStorage() {
 			return const_cast<ModelStorage&>(
 						const_cast<const VLListModelInterface*>(this)->getStorage()
