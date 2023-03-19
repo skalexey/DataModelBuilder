@@ -79,8 +79,11 @@ configure_file(
 )
 
 if (DMB_TESTS)
+	message("DMB_TESTS is enabled")
 	add_executable(DMBTest test.cpp)
 	target_link_libraries(DMBTest DMBCore)
+else()
+	message("DMB_TESTS is disabled")
 endif ()
 
 # add_custom_command(
