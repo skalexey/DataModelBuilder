@@ -1,18 +1,18 @@
 #include <limits>
 #include <QQmlApplicationEngine>
 #include <QVariantList>
+#include <utils/string_utils.h>
+#include <utils/Log.h>
+#ifdef LOG_ON
+    #include <QDebug>
+#endif
 #include "vl.h"
 #include "VLCollectionModel.h"
 #include "VLObjectVarModel.h"
 #include "VarModelFactory.h"
 #include "VLVarModel.h"
 #include "DMBModel.h"
-#include "utils/Utils.h"
 #include "ObjectModelStorageSubscriptionProcessor.h"
-#include "utils/Log.h"
-#ifdef LOG_ON
-	#include <QDebug>
-#endif
 LOG_TITLE("VLCollectionModel")
 LOG_STREAM([]{return qDebug();})
 SET_LOG_VERBOSE(false)
@@ -175,7 +175,7 @@ namespace dmb
 		// because the model name is the proto's object name
 		if (*getId(index) == "proto")
 			return QVariant(
-				Utils::FormatStr("{%s}"
+				utils::format_str("{%s}"
 				, m->getTypeId().c_str()).c_str()
 			);
 		else
@@ -485,7 +485,7 @@ namespace dmb
 			if (auto& p = dmbModel->modelByTypeId(protoId))
 				return putModel("proto", p, indexBefore);
 			else
-				LOCAL_WARNING(Utils::FormatStr("Can't find or create a model for proto '%s'", protoId.c_str()).c_str());
+				LOCAL_WARNING(utils::format_str("Can't find or create a model for proto '%s'", protoId.c_str()).c_str());
 		}
 		else
 		{

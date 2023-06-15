@@ -4,7 +4,7 @@
 #include "VLCollectionModel.h"
 #include "VLObjectVarModel.h"
 
-#include "Log.h"
+#include <utils/Log.h>
 #ifdef LOG_ON
 	#include <QDebug>
 #endif

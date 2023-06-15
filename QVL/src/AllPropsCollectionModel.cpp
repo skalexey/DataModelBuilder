@@ -2,13 +2,10 @@
 #include <functional>
 #include "AllPropsCollectionModel.h"
 #include "VLObjectVarModel.h"
-#include "DMBModel.h"
-#include "VarModelFactory.h"
 #include "vl.h"
-#include "utils/Utils.h"
 #include "AllPropsSubscriptionProcessor.h"
 #include "AllPropsStorageSubscriptionProcessor.h"
-#include "utils/Log.h"
+#include <utils/Log.h>
 #ifdef LOG_ON
 	#include <QDebug>
 #endif

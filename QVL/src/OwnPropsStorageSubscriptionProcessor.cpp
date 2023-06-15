@@ -2,7 +2,7 @@
 #include "vl.h"
 #include "OwnPropsCollectionModel.h"
 
-#include "Log.h"
+#include <utils/Log.h>
 #ifdef LOG_ON
 	#include <QDebug>
 #endif

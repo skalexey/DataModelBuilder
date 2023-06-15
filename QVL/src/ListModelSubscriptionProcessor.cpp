@@ -4,7 +4,7 @@
 #include "VLObjectVarModel.h"
 #include "PropPath.h"
 
-#include "Log.h"
+#include <utils/Log.h>
 #ifdef LOG_ON
 	#include <QDebug>
 	#include "DMBModel.h"

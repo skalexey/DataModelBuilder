@@ -1,6 +1,6 @@
 #include <assert.h>
+#include <utils/string_utils.h>
 #include "UniqueIdList.h"
-#include "Utils.h"
 
 namespace dmb
 {
@@ -121,7 +121,7 @@ namespace dmb
 		{
 			std::string tpl = newId;
 			for (int i = 1; i < std::numeric_limits<short>::max(); i++)
-				if ((success = !has(newId = Utils::FormatStr("%s %d", tpl.c_str(), i))))
+                if ((success = !has(newId = utils::format_str("%s %d", tpl.c_str(), i))))
 					break;
 		}
 		if (success)

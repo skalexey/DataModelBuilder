@@ -1,17 +1,16 @@
 #include <unordered_set>
 #include <QObject>
 #include <QVariant>
+#include <utils/Log.h>
+#ifdef LOG_ON
+    #include <QDebug>
+#endif
+#include <utils/string_utils.h>
 #include "VLObjectVarModel.h"
 #include "VLCollectionModel.h"
-#include "VLListModel.h"
 #include "VLVarModel.h"
 #include "vl.h"
 #include "DMBModel.h"
-#include "utils/Utils.h"
-#include "utils/Log.h"
-#ifdef LOG_ON
-	#include <QDebug>
-#endif
 LOG_TITLE("VLCollectionModel")
 LOG_STREAM([]{return qDebug();})
 SET_LOG_VERBOSE(false)
@@ -294,7 +293,7 @@ namespace dmb
 		{
 			if (instanceName.isEmpty())
 			{
-				auto instId = getFreeId(Utils::FormatStr("Concrete_%s", typeId.toStdString().c_str()));
+				auto instId = getFreeId(utils::format_str("Concrete_%s", typeId.toStdString().c_str()));
 				if (!instId.empty())
 					emit instantiateRequested(QString(instId.c_str()), typeId);
 				else

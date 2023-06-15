@@ -1,16 +1,16 @@
 #include <QUrl>
 #include <QFileInfo>
 #include <QDir>
+#include <utils/Log.h>
+#ifdef LOG_ON
+    #include <QDebug>
+#endif
+#include <utils/string_utils.h>
 #include "DMBModel.h"
 #include "DMBCore.h"
-#include "utils/Utils.h"
 #include "VLObjectVarModel.h"
 #include "VLListVarModel.h"
 #include "VarModelFactory.h"
-#include "utils/Log.h"
-#ifdef LOG_ON
-	#include <QDebug>
-#endif
 LOG_TITLE("DMBModel")
 SET_LOG_DEBUG(true)
 LOG_STREAM([]{return qDebug();})
@@ -115,7 +115,7 @@ namespace dmb
 		}
 		else
 		{
-			emit modelStoreError(QString(mFilePath.c_str()), Utils::FormatStr("Can't store the model to the file '%s'", fPath.c_str()).c_str());
+			emit modelStoreError(QString(mFilePath.c_str()), utils::format_str("Can't store the model to the file '%s'", fPath.c_str()).c_str());
 			return false;
 		}
 	}
@@ -135,7 +135,7 @@ namespace dmb
 		}
 		else
 		{
-			emit modelStoreError(QString(fPath.c_str()), Utils::FormatStr("Can't store the content to the file '%s'", fPath.c_str()).c_str());
+			emit modelStoreError(QString(fPath.c_str()), utils::format_str("Can't store the content to the file '%s'", fPath.c_str()).c_str());
 			return false;
 		}
 	}
@@ -161,7 +161,7 @@ namespace dmb
 		}
 		else
 		{
-			emit modelLoadError(url, Utils::FormatStr("Can't load the file '%s'", fPath.c_str()).c_str());
+			emit modelLoadError(url, utils::format_str("Can't load the file '%s'", fPath.c_str()).c_str());
 		}
 		return false;
 	}
@@ -324,13 +324,13 @@ namespace dmb
 					node = &m;
 				else
 				{
-					LOCAL_LOG(Utils::FormatStr("QVL: Wrong index %d in the path '%s' used for node '%s'", index, path.c_str(), lastId.c_str()).c_str());
+					LOCAL_LOG(utils::format_str("QVL: Wrong index %d in the path '%s' used for node '%s'", index, path.c_str(), lastId.c_str()).c_str());
 					return nullVarModelPtr;
 				}
 			}
 			else
 			{
-				LOCAL_LOG(Utils::FormatStr("QVL: Wrong container type during parsing the node path '%s'", path.c_str()).c_str());
+				LOCAL_LOG(utils::format_str("QVL: Wrong container type during parsing the node path '%s'", path.c_str()).c_str());
 				return nullVarModelPtr;
 			}
 			cursor = dotPos + 1;

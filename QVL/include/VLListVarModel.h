@@ -84,7 +84,7 @@ namespace dmb
 	protected:
 		// For Qt interface
 		QVariant listModel();
-		QVariant add(const dmb::VLVarModel* model, int indexBefore = -1);
+		QVariant add(dmb::VLVarModel* model, int indexBefore = -1);
 		// Protected data interface
 		vl::List& data();
 		vl::Var& data(int index);

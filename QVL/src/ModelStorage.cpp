@@ -2,7 +2,7 @@
 #include "ModelStorage.h"
 #include "VLVarModel.h"
 #include "DMBModel.h"
-#include "Log.h"
+#include <utils/Log.h>
 #ifdef LOG_ON
 	#include <QDebug>
 #endif

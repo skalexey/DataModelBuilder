@@ -5,8 +5,8 @@
 #include "VLListVarModel.h"
 #include "VarModelFactory.h"
 #include "DMBModel.h"
-#include "utils/Utils.h"
-#include "utils/Log.h"
+#include <utils/string_utils.h>
+#include <utils/Log.h>
 #ifdef LOG_ON
 	#include <QDebug>
 #endif
@@ -358,7 +358,7 @@ namespace dmb
 					return *id;
 			}
 			else if (parent->isList())
-				return Utils::FormatStr("[%d]", parent->asList()->getChildIndex(this));
+				return utils::format_str("[%d]", parent->asList()->getChildIndex(this));
 		}
 		return emptyString;
 	}

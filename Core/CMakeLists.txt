@@ -54,22 +54,22 @@ endif ()
 if (USE_JSONCONVERTER)
 	set (EXTRA_LIBS ${EXTRA_LIBS} JSONConverter)
 	add_subdirectory("${DEPS}/VL/JSONConverter" "${DEPS}/VL/JSONConverter/${BUILD_DIR_NAME}")
-	set(DMBCORE_INCLUDES ${DMBCORE_INCLUDES} "${JSONCONVERTER_INCLUDES}")
+	set(DMBCore_INCLUDES ${DMBCore_INCLUDES} "${JSONCONVERTER_INCLUDES}")
 else()
 	set (EXTRA_LIBS ${EXTRA_LIBS} VL)
 	add_subdirectory("${DEPS}/VL" "${DEPS}/VL/${BUILD_DIR_NAME}")
-	set(DMBCORE_INCLUDES ${DMBCORE_INCLUDES} "${VL_INCLUDES}")
+	set(DMBCore_INCLUDES ${DMBCore_INCLUDES} "${VL_INCLUDES}")
 endif () 
 
-set(DMBCORE_INCLUDES ${DMBCORE_INCLUDES} "${PROJECT_SOURCE_DIR}/include")
-set(DMBCORE_INCLUDES ${DMBCORE_INCLUDES} PARENT_SCOPE)
+set(DMBCore_INCLUDES ${DMBCore_INCLUDES} "${PROJECT_SOURCE_DIR}/include")
+set(DMBCore_INCLUDES ${DMBCore_INCLUDES} PARENT_SCOPE)
 
 include_directories(${PROJECT_BINARY_DIR})
-include_directories("${DMBCORE_INCLUDES}")
+include_directories("${DMBCore_INCLUDES}")
 
 file(GLOB SRC "src/*")
 file(GLOB HEADERS "include/*")
-add_library(DMBCore ${SRC} ${HEADERS})
+add_library(DMBCore ${SRC} ${HEADERS} )
 
 target_link_libraries(DMBCore ${EXTRA_LIBS})
 

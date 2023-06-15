@@ -2,4 +2,4 @@ Build-cmake
 Build-g++
 Notes
 CMakeLists.txt.user
-
+build*/

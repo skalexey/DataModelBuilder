@@ -4,7 +4,7 @@
 #include "VarModelFactory.h"
 #include "VLVarModel.h"
 
-#include "Log.h"
+#include <utils/Log.h>
 #ifdef LOG_ON
 	#include <QDebug>
 #endif

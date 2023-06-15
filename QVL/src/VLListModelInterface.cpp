@@ -2,7 +2,6 @@
 #include <QVariantList>
 #include <QVector>
 #include "VLListModelInterface.h"
-#include <utils/Utils.h>
 #include <utils/Log.h>
 #include <utils/common.h>
 #include "vl.h"

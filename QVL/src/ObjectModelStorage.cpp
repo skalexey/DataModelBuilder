@@ -4,7 +4,7 @@
 #include "VLVarModel.h"
 #include "DMBModel.h"
 #include "VLNotifications.h"
-#include "Log.h"
+#include <utils/Log.h>
 #ifdef LOG_ON
 	#include <QDebug>
 #endif

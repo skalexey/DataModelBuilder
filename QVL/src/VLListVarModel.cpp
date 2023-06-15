@@ -113,7 +113,7 @@ namespace dmb
 		return getListModel().add(data, indexBefore);
 	}
 
-	QVariant VLListVarModel::add(const VLVarModel *model, int indexBefore)
+	QVariant VLListVarModel::add(VLVarModel *model, int indexBefore)
 	{
 		return getListModel().add(model, indexBefore);
 	}
