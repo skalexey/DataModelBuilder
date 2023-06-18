@@ -52,6 +52,11 @@ macro(setup_module)
         ../Core/include
         include
     )
+    
+    # Allow debugging QML
+    if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+        target_compile_definitions(qvl PRIVATE QT_QML_DEBUG)
+    endif()
 
     target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         Qt${QT_VERSION_MAJOR}::Core

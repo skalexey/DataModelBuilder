@@ -5,12 +5,12 @@ function job()
 	source $THIS_DIR/os.sh
 
 	if is_windows; then
-		export dmbcore_deps="${HOME}/Projects"
+		export DMBCore_deps="${HOME}/Projects"
 	else
-		export dmbcore_deps="${HOME}/Projects"
+		export DMBCore_deps="${HOME}/Projects"
 	fi
 
-	[ ! -z dmbcore_deps ] && export build_deps=$dmbcore_deps
+	[ ! -z DMBCore_deps ] && export build_deps=$DMBCore_deps
 }
 
 job $@

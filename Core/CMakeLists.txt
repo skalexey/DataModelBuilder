@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 # Uncomment the next line if want to experiment with g++ compliation
 #set(CMAKE_CXX_COMPILER "g++")
 
-project(DataModelBuilderCore C CXX)
+project(DMBCore C CXX)
 
 if (LOG_ON)
 	add_compile_definitions("LOG_ON")
@@ -27,19 +27,19 @@ option(DMB_TESTS "Include DMBTest target" OFF)
 #message("DMBCore CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 # set deps variables
-set(dmbcore_DEPS "$ENV{dmbcore_deps}")
-set(dmbcore_DEPS "${dmbcore_DEPS}" PARENT_SCOPE)
-if ("${dmbcore_DEPS}" STREQUAL "")
+set(DMBCore_DEPS "$ENV{DMBCore_deps}")
+set(DMBCore_DEPS "${DMBCore_DEPS}" PARENT_SCOPE)
+if ("${DMBCore_DEPS}" STREQUAL "")
 	file(TO_CMAKE_PATH "$ENV{build_deps}" DEPS)
 endif()
 if ("${DEPS}" STREQUAL "")
-	set(DEPS ${dmbcore_DEPS})
+	set(DEPS ${DMBCore_DEPS})
 endif()
 if ("${DEPS}" STREQUAL "")
-	message(SEND_ERROR "dmbcore: ERROR: DEPS is not specified. Take the default value")
+	message(SEND_ERROR "DMBCore: ERROR: DEPS is not specified. Take the default value")
 	set(DEPS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies)
 else()
-	message("dmbcore: DEPS: ${DEPS}")
+	message("DMBCore: DEPS: ${DEPS}")
 endif()
 set(DEPS ${DEPS} PARENT_SCOPE)
 
@@ -69,7 +69,7 @@ include_directories("${DMBCore_INCLUDES}")
 
 file(GLOB SRC "src/*")
 file(GLOB HEADERS "include/*")
-add_library(DMBCore ${SRC} ${HEADERS} )
+add_library(DMBCore STATIC ${SRC} ${HEADERS})
 
 target_link_libraries(DMBCore ${EXTRA_LIBS})
 
