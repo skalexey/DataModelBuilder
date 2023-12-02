@@ -32,7 +32,7 @@ namespace dmb
 		}
 		else
 		{
-			LOCAL_ERROR("Storage update catched by a collection which does not support other storage index type as Number");
+			LOCAL_ERROR("Storage update caught by a collection which does not support other storage index type as Number");
 		}
 	}
 
@@ -47,7 +47,7 @@ namespace dmb
 		}
 		else
 		{
-			LOCAL_ERROR("Storage update 'modelRemove' catched by a collection which does not support other storage index type as Number");
+			LOCAL_ERROR("Storage update 'modelRemove' caught by a collection which does not support other storage index type as Number");
 		}
 	}
 }
