@@ -80,7 +80,7 @@ void dmb::Registry::Init(const vl::Object& data)
 vl::Object& dmb::Content::Add(const std::string& entityName, vl::Object& proto)
 {
 	if (Has(entityName))
-		return vl::nullObject;
+		return vl::NullObject();
 	vl::Object o;
 	o.SetPrototype(proto);
 	return mData.Set(entityName, o).AsObject();
@@ -89,7 +89,7 @@ vl::Object& dmb::Content::Add(const std::string& entityName, vl::Object& proto)
 vl::Var& dmb::Content::Add(const std::string& entityName, vl::Var& value)
 {
 	if (Has(entityName))
-		return vl::emptyVar;
+		return vl::EmptyVar();
 	if (value.IsObject())
 		return mData.Set(entityName, value.AsObject().Copy());
 	else if (value.IsList())
@@ -195,7 +195,7 @@ dmb::Model::Model()
 				else
 					LOG_ERROR(utils::format_str("Found node with null data during type resolution of '%s'", typeRef.c_str()));
 			}
-			return vl::nullObject;
+			return vl::NullObject();
 		}
 		, [&](const vl::Object& o) {
 			return IsType(o);

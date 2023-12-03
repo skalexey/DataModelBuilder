@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 #include "vl_fwd.h"
-#include "Observer.h"
+#include <utils/patterns/Observer.h>
 
 namespace vl
 {
