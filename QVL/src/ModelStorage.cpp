@@ -8,7 +8,7 @@
 #endif
 LOG_TITLE("ModelStorage")
 LOG_STREAM([]{return qDebug();})
-SET_LOG_DEBUG(true)
+SET_LOCAL_LOG_DEBUG(true)
 
 namespace dmb
 {

@@ -13,8 +13,8 @@
 #include "DMBModel.h"
 LOG_TITLE("VLCollectionModel")
 LOG_STREAM([]{return qDebug();})
-SET_LOG_VERBOSE(false)
-SET_LOG_DEBUG(true)
+SET_LOCAL_LOG_VERBOSE(false)
+SET_LOCAL_LOG_DEBUG(true)
 
 namespace
 {

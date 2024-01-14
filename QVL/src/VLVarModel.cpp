@@ -12,8 +12,8 @@
 #endif
 LOG_TITLE("VLVarModel")
 LOG_STREAM([]{return qDebug();})
-SET_LOG_VERBOSE(false)
-SET_LOG_DEBUG(true)
+SET_LOCAL_LOG_VERBOSE(false)
+SET_LOCAL_LOG_DEBUG(true)
 
 namespace dmb
 {

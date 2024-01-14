@@ -17,7 +17,7 @@
 #endif
 LOG_TITLE("VLListModelInterface")
 LOG_STREAM([]{return qDebug();})
-SET_LOG_VERBOSE(false)
+SET_LOCAL_LOG_VERBOSE(false)
 
 namespace {
 	dmb::VLVarModelPtr emptyVarModelPtr;
