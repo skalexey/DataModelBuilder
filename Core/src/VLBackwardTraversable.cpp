@@ -2,7 +2,12 @@
 #include "utils/Log.h"
 #include <utils/string_utils.h>
 #include "vl.h"
-
+LOG_TITLE("VLBackwardTraversable");
+#ifdef DMBCORE_LOG_VERBOSE
+	SET_LOCAL_LOG_VERBOSE(true);
+#else
+	SET_LOCAL_LOG_VERBOSE(false);
+#endif
 namespace
 {
 	const std::string emptyString;
@@ -24,7 +29,7 @@ namespace vl
 	VarTreeNode::~VarTreeNode()
 	{
 		mRegistry.RemoveNode(this);
-		LOG_VERBOSE(utils::format_str("~VarTreeNode() %p", this));
+		LOCAL_VERBOSE(utils::format_str("~VarTreeNode() %p", this));
 	}
 
 	const std::string& vl::VarTreeNode::GetId() const
@@ -311,7 +316,7 @@ namespace vl
 	vl::ObjectTreeNode::ObjectTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent)
 		: Base(registry, data, parent)
 	{
-		LOG_VERBOSE(utils::format_str("Create ObjectTreeNode %p for data %p with parent %p", this, data, parent));
+		LOCAL_VERBOSE(utils::format_str("Create ObjectTreeNode %p for data %p with parent %p", this, data, parent));
 
 		if (mData)
 			mData->AsObject().Attach(this);
@@ -400,7 +405,7 @@ namespace vl
 	vl::ListTreeNode::ListTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent)
 		: Base(registry, data, parent)
 	{
-		LOG_VERBOSE(utils::format_str("Create ListTreeNode %p for data %p with parent %p", this, data, parent));
+		LOCAL_VERBOSE(utils::format_str("Create ListTreeNode %p for data %p with parent %p", this, data, parent));
 
 		if (mData)
 			mData->AsList().Attach(this);
@@ -507,7 +512,7 @@ namespace vl
 
 	bool vl::ObjectTreeNode::Remove(const std::string& childId)
 	{
-		LOG_VERBOSE(utils::format_str("Erase child '%s' from %p", childId.c_str(), this));
+		LOCAL_VERBOSE(utils::format_str("Erase child '%s' from %p", childId.c_str(), this));
 		auto it = mChildren.find(childId);
 		if (it != mChildren.end())
 		{
@@ -569,7 +574,7 @@ namespace vl
 
 	void vl::ListTreeNode::Remove(int index)
 	{
-		LOG_VERBOSE(utils::format_str("Erase child '%d' from %p", index, this));
+		LOCAL_VERBOSE(utils::format_str("Erase child '%d' from %p", index, this));
 		mChildren.erase(mChildren.begin() + index);
 	}
 

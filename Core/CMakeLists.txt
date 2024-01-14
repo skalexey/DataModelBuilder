@@ -8,7 +8,8 @@ macro(setup_module)
 	
 	option(USE_JSONCONVERTER "Use JSONConverter lib" ON)
 	option(DMB_TESTS "Include DMBTest target" OFF)
-
+	option(DMBCORE_LOG_VERBOSE "Enable verbose logging" ON)
+	
 	# VL and JSONConverter dependencies
 	if (USE_JSONCONVERTER)
 		set (EXTRA_LIBS ${EXTRA_LIBS} JSONConverter)
