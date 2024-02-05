@@ -16,7 +16,7 @@ vl::Object& dmb::Registry::CreateType(const std::string& typeName)
 	return mData.Set(typeName, vl::Object()).AsObject();
 }
 
-vl::Var& dmb::Registry::RegisterType(const std::string& typeName, vl::Var& type)
+vl::VarPtr& dmb::Registry::RegisterType(const std::string& typeName, vl::Var& type)
 {
 	return mData.Set(typeName, type);
 }
@@ -86,10 +86,11 @@ vl::Object& dmb::Content::Add(const std::string& entityName, vl::Object& proto)
 	return mData.Set(entityName, o).AsObject();
 }
 
-vl::Var& dmb::Content::Add(const std::string& entityName, vl::Var& value)
+vl::VarPtr& dmb::Content::Add(const std::string& entityName, const vl::Var& value)
 {
+	static vl::VarPtr emptyVar;
 	if (Has(entityName))
-		return vl::EmptyVar();
+		return emptyVar;
 	if (value.IsObject())
 		return mData.Set(entityName, value.AsObject().Copy());
 	else if (value.IsList())
@@ -103,7 +104,7 @@ std::size_t dmb::Content::ItemCount() const
 	return mData.PropCount();
 }
 
-const vl::Var& dmb::Content::Get(const std::string& entityName) const
+const vl::VarPtr& dmb::Content::Get(const std::string& entityName) const
 {
 	return mData.Get(entityName);
 }
@@ -118,9 +119,9 @@ bool dmb::Content::Remove(const std::string& entityName)
 	return mData.RemoveProperty(entityName);
 }
 
-vl::Var& dmb::Content::Get(const std::string& entityName)
+vl::VarPtr& dmb::Content::Get(const std::string& entityName)
 {
-	return const_cast<vl::Var&>(const_cast<const dmb::Content*>(this)->Get(entityName));
+	return const_cast<vl::VarPtr&>(const_cast<const dmb::Content*>(this)->Get(entityName));
 }
 
 bool dmb::Content::Rename(const std::string& entityName, const std::string& newName)
@@ -255,7 +256,7 @@ std::string dmb::Model::JSONStr(const vl::CnvParams& params)
 	return converter.JSONStr(mData, mTypeResolver, params);
 }
 
-bool searchObject (const vl::Var& where, const vl::Object& what, std::string& typeId)
+bool searchObject (const vl::VarPtr& where, const vl::Object& what, std::string& typeId)
 {
 	if (where.IsNull())
 		return false;

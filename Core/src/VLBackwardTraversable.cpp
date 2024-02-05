@@ -360,7 +360,7 @@ namespace vl
 							LOG_ERROR("Unsynchronized backward traversible tree. Add update received, but we have already this node ('" << childName << "'). Will try to replace it");
 							Remove(childName);
 						}
-						Set(childName, mRegistry.CreateNamedNode(childName, mData->AsObject().Get(childName), this));
+						Set(childName, mRegistry.CreateNamedNode(childName, *mData->AsObject().Get(childName), this));
 					}
 					else if (auto& idVar = o.Get("set"))
 					{
@@ -373,7 +373,7 @@ namespace vl
 						}
 						else
 							LOG_ERROR("Unsynchronized backward traversible tree. Set update received, but there is no such node '" << childName << "'. Will just add it");
-						Set(childName, mRegistry.CreateNamedNode(childName, mData->AsObject().Get(childName), this));
+						Set(childName, mRegistry.CreateNamedNode(childName, *mData->AsObject().Get(childName), this));
 					}
 					else if (auto& idVar = o.Get("rename"))
 					{
@@ -387,7 +387,7 @@ namespace vl
 						else
 							LOG_ERROR("Unsynchronized backward traversible tree. Rename update received, but there is no such node '" << childName << "'. Will just add it");
 						auto& newName = o.Get("newId").AsString().Val();
-						Set(newName, mRegistry.CreateNamedNode(newName, mData->AsObject().Get(newName), this));
+						Set(newName, mRegistry.CreateNamedNode(newName, *mData->AsObject().Get(newName), this));
 					}
 					else if (auto& idVar = o.Get("remove"))
 					{

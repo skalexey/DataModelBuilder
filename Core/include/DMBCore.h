@@ -20,7 +20,7 @@ namespace dmb
 
 	public:
 		vl::Object& CreateType(const std::string&);
-		vl::Var& RegisterType(const std::string&, vl::Var& type);
+		vl::VarPtr& RegisterType(const std::string&, vl::Var& type);
 		vl::Object& GetType(const std::string&);
 		bool ForeachType(const std::function<bool(const std::string&, vl::Object&)>& pred);
 		bool ForeachType(const std::function<bool(const std::string&, const vl::Object&)>& pred) const;
@@ -51,10 +51,10 @@ namespace dmb
 		// Create an object of type proto and put it into the content
 		vl::Object& Add(const std::string&, vl::Object& proto);
 		// Put any value as it is. Objects and lists are copied
-		vl::Var& Add(const std::string&, vl::Var& value);
+		vl::VarPtr& Add(const std::string&, const vl::Var& value);
 		std::size_t ItemCount() const;
-		vl::Var& Get(const std::string& entityName);
-		const vl::Var& Get(const std::string& entityName) const;
+		vl::VarPtr& Get(const std::string& entityName);
+		const vl::VarPtr& Get(const std::string& entityName) const;
 		bool Has(const std::string& entityName) const;
 		bool Remove(const std::string& entityName);
 		bool Rename(const std::string& entityName, const std::string& newName);
