@@ -179,7 +179,7 @@ namespace vl
 			auto listSize = list.Size();
 			ptr->Resize(listSize);
 			for (int i = 0; i < listSize; i++)
-				ptr->Set(i, CreateIndexedNode(i, list.At(i), ptr.get()));
+				ptr->Set(i, CreateIndexedNode(i, *list.At(i), ptr.get()));
 			return ptr;
 		}
 		else
@@ -462,19 +462,19 @@ namespace vl
 								LOG_ERROR("Unsynchronized ListTreeNode. Trying to increment child " << i << "'s index when processing 'add' notification with given 'intexBefore' = " << indexBefore << " and can't find the child in the indexed nodes map");
 							}
 						}
-						auto newNode = mRegistry.CreateIndexedNode(index, mData->AsList().At(indexBefore), this);
+						auto newNode = mRegistry.CreateIndexedNode(index, *mData->AsList().At(indexBefore), this);
 						mChildren.insert(mChildren.begin() + indexBefore, newNode);
 					}
 					else
 					{
-						Add(mRegistry.CreateIndexedNode(index, mData->AsList().At(index), this));
+						Add(mRegistry.CreateIndexedNode(index, *mData->AsList().At(index), this));
 					}
 				}
 				else if (infoObj.Has("set"))
 				{
 					index = infoObj.Get("set").AsNumber().Val();
 					Clear(index);
-					Set(index, mRegistry.CreateIndexedNode(index, mData->AsList().At(index), this));
+					Set(index, mRegistry.CreateIndexedNode(index, *mData->AsList().At(index), this));
 				}
 				else if (infoObj.Has("remove"))
 				{
