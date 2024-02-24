@@ -9,7 +9,7 @@
 #endif
 LOG_TITLE("ModelStorageSubscriptionProcessor")
 LOG_STREAM([]{return qDebug();})
-SET_LOCAL_LOG_DEBUG(false)
+SET_LOCAL_LOG_LEVEL(error)
 
 namespace dmb
 {

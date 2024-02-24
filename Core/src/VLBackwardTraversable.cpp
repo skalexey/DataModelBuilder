@@ -4,9 +4,9 @@
 #include "vl.h"
 LOG_TITLE("VLBackwardTraversable");
 #ifdef DMBCORE_LOG_VERBOSE
-	SET_LOCAL_LOG_VERBOSE(true);
+	SET_LOCAL_LOG_LEVEL(verbose);
 #else
-	SET_LOCAL_LOG_VERBOSE(false);
+	SET_LOCAL_LOG_LEVEL(debug);
 #endif
 namespace
 {

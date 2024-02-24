@@ -12,7 +12,7 @@
 #endif
 LOG_TITLE("ListModelSubscriptionProcessor")
 LOG_STREAM([]{return qDebug();})
-SET_LOCAL_LOG_DEBUG(true)
+SET_LOCAL_LOG_LEVEL(debug)
 
 namespace dmb
 {

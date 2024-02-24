@@ -12,7 +12,7 @@
 #include "VLListVarModel.h"
 #include "VarModelFactory.h"
 LOG_TITLE("DMBModel")
-SET_LOCAL_LOG_DEBUG(true)
+SET_LOCAL_LOG_LEVEL(debug)
 LOG_STREAM([]{return qDebug();})
 
 namespace

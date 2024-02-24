@@ -9,7 +9,7 @@
 #endif
 LOG_STREAM([]{return qDebug();})
 LOG_TITLE("ListModelStorage")
-SET_LOCAL_LOG_DEBUG(true)
+SET_LOCAL_LOG_LEVEL(debug)
 
 namespace dmb
 {

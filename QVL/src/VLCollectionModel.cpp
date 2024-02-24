@@ -15,8 +15,8 @@
 #include "ObjectModelStorageSubscriptionProcessor.h"
 LOG_TITLE("VLCollectionModel")
 LOG_STREAM([]{return qDebug();})
-SET_LOCAL_LOG_VERBOSE(false)
-SET_LOCAL_LOG_DEBUG(true)
+SET_LOCAL_LOG_LEVEL(verbose)
+SET_LOCAL_LOG_LEVEL(debug)
 
 namespace
 {
