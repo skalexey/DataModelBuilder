@@ -62,7 +62,7 @@ namespace dmb
 		virtual const VLVarModelPtr& setModelAt(int index, const VLVarModelPtr& modelPtr) = 0;
 		virtual bool doSetData(int index, const QVariant& value, int role) = 0;
 		virtual const vl::Var& setElementValue(const VLVarModel* e, const vl::VarPtr& value) = 0;
-		virtual bool setElementType(const VLVarModel *childPtr, ObjectProperty::Type type) = 0;
+		virtual bool setElementType(const VLVarModel* childPtr, ObjectProperty::Type type) = 0;
 
 	protected:
 		virtual const ModelStorage& getStorage() const {
@@ -155,7 +155,7 @@ namespace dmb
 
 	protected:
 		// Properties implementation
-		dmb::VLVarModel *getParentModelProp() const;
+		dmb::VLVarModel* getParentModelProp() const;
 		virtual std::unique_ptr<ModelStorageSubscriptionProcessor> createStorageSubscriptionProcessor();
 
 	public slots:
