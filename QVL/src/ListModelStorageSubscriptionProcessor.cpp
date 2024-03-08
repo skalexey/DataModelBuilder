@@ -3,7 +3,7 @@
 #include "VLCollectionModel.h"
 #include "VLObjectVarModel.h"
 
-#include <utils/Log.h>
+#include <utils/log.h>
 #ifdef LOG_ON
 	#include <QDebug>
 	#include "DMBModel.h"

@@ -1,5 +1,5 @@
 #include "VLBackwardTraversable.h"
-#include "utils/Log.h"
+#include "utils/log.h"
 #include <utils/string_utils.h>
 #include "vl.h"
 LOG_TITLE("VLBackwardTraversable");

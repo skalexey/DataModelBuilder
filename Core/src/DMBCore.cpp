@@ -1,6 +1,6 @@
 #include <cstdlib>
 #include <JSONConverter.h>
-#include <utils/Log.h>
+#include <utils/log.h>
 #include <utils/string_utils.h>
 #define DMB_LOG_ON
 #ifdef DMB_LOG_ON
