@@ -24,9 +24,9 @@ namespace dmb
 	void ObjectModelStorageSubscriptionProcessor::onAfterModelPut(vl::Object& o)
 	{
 		auto& u = o.Get("modelPut");
-		if (u.IsString())
+		if (u.is<vl::String>())
 		{
-			auto modelId = u.AsString().Val();
+			auto modelId = u.as<vl::String>().Val();
 			if (auto& m = getOwner().getObjectStorage().get(modelId))
 				getOwner().onModelPut(m);
 		}
@@ -39,9 +39,9 @@ namespace dmb
 	void ObjectModelStorageSubscriptionProcessor::onBeforeRemove(vl::Object& o)
 	{
 		auto& u = o.Get("modelRemove");
-		if (u.IsString())
+		if (u.is<vl::String>())
 		{
-			auto modelId = u.AsString().Val();
+			auto modelId = u.as<vl::String>().Val();
 			if (auto& m = getOwner().getObjectStorage().get(modelId))
 				getOwner().onModelBeforeRemove(m);
 		}

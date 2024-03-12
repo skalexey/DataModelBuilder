@@ -18,7 +18,7 @@ namespace vl
 {
 
 	vl::VarTreeNode::VarTreeNode(vl::VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent)
-		: mRegistry(registry)
+		: mRegistry(&registry)
 		, mData(data)
 		, mParent(parent)
 	{
@@ -28,7 +28,7 @@ namespace vl
 
 	VarTreeNode::~VarTreeNode()
 	{
-		mRegistry.RemoveNode(this);
+		mRegistry->RemoveNode(this);
 		LOCAL_VERBOSE(utils::format_str("~VarTreeNode() %p", this));
 	}
 
@@ -41,8 +41,8 @@ namespace vl
 			LOG_WARNING("An attempt to get id of an unitialized VarTreeNode");
 			return emptyString;
 		}
-		if (mParent->IsObject())
-			return mRegistry.GetId(this);
+		if (mParent->is<vl::ObjectTreeNode>())
+			return mRegistry->GetId(this);
 		else
 			return emptyString;
 	}
@@ -56,8 +56,8 @@ namespace vl
 			LOG_WARNING("An attempt to get index of an unitialized VarTreeNode");
 			return -3;
 		}
-		if (mParent->IsList())
-			return mRegistry.GetIndex(this);
+		if (mParent->is<vl::ListTreeNode>())
+			return mRegistry->GetIndex(this);
 		else
 			return -1;
 	}
@@ -86,37 +86,7 @@ namespace vl
 
 	const vl::VarNodeRegistry& vl::VarTreeNode::GetRegistry() const
 	{
-		return mRegistry;
-	}
-
-	bool vl::VarTreeNode::IsList() const
-	{
-		return false;
-	}
-
-	bool vl::VarTreeNode::IsObject() const
-	{
-		return false;
-	}
-
-	vl::ObjectTreeNode* vl::VarTreeNode::AsObject()
-	{
-		return nullptr;
-	}
-
-	const vl::ObjectTreeNode* vl::VarTreeNode::AsObject() const
-	{
-		return nullptr;
-	}
-
-	vl::ListTreeNode* vl::VarTreeNode::AsList()
-	{
-		return nullptr;
-	}
-
-	const vl::ListTreeNode* vl::VarTreeNode::AsList() const
-	{
-		return nullptr;
+		return *mRegistry;
 	}
 
 	void vl::VarTreeNode::Update(Observable* sender, vl::VarPtr info)
@@ -128,11 +98,6 @@ namespace vl
 	{
 		// By default container with no children
 		return 0;
-	}
-
-	vl::VarTreeNodePtr VarTreeNode::SharedFromThis()
-	{
-		return nullptr;
 	}
 
 	bool vl::VarTreeNode::ForeachChildren(const std::function<bool(VarTreeNode&)>& pred)
@@ -163,19 +128,19 @@ namespace vl
 
 	vl::VarTreeNodePtr vl::VarNodeRegistry::CreateNode(vl::Var& data, VarTreeNode* parent)
 	{
-		if (data.IsObject())
+		if (data.is<vl::Object>())
 		{
 			auto ptr = std::make_shared<ObjectTreeNode>(*this, &data, parent);
-			data.AsObject().ForeachProp([&](const std::string& propName, vl::Var& value) {
+			data.as<vl::Object>().ForeachProp([&](const std::string& propName, vl::Var& value) {
 				ptr->Set(propName, CreateNamedNode(propName, value, ptr.get()));
 				return true;
 			});
 			return ptr;
 		}
-		else if (data.IsList())
+		else if (data.is<vl::List>())
 		{
 			auto ptr = std::make_shared<ListTreeNode>(*this, &data, parent);
-			auto& list = data.AsList();
+			auto& list = data.as<vl::List>();
 			auto listSize = list.Size();
 			ptr->Resize(listSize);
 			for (int i = 0; i < listSize; i++)
@@ -200,9 +165,9 @@ namespace vl
 				}
 		if (auto parent = node->GetParent())
 		{
-			if (parent->IsObject())
+			if (parent->is<vl::ObjectTreeNode>())
 				result &= (mNamedNodes.erase(node) > 0);
-			else if (parent->IsList())
+			else if (parent->is<vl::ListTreeNode>())
 			{
 				auto it = mIndexedNodes.find(node);
 				if (it != mIndexedNodes.end())
@@ -210,11 +175,11 @@ namespace vl
 					if (!node->mToBeReplaced)
 					{
 						auto index = it->second;
-						auto parentList = parent->AsList();
-						auto sz = parentList->ChildCount();
+						auto& parentList = parent->as<vl::ListTreeNode>();
+						auto sz = parentList.ChildCount();
 						for (int i = 0; i < sz; i++)
 						{
-							auto child = parentList->At(i).get();
+							auto child = parentList.At(i).get();
 							auto it = mIndexedNodes.find(child);
 							if (it != mIndexedNodes.end())
 							{
@@ -288,9 +253,9 @@ namespace vl
 			auto id = dotPos == std::string::npos ? 
 				path.substr(cursor) : path.substr(cursor, dotPos - cursor);
 			auto n = node ? node : &mTree;
-			if (auto o = n->AsObject())
+			if (auto o = n->as_ptr<vl::ObjectTreeNode>())
 				node = o->Get(id).get();
-			else if (auto l = n->AsList())
+			else if (auto l = n->as_ptr<vl::ListTreeNode>())
 			{
 				auto index = parseIndex(id);
 				if (index >= 0 && index < l->ChildCount())
@@ -319,7 +284,7 @@ namespace vl
 		LOCAL_VERBOSE(utils::format_str("Create ObjectTreeNode %p for data %p with parent %p", this, data, parent));
 
 		if (mData)
-			mData->AsObject().Attach(this);
+			mData->as<vl::Object>().Attach(this);
 	}
 
 	ObjectTreeNode::~ObjectTreeNode()
@@ -327,14 +292,14 @@ namespace vl
 
 	void vl::ObjectTreeNode::Update(Observable* sender, vl::VarPtr info)
 	{
-		if (!info->IsObject())
+		if (!info->is<vl::Object>())
 		{
 			LOG_WARNING("Wrong update info type passed to ObjectTreeNode observer");
 			return;
 		}
-		if (info->IsObject())
+		if (info->is<vl::Object>())
 		{
-			auto& o = info->AsObject();
+			auto& o = info->as<vl::Object>();
 			if (o.Has("clear"))
 				mChildren.clear();
 			else
@@ -345,7 +310,7 @@ namespace vl
 					return;
 				}
 
-				auto& obj = mData->AsObject();
+				auto& obj = mData->as<vl::Object>();
 
 				// Update the tree only after the data is already set
 				if (o.Has("after"))
@@ -354,17 +319,17 @@ namespace vl
 					//	return; // Ignore the proto as it has been already created
 					if (auto& idVar = o.Get("add"))
 					{
-						auto& childName = idVar.AsString().Val();
+						auto& childName = idVar.as<vl::String>().Val();
 						if (Has(childName))
 						{
 							LOG_ERROR("Unsynchronized backward traversible tree. Add update received, but we have already this node ('" << childName << "'). Will try to replace it");
 							Remove(childName);
 						}
-						Set(childName, mRegistry.CreateNamedNode(childName, *mData->AsObject().Get(childName), this));
+						Set(childName, mRegistry->CreateNamedNode(childName, *mData->as<vl::Object>().Get(childName), this));
 					}
 					else if (auto& idVar = o.Get("set"))
 					{
-						auto& childName = idVar.AsString().Val();
+						auto& childName = idVar.as<vl::String>().Val();
 						if (Has(childName))
 						{
 							//if (mData->GetType() != obj.Get(childName).GetType())
@@ -373,11 +338,11 @@ namespace vl
 						}
 						else
 							LOG_ERROR("Unsynchronized backward traversible tree. Set update received, but there is no such node '" << childName << "'. Will just add it");
-						Set(childName, mRegistry.CreateNamedNode(childName, *mData->AsObject().Get(childName), this));
+						Set(childName, mRegistry->CreateNamedNode(childName, *mData->as<vl::Object>().Get(childName), this));
 					}
 					else if (auto& idVar = o.Get("rename"))
 					{
-						auto& childName = idVar.AsString().Val();
+						auto& childName = idVar.as<vl::String>().Val();
 						if (Has(childName))
 						{
 							//if (mData->GetType() != obj.Get(childName).GetType())
@@ -386,12 +351,12 @@ namespace vl
 						}
 						else
 							LOG_ERROR("Unsynchronized backward traversible tree. Rename update received, but there is no such node '" << childName << "'. Will just add it");
-						auto& newName = o.Get("newId").AsString().Val();
-						Set(newName, mRegistry.CreateNamedNode(newName, *mData->AsObject().Get(newName), this));
+						auto& newName = o.Get("newId").as<vl::String>().Val();
+						Set(newName, mRegistry->CreateNamedNode(newName, *mData->as<vl::Object>().Get(newName), this));
 					}
 					else if (auto& idVar = o.Get("remove"))
 					{
-						auto& childName = idVar.AsString().Val();
+						auto& childName = idVar.as<vl::String>().Val();
 						if (Has(childName))
 							Remove(childName);
 						else
@@ -408,7 +373,7 @@ namespace vl
 		LOCAL_VERBOSE(utils::format_str("Create ListTreeNode %p for data %p with parent %p", this, data, parent));
 
 		if (mData)
-			mData->AsList().Attach(this);
+			mData->as<vl::List>().Attach(this);
 	}
 
 	ListTreeNode::~ListTreeNode()
@@ -416,14 +381,14 @@ namespace vl
 
 	void vl::ListTreeNode::Update(Observable* sender, vl::VarPtr info)
 	{
-		if (!info->IsNumber() && !info->IsObject())
+		if (!info->is<vl::Number>() && !info->is<vl::Object>())
 		{
 			LOG_WARNING("Wrong update info type passed to ListTreeNode observer");
 			return;
 		}
-		if (info->IsObject())
+		if (info->is<vl::Object>())
 		{
-			auto& infoObj = info->AsObject();
+			auto& infoObj = info->as<vl::Object>();
 			if (infoObj.Has("clear"))
 				mChildren.clear();
 			else
@@ -436,23 +401,23 @@ namespace vl
 				if (infoObj.Has("before"))
 					return; // Process only "after" notifications
 
-				auto& list = mData->AsList();
+				auto& list = mData->as<vl::List>();
 				auto listSize = list.Size();
 
 				int index = -1;
 
 				if (infoObj.Has("add"))
 				{
-					auto indexBefore = infoObj.Has("indexBefore") ? infoObj.Get("indexBefore").AsNumber().Val() : -1;
+					auto indexBefore = infoObj.Has("indexBefore") ? infoObj.Get("indexBefore").as<vl::Number>().Val() : -1;
 					auto count = ChildCount();
-					index = infoObj.Get("add").AsNumber().Val();
+					index = infoObj.Get("add").as<vl::Number>().Val();
 					if (indexBefore >= 0)
 					{
 						for (int i = indexBefore; i < count; i++)
 						{
 							auto& c = mChildren[i];
-							auto it = mRegistry.mIndexedNodes.find(c.get());
-							if (it != mRegistry.mIndexedNodes.end())
+							auto it = mRegistry->mIndexedNodes.find(c.get());
+							if (it != mRegistry->mIndexedNodes.end())
 							{
 								if (it->second >= indexBefore)
 									it->second++;
@@ -462,23 +427,23 @@ namespace vl
 								LOG_ERROR("Unsynchronized ListTreeNode. Trying to increment child " << i << "'s index when processing 'add' notification with given 'intexBefore' = " << indexBefore << " and can't find the child in the indexed nodes map");
 							}
 						}
-						auto newNode = mRegistry.CreateIndexedNode(index, *mData->AsList().At(indexBefore), this);
+						auto newNode = mRegistry->CreateIndexedNode(index, *mData->as<vl::List>().At(indexBefore), this);
 						mChildren.insert(mChildren.begin() + indexBefore, newNode);
 					}
 					else
 					{
-						Add(mRegistry.CreateIndexedNode(index, *mData->AsList().At(index), this));
+						Add(mRegistry->CreateIndexedNode(index, *mData->as<vl::List>().At(index), this));
 					}
 				}
 				else if (infoObj.Has("set"))
 				{
-					index = infoObj.Get("set").AsNumber().Val();
+					index = infoObj.Get("set").as<vl::Number>().Val();
 					Clear(index);
-					Set(index, mRegistry.CreateIndexedNode(index, *mData->AsList().At(index), this));
+					Set(index, mRegistry->CreateIndexedNode(index, *mData->as<vl::List>().At(index), this));
 				}
 				else if (infoObj.Has("remove"))
 				{
-					index = infoObj.Get("remove").AsNumber().Val();
+					index = infoObj.Get("remove").as<vl::Number>().Val();
 					Remove(index);
 				}
 				else
@@ -524,34 +489,9 @@ namespace vl
 		return false;
 	}
 
-	VarTreeNodePtr ObjectTreeNode::SharedFromThis()
-	{
-		return shared_from_this();
-	}
-
-	ObjectTreeNodePtr ObjectTreeNode::ObjectSharedFromThis()
-	{
-		return shared_from_this();
-	}
-
 	std::size_t vl::ObjectTreeNode::ChildCount() const
 	{
 		return mChildren.size();
-	}
-
-	vl::ObjectTreeNode* vl::ObjectTreeNode::AsObject()
-	{
-		return this;
-	}
-
-	const vl::ObjectTreeNode* vl::ObjectTreeNode::AsObject() const
-	{
-		return this;
-	}
-
-	bool ObjectTreeNode::IsObject() const
-	{
-		return true;
 	}
 
 	bool vl::ObjectTreeNode::ForeachChildren(const std::function<bool(VarTreeNode&)>& pred)
@@ -578,16 +518,6 @@ namespace vl
 		mChildren.erase(mChildren.begin() + index);
 	}
 
-	VarTreeNodePtr ListTreeNode::SharedFromThis()
-	{
-		return std::enable_shared_from_this<ListTreeNode>::shared_from_this();
-	}
-
-	vl::ListTreeNodePtr ListTreeNode::ListSharedFromThis()
-	{
-		return std::enable_shared_from_this<ListTreeNode>::shared_from_this();
-	}
-
 	const vl::VarTreeNodePtr& vl::ListTreeNode::At(std::size_t index) const
 	{
 		return mChildren[index];
@@ -597,21 +527,6 @@ namespace vl
 	{
 		mChildren[index]->mToBeReplaced = true;
 		mChildren[index] = nullptr;
-		return true;
-	}
-
-	vl::ListTreeNode* vl::ListTreeNode::AsList()
-	{
-		return this;
-	}
-
-	const vl::ListTreeNode* vl::ListTreeNode::AsList() const
-	{
-		return this;
-	}
-
-	bool ListTreeNode::IsList() const
-	{
 		return true;
 	}
 

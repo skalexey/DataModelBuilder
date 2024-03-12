@@ -64,7 +64,7 @@ namespace dmb
 	{
 		// Invoke const version of getModel
 		if (auto model = mRoot->getModel("content"))
-			return model->asObject();
+			return model->as<vl::Object>();
 		return nullptr;
 	}
 
@@ -74,7 +74,7 @@ namespace dmb
 		if (!mRoot)
 			return nullptr;
 		if (auto& model = mRoot->model("content"))
-			return model->asObject();
+			return model->as<vl::Object>();
 		return nullptr;
 	}
 
@@ -84,7 +84,7 @@ namespace dmb
 		if (!mRoot)
 			return nullptr;
 		if (auto& model = mRoot->getModel("types"))
-			return model->asObject();
+			return model->as<vl::Object>();
 		return nullptr;
 	}
 
@@ -94,7 +94,7 @@ namespace dmb
 		if (!mRoot)
 			return nullptr;
 		if (auto& model = mRoot->model("types"))
-			return model->asObject();
+			return model->as<vl::Object>();
 		return nullptr;
 	}
 
@@ -211,11 +211,11 @@ namespace dmb
 
 	void DMBModel::clear()
 	{
-//		mRoot->asObject()->getAllPropsListModel().foreachElement([&](int i, const VLVarModelPtr& m) {
+//		mRoot->as<vl::Object>()->getAllPropsListModel().foreachElement([&](int i, const VLVarModelPtr& m) {
 //			VLVarModel* mp = m.get();
-//			if (auto l = mp->asList())
+//			if (auto l = mp->as<vl::List>())
 //				l->getListModel().clearAndNotify();
-//			else if (auto o = m->asObject())
+//			else if (auto o = m->as<vl::Object>())
 //				o->getAllPropsListModel().clearAndNotify();
 //			return true;
 //		}, true);
@@ -315,9 +315,9 @@ namespace dmb
 			auto id = dotPos == std::string::npos ?
 				path.substr(cursor) : path.substr(cursor, dotPos - cursor);
 			auto n = ((node && *node) ? node : &root)->get();
-			if (auto o = n->asObject())
+			if (auto o = n->as<vl::Object>())
 				node = &o->model(id);
-			else if (auto l = n->asList())
+			else if (auto l = n->as<vl::List>())
 			{
 				auto index = parseIndex(id);
 				if (auto& m = l->modelAt(index))

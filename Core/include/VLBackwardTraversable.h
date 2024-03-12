@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include "vl_fwd.h"
+#include <utils/entity.h>
 #include <utils/patterns/Observer.h>
 
 namespace vl
@@ -19,7 +20,7 @@ namespace vl
 	typedef std::shared_ptr<ListTreeNode> ListTreeNodePtr;
 	class VarNodeRegistry;
 	
-	class VarTreeNode : public Observer {
+	class VarTreeNode : public utils::entity, public Observer {
 		friend class VarNodeRegistry;
 		friend class ListTreeNode;
 		friend class ObjectTreeNode;
@@ -31,19 +32,12 @@ namespace vl
 		int GetIndex() const;
 		std::string GetPath() const;
 		const VarNodeRegistry& GetRegistry() const;
-		virtual bool IsList() const;
-		virtual bool IsObject() const;
-		virtual ObjectTreeNode* AsObject();
-		virtual const ObjectTreeNode* AsObject() const;
-		virtual ListTreeNode* AsList();
-		virtual const ListTreeNode* AsList() const;
 		void Update(Observable* sender, vl::VarPtr info) override;
 		virtual std::size_t ChildCount() const;
 		const vl::Var* GetData() const {
 			return mData;
 		}
 		// Needed because of non-virtuality of std::shared_from_this()
-		virtual VarTreeNodePtr SharedFromThis();
 		bool IsRoot() const {
 			return mParent == nullptr;
 		}
@@ -63,13 +57,13 @@ namespace vl
 		vl::AbstractVar* mData = nullptr;
 		const void* mDataPtr = nullptr;
 		VarTreeNode* mParent = nullptr;
-		VarNodeRegistry& mRegistry;
+		VarNodeRegistry* mRegistry;
 		bool mToBeReplaced = false;
 	};
 	
 
 	// ObjectTreeNode
-	class ObjectTreeNode : public VarTreeNode, public std::enable_shared_from_this<ObjectTreeNode> {
+	class ObjectTreeNode : public VarTreeNode {
 		typedef VarTreeNode Base;
 	public:
 		ObjectTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent);
@@ -79,12 +73,7 @@ namespace vl
 		void Set(const std::string& childId, const VarTreeNodePtr& node);
 		const VarTreeNodePtr& Get(const std::string& childId) const;
 		std::size_t ChildCount() const override;
-		ObjectTreeNode* AsObject() override;
-		const ObjectTreeNode* AsObject() const override;
-		bool IsObject() const override;
 		bool Remove(const std::string& childId);
-		VarTreeNodePtr SharedFromThis() override;
-		ObjectTreeNodePtr ObjectSharedFromThis();
 
 	protected:
 		bool ForeachChildren(const std::function<bool(VarTreeNode&)>& pred);
@@ -95,7 +84,7 @@ namespace vl
 	typedef std::shared_ptr<ObjectTreeNode> ObjectTreeNodePtr;
 
 	// ListTreeNode
-	class ListTreeNode : public VarTreeNode, public std::enable_shared_from_this<ListTreeNode> {
+	class ListTreeNode : public VarTreeNode {
 		typedef VarTreeNode Base;
 	public:
 		ListTreeNode(VarNodeRegistry& registry, vl::AbstractVar* data, VarTreeNode* parent);
@@ -111,12 +100,7 @@ namespace vl
 		}
 		const VarTreeNodePtr& At(std::size_t index) const;
 		bool Clear(int index);
-		ListTreeNode* AsList() override;
-		bool IsList() const override;
-		const ListTreeNode* AsList() const override;
 		void Remove(int index);
-		VarTreeNodePtr SharedFromThis() override;
-		ListTreeNodePtr ListSharedFromThis();
 
 	protected:
 		bool ForeachChildren(const std::function<bool(VarTreeNode&)>& pred);

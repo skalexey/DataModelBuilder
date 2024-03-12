@@ -18,21 +18,21 @@ namespace dmb
 
 	vl::Object &NotifContext::localData()
 	{
-		return mLocalData->AsObject();
+		return mLocalData->as<vl::Object>();
 	}
 
 	const vl::Object &NotifContext::getLocalData() const
 	{
-		return mLocalData->AsObject();
+		return mLocalData->as<vl::Object>();
 	}
 
 	vl::Object &NotifContext::notifData()
 	{
-		return mNotifData->AsObject();
+		return mNotifData->as<vl::Object>();
 	}
 
 	const vl::Object &NotifContext::getNotifData() const
 	{
-		return mNotifData->AsObject();
+		return mNotifData->as<vl::Object>();
 	}
 }

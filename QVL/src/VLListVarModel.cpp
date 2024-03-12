@@ -60,7 +60,7 @@ namespace dmb
 
 	const vl::List &VLListVarModel::getData() const
 	{
-		return Base::getData().AsList();
+		return Base::getData().as<vl::List>();
 	}
 
 	const vl::Var &VLListVarModel::getData(int index) const

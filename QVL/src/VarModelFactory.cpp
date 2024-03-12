@@ -14,9 +14,9 @@ namespace dmb
 	VLVarModelPtr VarModelFactory::CreateEmpty(const vl::Var &v)
 	{
 		VLVarModelPtr ptr = nullptr;
-		if (v.IsObject())
+		if (v.is<vl::Object>())
 			ptr = std::dynamic_pointer_cast<VLVarModel>(std::make_shared<VLObjectVarModel>());
-		else if (v.IsList())
+		else if (v.is<vl::List>())
 			ptr = std::dynamic_pointer_cast<VLVarModel>(std::make_shared<VLListVarModel>());
 		else
 			ptr = std::make_shared<VLVarModel>();
@@ -36,9 +36,9 @@ namespace dmb
 	VLVarModelPtr VarModelFactory::Create(const vl::Var &v)
 	{
 		VLVarModelPtr ptr = nullptr;
-		if (v.IsObject())
+		if (v.is<vl::Object>())
 			ptr = std::dynamic_pointer_cast<VLVarModel>(std::make_shared<VLObjectVarModel>(v));
-		else if (v.IsList())
+		else if (v.is<vl::List>())
 			ptr = std::dynamic_pointer_cast<VLVarModel>(std::make_shared<VLListVarModel>(v));
 		else
 			ptr = std::make_shared<VLVarModel>(v);

@@ -35,7 +35,7 @@ namespace dmb
 
 	void ModelStorage::Notify(vl::VarPtr info)
 	{
-		info->AsObject().Set("who", "storage");
+		info->as<vl::Object>().Set("who", "storage");
 		Observable::Notify(info);
 	}
 

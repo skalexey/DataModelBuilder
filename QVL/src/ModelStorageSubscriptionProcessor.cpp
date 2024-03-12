@@ -21,9 +21,9 @@ namespace dmb
 			LOCAL_DEBUG("Update storage notification on '" << collectionOwner->getStringId().c_str() << "'");
 		LOCAL_DEBUG("msg: " << vl::VarToJSON(*info).c_str());
 
-		if (auto& o = info->AsObject())
+		if (auto& o = info->as<vl::Object>())
 		{
-			if (o.Get("who").AsString().Val() == "storage")
+			if (o.Get("who").as<vl::String>().Val() == "storage")
 			{
 				if (auto& u = o.Get("modelPut"))
 				{
@@ -64,14 +64,14 @@ namespace dmb
 				{
 					if (o.Has("before"))
 					{
-						auto& id = o.Get("rename").AsString().Val();
-						auto& newId = o.Get("newId").AsString().Val();
+						auto& id = o.Get("rename").as<vl::String>().Val();
+						auto& newId = o.Get("newId").as<vl::String>().Val();
 						onBeforeRename(id, newId);
 					}
 					else if (o.Has("after"))
 					{
-						auto& id = o.Get("rename").AsString().Val();
-						auto& newId = o.Get("newId").AsString().Val();
+						auto& id = o.Get("rename").as<vl::String>().Val();
+						auto& newId = o.Get("newId").as<vl::String>().Val();
 						onAfterRename(id, newId);
 					}
 				}

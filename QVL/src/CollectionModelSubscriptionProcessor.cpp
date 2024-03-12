@@ -19,12 +19,12 @@ namespace dmb
 {
 	bool CollectionModelSubscriptionProcessor::processUpdate(vl::Var& v, const std::string& path)
 	{
-		auto& o = v.AsObject();
+		auto& o = v.as<vl::Object>();
 		if (o.Has("propUpdate"))
 		{
-			auto& u = o.Get("propUpdate").AsObject();
+			auto& u = o.Get("propUpdate").as<vl::Object>();
 			if (u.Has("data"))
-				return processUpdate(u.Get("data"), (path.empty() ? "" : (path + ".")) + u.Get("id").AsString().Val());
+				return processUpdate(u.Get("data"), (path.empty() ? "" : (path + ".")) + u.Get("id").as<vl::String>().Val());
 			return false;
 		}
 		else
@@ -50,11 +50,11 @@ namespace dmb
 
 		LOCAL_DEBUG("msg: " << vl::VarToJSON(*info).c_str());
 
-		if (!info->IsObject())
+		if (!info->is<vl::Object>())
 			return;
-		auto& o = info->AsObject();
+		auto& o = info->as<vl::Object>();
 
-		auto& who = o.Get("who").AsString().Val();
+		auto& who = o.Get("who").as<vl::String>().Val();
 		if (who != "vl")
 		{
 			LOCAL_ERROR("Unsupported update from '" << who.c_str() << "'");
@@ -75,10 +75,10 @@ namespace dmb
 			if (!PropPath(path).isProtoPath())
 				return false; // Ignore all no proto nested objects updates
 
-		if (!info.IsObject())
+		if (!info.is<vl::Object>())
 			return false;
 
-		auto& o = info.AsObject();
+		auto& o = info.as<vl::Object>();
 
 		// Proces update recursively until we reach the final command
 		if (o.Has("propUpdate"))
@@ -138,7 +138,7 @@ namespace dmb
 		auto& l = context().localData();
 		if (auto& m = getOwner().getModel(id))
 		{
-			if (l.Has("oldType") && int(m->getData().GetType()) != l.Get("oldType").AsNumber().Val())
+			if (l.Has("oldType") && int(m->getData().GetType()) != l.Get("oldType").as<vl::Number>().Val())
 				emit m->typeChanged();
 			else
 			{
@@ -188,7 +188,7 @@ namespace dmb
 	{
 		auto& c = context();
 		auto& o = c.notifData();
-		auto& id = o.Get("add").AsString().Val();
+		auto& id = o.Get("add").as<vl::String>().Val();
 		if (o.Has("before"))
 			onBeforeAdd(id);
 		else if (o.Has("after"))
@@ -229,7 +229,7 @@ namespace dmb
 	{
 		auto& c = context();
 		auto& o = c.notifData();
-		auto& id = o.Get("set").AsString().Val();
+		auto& id = o.Get("set").as<vl::String>().Val();
 		if (o.Has("before"))
 			onBeforeSet(id);
 		else if (o.Has("after"))
@@ -269,7 +269,7 @@ namespace dmb
 	{
 		auto& c = context();
 		auto& o = c.notifData();
-		auto& id = o.Get("remove").AsString().Val();
+		auto& id = o.Get("remove").as<vl::String>().Val();
 		if (o.Has("before"))
 			onBeforeRemove(id);
 		else if (o.Has("after"))
@@ -347,8 +347,8 @@ namespace dmb
 	{
 		auto& c = context();
 		auto& o = c.notifData();
-		auto& id = o.Get("rename").AsString().Val();
-		auto& newId = o.Get("newId").AsString().Val();
+		auto& id = o.Get("rename").as<vl::String>().Val();
+		auto& newId = o.Get("newId").as<vl::String>().Val();
 		if (o.Has("before"))
 			onBeforeRename(id, newId);
 		else if (o.Has("after"))

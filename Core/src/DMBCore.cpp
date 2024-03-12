@@ -13,7 +13,7 @@
 
 vl::Object& dmb::Registry::CreateType(const std::string& typeName)
 {
-	return mData.Set(typeName, vl::Object()).AsObject();
+	return mData.Set(typeName, vl::Object()).as<vl::Object>();
 }
 
 vl::VarPtr& dmb::Registry::RegisterType(const std::string& typeName, vl::Var& type)
@@ -23,7 +23,7 @@ vl::VarPtr& dmb::Registry::RegisterType(const std::string& typeName, vl::Var& ty
 
 vl::Object& dmb::Registry::GetType(const std::string& typeName)
 {
-	return mData.Get(typeName).AsObject();
+	return mData.Get(typeName).as<vl::Object>();
 }
 
 bool dmb::Registry::ForeachType(const std::function<bool(const std::string&, vl::Object&)>& pred)
@@ -38,7 +38,7 @@ bool dmb::Registry::ForeachType(const std::function<bool(const std::string&, vl:
 bool dmb::Registry::ForeachType(const std::function<bool(const std::string&, const vl::Object&)>& pred) const
 {
 	return mData.ForeachProp([&](const std::string& name, const vl::Var& value) {
-		return pred(name, value.AsObject());
+		return pred(name, value.as<vl::Object>());
 	});
 }
 
@@ -83,7 +83,7 @@ vl::Object& dmb::Content::Add(const std::string& entityName, vl::Object& proto)
 		return vl::NullObject();
 	vl::Object o;
 	o.SetPrototype(proto);
-	return mData.Set(entityName, o).AsObject();
+	return mData.Set(entityName, o).as<vl::Object>();
 }
 
 vl::VarPtr& dmb::Content::Add(const std::string& entityName, const vl::Var& value)
@@ -91,10 +91,10 @@ vl::VarPtr& dmb::Content::Add(const std::string& entityName, const vl::Var& valu
 	static vl::VarPtr emptyVar;
 	if (Has(entityName))
 		return emptyVar;
-	if (value.IsObject())
-		return mData.Set(entityName, value.AsObject().Copy());
-	else if (value.IsList())
-		return mData.Set(entityName, value.AsList().Copy());
+	if (value.is<vl::Object>())
+		return mData.Set(entityName, value.as<vl::Object>().Copy());
+	else if (value.is<vl::List>())
+		return mData.Set(entityName, value.as<vl::List>().Copy());
 	else
 		return mData.Set(entityName, value);
 }
@@ -141,7 +141,7 @@ bool dmb::Content::ForeachItem(const std::function<bool(const std::string&, vl::
 bool dmb::Content::ForeachItem(const std::function<bool(const std::string&, const vl::Object&)>& pred) const
 {
 	return mData.ForeachProp([&](const std::string& name, const vl::Var& value) {
-		return pred(name, value.AsObject());
+		return pred(name, value.as<vl::Object>());
 	});
 }
 
@@ -192,7 +192,7 @@ dmb::Model::Model()
 			if (auto node = mVarNodeRegistry.GetNode(typeRef))
 			{
 				if (auto data = node->GetData())
-					return data->AsObject();
+					return data->as<vl::Object>();
 				else
 					LOG_ERROR(utils::format_str("Found node with null data during type resolution of '%s'", typeRef.c_str()));
 			}
@@ -208,7 +208,7 @@ dmb::Model::Model()
 
 vl::Object& dmb::Model::GetType(const std::string& typeName) 
 {
-	return mRegistry.GetType(typeName).AsObject();
+	return mRegistry.GetType(typeName).as<vl::Object>();
 }
 
 bool dmb::Model::Load(const std::string& filePath)
@@ -260,9 +260,9 @@ bool searchObject (const vl::VarPtr& where, const vl::Object& what, std::string&
 {
 	if (where.IsNull())
 		return false;
-	return !where.AsObject().ForeachProp(
+	return !where.as<vl::Object>().ForeachProp(
 		[&](const std::string& propName, const vl::Var& propVal) {
-			if (propVal.AsObject() == what)
+			if (propVal.as<vl::Object>() == what)
 			{
 				typeId = propName;
 				return false;
@@ -312,18 +312,18 @@ std::string dmb::Model::DataStr(bool pretty) const
 void dmb::Model::Init()
 {
 	if (mData.Has("types"))
-		mRegistry.Init(mData.Get("types").AsObject());
+		mRegistry.Init(mData.Get("types").as<vl::Object>());
 	else
-		mRegistry.Init(mData.Set("types", vl::Object()).AsObject());
+		mRegistry.Init(mData.Set("types", vl::Object()).as<vl::Object>());
 
 	if (mData.Has("private"))
-		mPrivate.Init(mData.Get("private").AsObject());
+		mPrivate.Init(mData.Get("private").as<vl::Object>());
 	else
-		mPrivate.Init(mData.Set("private", vl::Object()).AsObject());
+		mPrivate.Init(mData.Set("private", vl::Object()).as<vl::Object>());
 
 	if (mData.Has("content"))
-		mContent.Init(mData.Get("content").AsObject(), mTypeResolver);
+		mContent.Init(mData.Get("content").as<vl::Object>(), mTypeResolver);
 	else
-		mContent.Init(mData.Set("content", vl::Object()).AsObject(), mTypeResolver);
+		mContent.Init(mData.Set("content", vl::Object()).as<vl::Object>(), mTypeResolver);
 }
 

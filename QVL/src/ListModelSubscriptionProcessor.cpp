@@ -21,7 +21,7 @@ namespace dmb
 		auto& l = context().localData();
 		if (auto& m = getOwner().getModelAt(index))
 		{
-			if (l.Has("oldType") && int(m->getData().GetType()) != l.Get("oldType").AsNumber().Val())
+			if (l.Has("oldType") && int(m->getData().GetType()) != l.Get("oldType").as<vl::Number>().Val())
 				emit m->typeChanged();
 			else
 			{
@@ -47,7 +47,7 @@ namespace dmb
 
 
 	VLListModel &ListModelSubscriptionProcessor::getOwner() {
-		return *mOwner->asList();
+		return *mOwner->as<vl::List>();
 	}
 
 	// "Add" processor functional
@@ -55,7 +55,7 @@ namespace dmb
 	{
 		auto& c = context();
 		auto& o = c.notifData();
-		auto index = o.Get("add").AsNumber().Val();
+		auto index = o.Get("add").as<vl::Number>().Val();
 		if (o.Has("before"))
 			onBeforeAdd(index);
 		else if (o.Has("after"))
@@ -96,7 +96,7 @@ namespace dmb
 	{
 		auto& c = context();
 		auto& o = c.notifData();
-		auto index = o.Get("set").AsNumber().Val();
+		auto index = o.Get("set").as<vl::Number>().Val();
 		if (o.Has("before"))
 			onBeforeSet(index);
 		else if (o.Has("after"))
@@ -136,7 +136,7 @@ namespace dmb
 	{
 		auto& c = context();
 		auto& o = c.notifData();
-		auto index = o.Get("remove").AsNumber().Val();
+		auto index = o.Get("remove").as<vl::Number>().Val();
 		if (o.Has("before"))
 			onBeforeRemove(index);
 		else if (o.Has("after"))

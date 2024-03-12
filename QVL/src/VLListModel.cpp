@@ -43,7 +43,7 @@ namespace dmb
 		if (auto parent = getParentModel())
 			if (parent != newParent)
 				if (mVLSubscriptionProcessor)
-					getData().AsList().Detach(mVLSubscriptionProcessor.get());
+					getData().as<vl::List>().Detach(mVLSubscriptionProcessor.get());
 
 		// If newParent is the same as own
 		if (!Base::Init(newParent))
@@ -51,7 +51,7 @@ namespace dmb
 
 		if (auto parent = getParentModel())
 			if ((mVLSubscriptionProcessor = createVLSubacriptionProcessor()))
-				getData().AsList().Attach(mVLSubscriptionProcessor.get());
+				getData().as<vl::List>().Attach(mVLSubscriptionProcessor.get());
 		return true;
 	}
 
@@ -191,7 +191,7 @@ namespace dmb
 
 				LOCAL_DEBUG("Put '[" << insertRet.index << "] "
 					 << (standaloneModelPtr->isObject() ?
-							 standaloneModelPtr->asObject()->getData().Get("name").AsString().Val().c_str()
+							 standaloneModelPtr->as<vl::Object>()->getData().Get("name").as<vl::String>().Val().c_str()
 						   : "")
 					 << "' (" << standaloneModelPtr.get() << ")");
 
@@ -264,17 +264,17 @@ namespace dmb
 				switch (data.userType())
 				{
 				case QMetaType::QString:
-					if (m->getData().AsString().Val() == data.toString().toStdString())
+					if (m->getData().as<vl::String>().Val() == data.toString().toStdString())
 						result = model.get();
 					break;
 				case QMetaType::Int:
 				case QMetaType::Double:
 				case QMetaType::Float:
-					if (m->getData().AsNumber().Val() == data.toInt())
+					if (m->getData().as<vl::Number>().Val() == data.toInt())
 						result = model.get();
 					break;
 				case QMetaType::Bool:
-					if (m->getData().AsBool().Val() == data.toBool())
+					if (m->getData().as<vl::Bool>().Val() == data.toBool())
 						result = model.get();
 				}
 			}
@@ -363,7 +363,7 @@ namespace dmb
 #ifdef LOG_ON
 		qDebug() << "Put '[" << index << "] "
 				 << (ptr->isObject() ?
-						 ptr->asObject()->getData().Get("name").AsString().Val().c_str()
+						 ptr->as<vl::Object>()->getData().Get("name").as<vl::String>().Val().c_str()
 					   : "")
 				 << "' (" << ptr.get() << ")";
 #endif

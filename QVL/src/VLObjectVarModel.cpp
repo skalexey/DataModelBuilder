@@ -149,7 +149,7 @@ namespace dmb
 
 	const vl::ObjectVar &VLObjectVarModel::getData() const
 	{
-		return Base::getData().AsObject();
+		return Base::getData().as<vl::Object>();
 	}
 
 	vl::ObjectVar &VLObjectVarModel::data()
@@ -235,7 +235,7 @@ namespace dmb
 	QVariant VLObjectVarModel::protoPropListModel()
 	{
 		if (auto& protoModel = model("proto"))
-			if (auto objectModel = protoModel->asObject())
+			if (auto objectModel = protoModel->as<vl::Object>())
 				return QVariant::fromValue(objectModel->propListModel());
 		return QVariant();
 	}
@@ -359,7 +359,7 @@ namespace dmb
 	QVariant VLObjectVarModel::protoId() const
 	{
 		if (auto& protoModel = getModel("proto"))
-			return protoModel->asObject()->typeId();
+			return protoModel->as<vl::Object>()->typeId();
 		return QVariant();
 	}
 

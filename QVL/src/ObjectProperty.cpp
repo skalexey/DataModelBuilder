@@ -26,15 +26,15 @@ namespace dmb
 	// ======= Begin of Static interface =======
 	ObjectProperty::Type ObjectProperty::ConvertVLType(const vl::Var &var)
 	{
-		if (var.IsBool())
+		if (var.is<vl::Bool>())
 			return Type::Bool;
-		else if (var.IsNumber())
+		else if (var.is<vl::Number>())
 			return Type::Int;
-		else if (var.IsString())
+		else if (var.is<vl::String>())
 			return Type::String;
-		else if (var.IsList())
+		else if (var.is<vl::List>())
 			return Type::List;
-		else if (var.IsObject())
+		else if (var.is<vl::Object>())
 			return Type::Object;
 		return Type::Null;
 	}
@@ -96,13 +96,13 @@ namespace dmb
 			case vl::Type::Object:
 			{
 				if (data.canConvert<VLVarModel*>())
-					return vl::MakePtr(qvariant_cast<VLVarModel*>(data)->getData().AsObject());
+					return vl::MakePtr(qvariant_cast<VLVarModel*>(data)->getData().as<vl::Object>());
 				break;
 			}
 			case vl::Type::List:
 			{
 				if (data.canConvert<VLVarModel*>())
-					return vl::MakePtr(qvariant_cast<VLVarModel*>(data)->getData().AsList());
+					return vl::MakePtr(qvariant_cast<VLVarModel*>(data)->getData().as<vl::List>());
 				break;
 			}
 			case vl::Type::Null:

@@ -205,9 +205,9 @@ namespace dmb
 			{
 				if (recursive)
 				{
-					if (auto o = m->asObject())
+					if (auto o = m->as<vl::Object>())
 						o->getOwnPropsListModel().foreachElement(pred, recursive);
-					if (auto l = m->asList())
+					if (auto l = m->as<vl::List>())
 						l->getListModel().foreachElement(pred, recursive);
 				}
 				if (!pred(i, getModelAt(i)))

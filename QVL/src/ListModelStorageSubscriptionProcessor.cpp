@@ -16,9 +16,9 @@ namespace dmb
 	void ListModelStorageSubscriptionProcessor::onAfterModelPut(vl::Object& o)
 	{
 		auto& u = o.Get("modelPut");
-		if (u.IsNumber())
+		if (u.is<vl::Number>())
 		{
-			auto modelIndex = u.AsNumber().Val();
+			auto modelIndex = u.as<vl::Number>().Val();
 			if (auto& m = getOwner().getStorage().at(modelIndex))
 				getOwner().onModelPut(m);
 		}
@@ -31,9 +31,9 @@ namespace dmb
 	void ListModelStorageSubscriptionProcessor::onBeforeRemove(vl::Object& o)
 	{
 		auto& u = o.Get("modelRemove");
-		if (u.IsNumber())
+		if (u.is<vl::Number>())
 		{
-			auto modelIndex = u.AsNumber().Val();
+			auto modelIndex = u.as<vl::Number>().Val();
 			if (auto& m = getOwner().getStorage().at(modelIndex))
 				getOwner().onModelBeforeRemove(m);
 		}

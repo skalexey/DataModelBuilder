@@ -50,7 +50,7 @@ namespace dmb
 		if (auto parent = getParentModel())
 			if (parent != newParent)
 				if (mVLSubscriptionProcessor)
-					getData().AsObject().Detach(mVLSubscriptionProcessor.get());
+					getData().as<vl::Object>().Detach(mVLSubscriptionProcessor.get());
 
 		// If newParent is the same as own
 		if (!Base::Init(newParent))
@@ -58,7 +58,7 @@ namespace dmb
 
 		if (auto parent = getParentModel())
 			if ((mVLSubscriptionProcessor = createVLSubacriptionProcessor()))
-				getData().AsObject().Attach(mVLSubscriptionProcessor.get());
+				getData().as<vl::Object>().Attach(mVLSubscriptionProcessor.get());
 		return true;
 	}
 
@@ -235,7 +235,7 @@ namespace dmb
 		bool result = true;
 		mVLSubscriptionProcessor->setOnAfterUpdate([&, propId] (const NotifContext& context) {
 			auto& o = context.getNotifData();
-			if (o.Get("rename").AsString().Val() == propId)
+			if (o.Get("rename").as<vl::String>().Val() == propId)
 				if (o.Has("after"))
 				{
 					// If there is no such id entry or a model in the storage
@@ -322,7 +322,7 @@ namespace dmb
 		mVLSubscriptionProcessor->setOnAfterUpdate([&] (const NotifContext& context) {
 			auto& o = context.getNotifData();
 			auto& l = context.getLocalData();
-			if (o.Get("remove").AsString().Val() == propId)
+			if (o.Get("remove").as<vl::String>().Val() == propId)
 			{
 				if (o.Has("after"))
 				{
@@ -478,7 +478,7 @@ namespace dmb
 	// indexBefore is not used on the higher levels now
 	const VLVarModelPtr& VLCollectionModel::loadProtoModel(const vl::Var& data, const VLObjectVarModelPtr& collectionOwner, int indexBefore)
 	{
-		auto& protoData = data.AsObject();
+		auto& protoData = data.as<vl::Object>();
 		if (auto dmbModel = collectionOwner->getDataModel())
 		{
 			auto protoId = dmbModel->getDataModel().GetTypeId(protoData);
@@ -557,8 +557,8 @@ namespace dmb
 		if (modelPtr)
 			mVLSubscriptionProcessor->setOnBeforeUpdate([&, propId] (const NotifContext& c) {
 				auto& o = c.getNotifData();
-				if (o.Get("add").AsString().Val() == propId
-				|| o.Get("set").AsString().Val() == propId)
+				if (o.Get("add").as<vl::String>().Val() == propId
+				|| o.Get("set").as<vl::String>().Val() == propId)
 					if (o.Has("after"))
 					{
 						// Put the model if it is not restricted by a flag
@@ -583,7 +583,7 @@ namespace dmb
 		if (propId == "proto")
 			return nullVarModelPtr;
 		if (auto proto = getModel("proto"))
-			return proto->asObject()->getModel(propId);
+			return proto->as<vl::Object>()->getModel(propId);
 		return nullVarModelPtr;
 	}
 
@@ -599,7 +599,7 @@ namespace dmb
 		if (propId == "proto")
 			return nullVarModelPtr;
 		if (auto proto = model("proto"))
-			return proto->asObject()->model(propId);
+			return proto->as<vl::Object>()->model(propId);
 		return nullVarModelPtr;
 	}
 
