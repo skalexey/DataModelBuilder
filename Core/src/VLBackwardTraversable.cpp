@@ -207,6 +207,8 @@ namespace vl
 
 	vl::VarTreeNodePtr vl::VarNodeRegistry::CreateNamedNode(const std::string& nodeId, vl::Var& data, VarTreeNode* parent)
 	{
+		if (!&data)
+			return nullptr;
 		if (data.Data() == nullptr)
 			return nullptr;
 		auto ptr = CreateNode(data, parent);
