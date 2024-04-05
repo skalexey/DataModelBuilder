@@ -7,7 +7,7 @@
 #include "vl.h"
 #include "JSONDefs.h"
 #include "VLBackwardTraversable.h"
-#include "TypeResolver.h"
+#include "vl/TypeResolver.h"
 
 namespace dmb
 {
@@ -68,11 +68,11 @@ namespace dmb
 		void Clear(bool recursive = false);
 
 	protected:
-		void Init(const vl::Object& data, const TypeResolver& typeResolver);
+		void Init(const vl::Object& data, const vl::TypeResolver& typeResolver);
 
 	protected:
 		vl::Object mData;
-		TypeResolver mTypeResolver;
+		vl::TypeResolver mTypeResolver;
 	};
 
 	// Util class for working with data model as a vl object
@@ -103,7 +103,7 @@ namespace dmb
 		const vl::VarNodeRegistry& GetVarNodeRegistry() const {
 			return mVarNodeRegistry;
 		}
-		const TypeResolver& GetTypeResolver() const {
+		const vl::TypeResolver& GetTypeResolver() const {
 			return mTypeResolver;
 		}
 
@@ -113,7 +113,7 @@ namespace dmb
 		Registry mPrivate;
 		Content mContent;
 		vl::VarNodeRegistry mVarNodeRegistry;
-		TypeResolver mTypeResolver;
+		vl::TypeResolver mTypeResolver;
 		bool mIsLoaded = false;
 		struct StoreState
 		{

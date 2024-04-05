@@ -172,7 +172,7 @@ void dmb::Content::Clear(bool recursive)
 	mData.Clear(recursive);
 }
 
-void dmb::Content::Init(const vl::Object& data, const TypeResolver& typeResolver)
+void dmb::Content::Init(const vl::Object& data, const vl::TypeResolver& typeResolver)
 {
 	mData = data;
 	mTypeResolver = typeResolver;
@@ -180,7 +180,7 @@ void dmb::Content::Init(const vl::Object& data, const TypeResolver& typeResolver
 
 dmb::Model::~Model()
 {
-	mTypeResolver = TypeResolver();
+	mTypeResolver = vl::TypeResolver();
 }
 
 dmb::Model::Model()
