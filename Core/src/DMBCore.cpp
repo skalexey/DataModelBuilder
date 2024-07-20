@@ -81,10 +81,8 @@ vl::VarPtr& dmb::Content::Add(const std::string& entityName, const vl::Var& valu
 	static vl::VarPtr emptyVar;
 	if (Has(entityName))
 		return emptyVar;
-	if (value.is<vl::Object>())
-		return mData.Set(entityName, value.as<vl::Object>().Copy());
-	else if (value.is<vl::List>())
-		return mData.Set(entityName, value.as<vl::List>().Copy());
+	if (value.is<vl::Object>() || value.is<vl::List>())
+		return mData.Set(entityName, value.CopyAsPtr());
 	else
 		return mData.Set(entityName, value);
 }

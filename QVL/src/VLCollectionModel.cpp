@@ -540,7 +540,7 @@ namespace dmb
 
 		if (!dataPtr)
 			// Otherwise just take its data as a copy
-			dataPtr = m->getData().Copy();
+			dataPtr = m->getData().CopyAsPtr();
 			// and then return a newly created model
 			// We don't support sharing other models as prototypes
 

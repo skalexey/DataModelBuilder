@@ -196,7 +196,7 @@ namespace dmb
 		if (auto owner = getDataModel())
 			return QVariant::fromValue(
 						owner->storeStandaloneModel(
-							VarModelFactory::Instance().Create(*getData().Copy())
+							VarModelFactory::Instance().Create(*getData().CopyAsPtr())
 							).get()
 						);
 		return QVariant();

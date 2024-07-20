@@ -339,7 +339,7 @@ namespace dmb
 		// Otherwise just take its data as a copy
 		// And return a newly created model
 		if (!modelPtr)
-			dataPtr = m->getData().Copy();
+			dataPtr = m->getData().CopyAsPtr();
 
 		// Set the data
 		setData(index, dataPtr);
