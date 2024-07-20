@@ -57,16 +57,6 @@ bool dmb::Registry::HasType(const std::string& typeName)
 	return mData.Has(typeName);
 }
 
-vl::Object& dmb::Registry::GetData()
-{
-	return mData;
-}
-
-const vl::Object& dmb::Registry::GetData() const
-{
-	return mData;
-}
-
 void dmb::Registry::Clear(bool recursive)
 {
 	mData.Clear(recursive);
@@ -155,16 +145,6 @@ std::string dmb::Content::JSONStr(const vl::CnvParams& params)
 {
 	vl::JSONConverter converter;
 	return converter.JSONStr(mData, mTypeResolver, { params.pretty, false, params.storeTypeId });
-}
-
-vl::Object& dmb::Content::GetData()
-{
-	return mData;
-}
-
-const vl::Object& dmb::Content::GetData() const
-{
-	return mData;
 }
 
 void dmb::Content::Clear(bool recursive)
@@ -290,11 +270,6 @@ bool dmb::Model::IsType(const vl::Object& obj) const
 {
 	std::string type;
 	return searchObject(mData.Get("types"), obj, type);
-}
-
-const vl::Object& dmb::Model::GetData()
-{
-	return mData;
 }
 
 void dmb::Model::Clear(bool recursive)

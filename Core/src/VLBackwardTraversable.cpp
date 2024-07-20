@@ -319,7 +319,7 @@ namespace vl
 				{
 					//if (childName == "proto")
 					//	return; // Ignore the proto as it has been already created
-					if (auto& idVar = o.Get("add"))
+					if (auto idVar = o.Get("add", nullptr))
 					{
 						auto& childName = idVar.as<vl::String>().Val();
 						if (Has(childName))

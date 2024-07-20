@@ -28,8 +28,12 @@ namespace dmb
 		bool RenameType(const std::string& typeName, const std::string& newName);
 		bool HasType(const std::string& typeName);
 		// TODO: think how to keep it under the hood
-		vl::Object& GetData();
-		const vl::Object& GetData() const;
+		vl::Object& Data() {
+			return mData;
+		}
+		const vl::Object& GetData() const {
+			return mData;
+		}
 		void Clear(bool recursive = false);
 
 	protected:
@@ -63,8 +67,12 @@ namespace dmb
 		bool Store(const std::string& filePath, const vl::CnvParams& params = vl::CnvParams());
 		std::string JSONStr(const vl::CnvParams& params = vl::CnvParams());
 		// TODO: think how to keep it under the hood
-		vl::Object& GetData();
-		const vl::Object& GetData() const;
+		vl::Object& Data() {
+			return mData;
+		}
+		const vl::Object& GetData() const {
+			return mData;
+		}
 		void Clear(bool recursive = false);
 
 	protected:
@@ -80,16 +88,18 @@ namespace dmb
 	// You can store or load a model from JSON
 	class Model
 	{
+		using Content_t = Content;
+		using Registry_t = Registry;
 	public:
 		Model();
 		~Model();
 		void Init();
-		Registry& GetRegistry() { return mRegistry; }
-		Registry& GetPrivateScope() { return mPrivate; }
-		Content& GetContent() { return mContent; }
-		const Registry& GetRegistry() const { return mRegistry; }
-		const Registry& GetPrivateScope() const { return mPrivate; }
-		const Content& GetContent() const { return mContent; }
+		Registry_t& Registry() { return mRegistry; }
+		Registry_t& PrivateScope() { return mPrivate; }
+		Content_t& Content() { return mContent; }
+		const Registry_t& GetRegistry() const { return mRegistry; }
+		const Registry_t& GetPrivateScope() const { return mPrivate; }
+		const Content_t& GetContent() const { return mContent; }
 		vl::Object& GetType(const std::string& typeName);
 		bool Load(const std::string& filePath);
 		bool IsLoaded() const;
@@ -97,7 +107,12 @@ namespace dmb
 		std::string JSONStr(const vl::CnvParams& params = vl::CnvParams());
 		std::string GetTypeId(const vl::Object& obj) const;
 		bool IsType(const vl::Object& obj) const;
-		const vl::Object& GetData();
+		const vl::Object& GetData() const {
+			return mData;
+		}
+		vl::Object& Data() {
+			return mData;
+		}
 		void Clear(bool recursive = false);
 		std::string DataStr(bool pretty = true) const;
 		const vl::VarNodeRegistry& GetVarNodeRegistry() const {
@@ -109,9 +124,9 @@ namespace dmb
 
 	protected:
 		vl::Object mData;
-		Registry mRegistry;
-		Registry mPrivate;
-		Content mContent;
+		Registry_t mRegistry;
+		Registry_t mPrivate;
+		Content_t mContent;
 		vl::VarNodeRegistry mVarNodeRegistry;
 		vl::TypeResolver mTypeResolver;
 		bool mIsLoaded = false;
